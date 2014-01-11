@@ -1,0 +1,68 @@
+% A program that uses all arithmetic, logical and comparison operators
+
+{
+    var x, y : integer
+    var b : boolean
+
+
+    % integer literal constant
+    x := 1
+
+    % unary minus
+    x := - 1
+
+    % addition
+    x := 1 + 1
+
+    % subtraction
+    x := 1 - 1
+
+    % multiplication
+    x := 1 * 1
+
+    % division
+    x := 1 / 1
+
+
+    % Boolean constant true
+    b := true
+
+    % Boolean constant false
+    b := false
+
+    % Boolean not
+    b := not false
+
+    % Boolean and
+    b := true and true
+
+    % Boolean or
+    b := true or false
+
+
+    % equality comparison
+    b := 1 = 1
+
+    % inequality comparison
+    b := 1 not= 2
+
+    % less than comparison
+    b := 1 < 2
+
+    % less than or equal comparison
+    b := 1 <= 1
+
+    % greater than comparison
+    b := 2 > 1
+
+    % greater than or equal comparison
+    b := 1 >= 1
+
+
+    % conditional expression
+    x := ( true ? 1 : 2 )
+
+    % reference to a variable    
+    y := x
+}
+
