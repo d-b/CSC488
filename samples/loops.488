@@ -1,0 +1,42 @@
+% A program using all forms of loop building and loop exit constructs
+
+{
+    var i : integer
+
+    % basic while loop construct
+    i := 0
+    while i < 10 do
+        i := i + 1
+    end
+
+    % basic repeat loop construct
+    i := 10
+    repeat
+        i := i - 1
+    until i = 0
+
+    % unconditional loop exits
+    i := 0
+    while i = 0 do
+        exit
+    end
+
+    i := 0
+    repeat
+        exit
+    until i = 1
+
+    % conditional loop exits
+    i := 10
+    while i >= 0 do
+        exit when i <= 5
+        i := i - 1
+    end
+
+    i := 1
+    repeat
+        exit when i >= 5
+        i := i + 1
+    until i >= 10
+}
+
