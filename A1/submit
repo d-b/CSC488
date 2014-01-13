@@ -1,0 +1,33 @@
+#!/bin/bash
+# Prepares tar ball with deliverables and submits the tarball
+
+# CSC488 team number
+TEAM_NUMBER="XY"
+
+# Assignment deliverables
+DELIVERABLES=(A1a.488 A1b.488 A1c.488 A1d.488 A1e.488 README.A1)
+DELIVERABLES_TARBALL="csc488h.A1.${TEAM_NUMBER}.tar"
+
+# Check for submit
+if ! which submit > /dev/null 2>&1; then
+    echo "Submit not found... Is this really CDF?" 1>&2
+    exit 1
+fi
+
+# Check for prerequisites
+for i in "${DELIVERABLES[@]}"; do
+    if ! [ -e $i ]; then
+        echo "Error: Deliverable \"$i\" not found!" 1>&2
+        exit 1
+    fi
+done
+
+# Prepare deliverables tar ball
+tar -cf $DELIVERABLES_TARBALL ${DELIVERABLES[@]}
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to prepare submission tar ball!" 1>&2
+    exit 1
+fi
+
+# Submit assignment
+submit -c csc488h $DELIVERABLES_TARBALL
