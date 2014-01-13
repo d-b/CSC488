@@ -1,5 +1,5 @@
 #!/bin/bash
-# Prepares tar ball with deliverables and submits the tarball
+# Prepares tar ball with assignment 1 deliverables and submits the assignment tar ball
 
 # CSC488 team number
 TEAM_NUMBER="XY"
