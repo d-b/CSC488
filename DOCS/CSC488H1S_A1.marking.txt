@@ -1,0 +1,19 @@
+Marking Scheme for CSC488S Assignment 1
+
+Mark out of 100.  Each of the five programs (including it's description)
+is worth 20 marks.
+
+If each program satisfies the functionality requirements described
+in the assignment handout, it will get full marks.
+
+We will not judge the programs on programming style, semantic correctness
+or sensibility.  The programs are not required to do anything useful.
+
+EXCEPT:  any program containing a syntax errors will lose 4 marks.
+
+EXCEPT:  Packaging and naming errors will lose 10 marks (once).
+  - wrong name for submitted tarball
+  - wrong contents for submitted tarball
+  - failure to use correct program names as described in the
+    submit instructions.
+

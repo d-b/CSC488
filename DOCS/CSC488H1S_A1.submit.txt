@@ -1,0 +1,42 @@
+What to submit / How to submit Assignment 1
+
+1) Submit  tar ball named  csc488h.A1.XY.tar  (where XY is your team number).
+   If more than one tar ball is submitted by a team we will use the most
+   recent one.  Like this:
+
+   submit -c csc488h  csc488h.A1.XY.tar
+
+   See "man submit" on CDF for more information.
+
+The tar ball should contain:
+
+a) A README.A1 file that describes what each team member did for this assignment
+
+b) The README.A1 file should also contain a *brief* (i.e. 1 .. 2 sentences) 
+   description of each of your programs.  The author(s) of each program
+   should also be identified in each program file.
+
+c) The five programs called for in the assignment.
+   To facilitate processing and marking of Assignment 1, all teams *must*
+   use the file name conventions:
+
+  A1a.488
+  A1b.488
+  A1c.488
+  A1d.488
+  A1e.488
+
+NOTE: these file names and the name of the tarball itself are
+*case sensitive*.  Please try to hard to get the names exactly
+right so you don't break our automated processing scripts.
+
+2) You do not have to submit any hardcopy for this assignment.
+
+3) We strongly suggest that each team adopt a common "coding style"
+   i.e. how a program is formatted, comment and indentation conventions.
+  The particular style used by a team is not important but consistency among
+  different program is. A consistent style will help team members 
+  read each others programs and it will make it easier for the TA to mark 
+  your software.
+
+
