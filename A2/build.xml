@@ -1,0 +1,169 @@
+<!-- $Id: build.xml,v 1.8 2012/01/15 16:54:01 dw Exp dw $  -->
+<project name="CSC488 Compiler" default="help">
+  <description>
+    Compiler for CSC488 Assignment 2
+  </description>
+  <!-- src, build, lib and dist directories -->
+  <property name="src" location="src"/>
+  <property name="build" location="bin"/>
+  <property name="lib" location="lib"/>
+  <property name="dist" location="dist"/>
+  <property name="basedir" location="bin"/>
+  <property name="doc"  location="doc"/>
+
+  <!-- true if this is a debug build -->
+  <property name="debug_build" value="false"/>
+
+  <property name="jflex.jar" value="${lib}/JFlex.jar" />
+  <property name="cup.jar" value="${lib}/java-cup-v11a.jar" />
+  <property name="runtime.jar" value="${lib}/java-cup-11a-runtime.jar" />
+
+  <!-- where to get jar files from -->
+  <!-- Locations for cdf.toronto.edu     -->
+  <property name="jflex.jar.url" 
+        value="http://www.cdf.toronto.edu/~csc488h/winter/lib/JFlex.jar" />
+  <property name="cup.jar.url" 
+  	value="http://www.cdf.toronto.edu/~csc488h/winter/lib/java-cup-v11a.jar" />
+  <property name="runtime.jar.url" 
+  	value="http://www.cdf.toronto.edu/~csc488h/winter/lib/java-cup-11a-runtime.jar" />
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="help" description="show help message">
+  	<echo message="Ant build file for CSC488. Useful targets:"/> 
+  	<echo message=""/> 
+	<echo message="compiler488:      build the compiler"/>
+  	<echo message="gettools:         download development tools to local lib"/> 
+	<echo message="libclean:         remove the local library (i.e. ungettools)"/>
+  	<echo message="realclean:        remove all compiled and generated files"/>
+        <echo message="jflex:            run jflex to produce a scanner"/>
+        <echo message="jflexclean:       remove JFlex generated files"/>
+        <echo message="jcup:             run java_cup to produce a parser"/>
+        <echo message="jcupclean:        remove java_cup generated files"/>
+  	<echo message="compile:          compile the compiler"/> 
+  	<echo message="dist:             build a distribution jar"/> 
+        <echo message="doc:              build javadoc documentation"/>
+        <echo message="docclean:         remove all javadoc documentation"/>
+  	<echo message="clean:            remove all compiled files"/> 
+	<echo message="rebuild:          clean followed by compile"/>
+  	<echo message=""/> 
+  </target> 
+
+
+  <target name="declare" description="define tasks for jflex and cup">
+    <taskdef 
+     classname="JFlex.anttask.JFlexTask" name="jflex" 
+     classpath="${jflex.jar}"/>
+
+    <taskdef
+      classname="java_cup.anttask.CUPTask" name="cup"
+      classpath="${cup.jar}"/>
+  </target>
+
+
+  <target name="gettools" description="download development tools">
+    <mkdir dir="${lib}"/>
+    <get src="${jflex.jar.url}" dest="${jflex.jar}"/>
+    <get src="${cup.jar.url}" dest="${cup.jar}"/>
+    <get src="${runtime.jar.url}" dest="${runtime.jar}"/>
+  </target>
+
+  
+  <target name="jflex" depends="declare" description="generate scanner">
+    <jflex file="${src}/compiler488/parser/csc488.flex" />
+  </target>
+
+  <target name="jflexclean">
+    <delete file="${src}/compiler488/parser/Lexer.java" />
+  </target>
+
+  <target name="jcup" depends="declare" description="generate parser">
+  	<cup srcfile="${src}/compiler488/parser/csc488.cup"
+	 destdir="${src}"
+         expect="0"
+  	 force="true"
+         parser="Parser" />
+  </target>
+  
+  <target name="jcupclean">
+    <delete file="${src}/compiler488/parser/Parser.java"/>
+    <delete file="${src}/compiler488/parser/sym.java"/>
+  </target>
+
+  <target name="compile" depends="init,jflex,jcup"
+    description="compiles the source">
+    <!-- workaround for bug in ant 1.8 -->
+    <javac debug="${debug_build}" 
+	   includeantruntime="false"
+	   srcdir="${src}" destdir="${build}"  >
+      <classpath>
+	<fileset dir="${lib}">
+	  <include name="java-cup-11a-runtime.jar"/>
+	</fileset>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="dist" depends="compile"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <!-- Put everything in ${build} into the csc488.jar file -->
+    <jar jarfile="${dist}/compiler488.jar" basedir="${build}">
+      <manifest>
+	<attribute 
+	 name="Main-Class" value="compiler488.Compiler488"
+	 />
+	<attribute 
+	 name="Class-Path"
+	 value="../lib/java-cup-11a-runtime.jar"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="doc">
+    <mkdir dir="${doc}"/>
+    <mkdir dir="${doc}/javadoc"/>    
+    <javadoc destdir="doc/javadoc" Use="true">
+      <fileset dir="${src}">
+	<include name="**/*.java"/>
+      </fileset>
+      <classpath>
+	<fileset dir="${lib}">
+	  <include name="java-cup-11a-runtime.jar"/>
+	</fileset>
+      </classpath>
+    </javadoc>
+  </target>
+
+  <target name="docclean"
+        description="clean up doc" >
+    <!-- Delete the ${doc} directory tree -->
+    <delete dir="${doc}"/>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+  <target name="libclean"
+        description="clean up lib" >
+    <!-- Delete the ${lib} directory tree -->
+    <delete dir="${lib}"/>
+  </target>
+
+  <target name="realclean" depends="clean, jflexclean, jcupclean"/>
+
+  <target name="rebuild" depends="realclean,compile"/>
+
+  <target name="compiler488" depends="compile"/>
+
+</project>
+
