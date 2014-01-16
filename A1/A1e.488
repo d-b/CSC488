@@ -3,7 +3,7 @@
 {
 	% recursive procedure with parameters -- find triangle number
 	var triangle : integer
-	proc recursive_proc_params (n : integer) {
+	proc recursive_proc (n : integer) {
 		if n <= 0 then
 			triangle := 0
 			return 
