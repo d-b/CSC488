@@ -5,7 +5,13 @@
     var xs [ 10 ] : integer
     var ys [ 2 .. 10 ] : integer
     var zs [ -3 .. 10 ] : integer
-   
+
+    % NB: two distinct tokens in `bound` parse rule definition
+    var ps [ - 5 . . - 1 ] : integer
+
+    % "Lower bound must be less than or equal to the upper bound"
+    var qs [ 4 .. 4 ] : integer
+
     var area1 [ 10, 10 ] : integer
     var area2 [ 10, 2 .. 9 ] : integer
     var area3 [ 2 .. 9, 10 ] : integer
