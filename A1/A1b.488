@@ -29,6 +29,13 @@
     xs[1] := 1
     xs[10] := 10
 
+    % Array reference by expression
+    xs[(10)] := 10
+    xs[5 + 5] := 10
+
+    xs[xs[1]] := 1
+    xs[(( not true or false ? -1 : 1))] := 1
+
     ys[2] := 2
     ys[10] := 10
 
@@ -43,6 +50,9 @@
     area1[ 10, 1 ] := 2
     area1[ 10, 10 ] := 3
     area1[ 1, 10 ] := 4
+
+    % 2D array reference by expression
+    area1[ 5 + 5, 4 + 6 ] := 3
 
     area2[ 1, 2 ] := 1
     area2[ 10, 2 ] := 2
