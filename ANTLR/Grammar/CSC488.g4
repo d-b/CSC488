@@ -60,7 +60,8 @@ generalBound
 
 type
     : 'integer'
-    | 'boolean';
+    | 'boolean'
+    ;
 
 statement
     : variable ':' '=' expression
