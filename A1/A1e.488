@@ -24,7 +24,9 @@
 	proc print_parentheses () {
 		put "("
 		number_to_print := number_to_print - 1
-		print_parentheses ()
+		if number_to_print not = 0 then 
+			print_parentheses ()
+		fi
 		put ")"
 		return
 	}
