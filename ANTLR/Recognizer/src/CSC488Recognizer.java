@@ -5,11 +5,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 public class CSC488Recognizer {
-
-	/**
-	 * @param args
-	 * @throws IOException 
-	 */
 	public static void main(String[] args) throws IOException {
 		if(args.length == 0){
 			System.out.println("Usage: <sample>");
@@ -22,5 +17,4 @@ public class CSC488Recognizer {
 		CSC488Parser parser = new CSC488Parser(stream);
 		parser.program();
 	}
-
 }
