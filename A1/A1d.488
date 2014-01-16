@@ -34,6 +34,6 @@
     dummy_bool := func_args_bool(1, true)
 
     % functions in expressions
-    dummy_int  := func_noargs_int() + func_args_int(1 + 1, true ? true : false)
-    dummy_bool := func_noargs_bool() and func_args_bool(1 + 1, true ? true : false)
+    dummy_int  := func_noargs_int() + func_args_int(1 + 1, (true ? true : false))
+    dummy_bool := func_noargs_bool() and func_args_bool(1 + 1, (true ? true : false))
 }
