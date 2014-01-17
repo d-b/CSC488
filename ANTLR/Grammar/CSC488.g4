@@ -117,7 +117,7 @@ and_expr
     ;
 
 not_expr
-    : 'not'? pred_expr
+    : 'not'* pred_expr
     ;
 
 pred_expr
