@@ -2,7 +2,7 @@
 # Prepares tar ball with assignment 1 deliverables and submits the assignment tar ball
 
 # CSC488 team number
-TEAM_NUMBER="XY"
+TEAM_NUMBER="09"
 
 # Assignment deliverables
 DELIVERABLES=(A1a.488 A1b.488 A1c.488 A1d.488 A1e.488 README.A1)
