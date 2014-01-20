@@ -3,38 +3,36 @@ CSC488 GROUP 9		Documentation
 g2watson - Watson Oren Isaac
 g2scotts - Simon Scott
 g2mccorm - Peter McCormick
-g0dbloem - Daniel Bloemendal"
+g0dbloem - Daniel Bloemendal
 
 ASSIGNMENT 1 Learning the Language
 
-Assignment Issues:
+Deliverables
 
-#1 A1a.488 A program that uses all arithmetic, logical and comparison operators
-	Closed by: Peter Mccormick
+A1a.488 - A program that uses all arithmetic, logical and comparison operators
+	Authors: g2mccorm
 
-#2 A1b.488 A program using arrays including both forms of array declaration, positive and negative bounds
-	Closed by: Peter Mccormick
+A1b.488 -  A program using arrays including both forms of array declaration, positive and negative bounds
+	Authors: g2mccorm
 
-#3 A1c.488 A program using all forms of loop building and loop exit constructs
-	Closed by: Peter Mccormick
-
-#4 A1d.488 A program using non-recursive functions and procedures with and without parameters 
-	Closed by: Daniel Bloemendal
-
-#5 A1e.488 A program using recursive functions and procedures with and without parameters include at least one nested procedure and one nested function declaration 
-	Closed by: Daniel Bloemendal
-
-#6 Rename files in accordance with submission instructions 
-	Closed by: Daniel Bloemendal
-
-#7 Discover our team number and add it to the submission script 
-	Closed by: Daniel Bloemendal
-
-#8 Prepare README.A1 in accordance with submission instructions
-	Closed by: Simon Scott
-
-#9 Embed group number and CDF usernames in each A1 deliverable
-	Closed by: Daniel Bloemendal
+A1c.488 - A program using all forms of loop building and loop exit constructs
+	Authors: g2mccorm
 	
-#11 Discover our team number and add it to the submission script
-	CLosed by: Daniel Bloemendal
+A1d.488 - A program using non-recursive functions and procedures with and without parameters
+	Authors: g0dbloem
+	
+A1e.488 - A program using recursive functions and procedures with and without parameters include at least one nested procedure and one nested function declaration
+	Authors: g2watson
+	
+README.A1 - Credits and file descriptions
+	Authors: g2scotts, g0dbloem
+
+Non-deliverables
+
+submit - Shell script to prepare deliverables tar ball in accordance with submission specifications and submit it via 'submit' on CDF
+github administration - Creation of private repo, creation & management of issues, etc.
+	Members: g0dbloem
+	
+CSC488.g4 - A quick and dirty ANTLR4 grammar/lexer specifcation. Used to implement a basic recognizer for the CSC488 language.
+            All above sample programs pass without syntax errors. It is unknown whether or not the grammar is truly equivalent to the provided spec.
+	Authors: g0dbloem
