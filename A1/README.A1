@@ -9,19 +9,19 @@ ASSIGNMENT 1 Learning the Language
 
 Github Milestones
 
-#1 A program that uses all arithmetic, logical and comparison operators
+#1 A1a.488 A program that uses all arithmetic, logical and comparison operators
 	Closed by: Peter Mccormick
 
-#2 A program using arrays including both forms of array declaration, positive and negative bounds
+#2 A1b.488 A program using arrays including both forms of array declaration, positive and negative bounds
 	Closed by: Peter Mccormick
 
-#3 A program using all forms of loop building and loop exit constructs
+#3 A1c.488 A program using all forms of loop building and loop exit constructs
 	Closed by: Peter Mccormick
 
-#4 A program using non-recursive functions and procedures with and without parameters 
+#4 A1d.488 A program using non-recursive functions and procedures with and without parameters 
 	Closed by: Daniel Bloemendal
 
-#5 A program using recursive functions and procedures with and without parameters include at least one nested procedure and one nested function declaration 
+#5 A1e.488 A program using recursive functions and procedures with and without parameters include at least one nested procedure and one nested function declaration 
 	Closed by: Daniel Bloemendal
 
 #6 Rename files in accordance with submission instructions 
