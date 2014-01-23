@@ -233,7 +233,6 @@ expression
     ::= or_expr
     ;
 
-
 or_expr
     ::= or_expr OR and_expr
     |   and_expr
