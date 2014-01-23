@@ -113,11 +113,8 @@ terminal String  TEXTCONST  ;
 // nonterminal xxx
 
 nonterminal program, scope;
-nonterminal declaration_list, statement_list, 
-            variable_declaration_list, 
-            parameter_list,  optional_parameter_list,
-            argument_list,   optional_argument_list,
-            input_list,      output_list;
+nonterminal declaration_list, statement_list, variable_declaration_list,
+            parameter_list, optional_parameter_list, argument_list, optional_argument_list, input_list, output_list;
 nonterminal declaration, functionHead, procedureHead,
             parameter, variable_declaration, bound, generalBound, type;
 nonterminal statement, variable, output, input, text;
