@@ -13,13 +13,13 @@ import java_cup.runtime.*;      // Must always import this.
 // your code goes HERE
 //:};
 
-/* User code components 2: parser code components. 
+/* User code components 2: parser code components.
  * Modifications to the default generated parser
  */
 parser code {:
 
     String lastError;
-    
+
     /** Override the report_error method so it will display the line and
      * column of where the error occurred in the input as well as the
      * reason for the error which is passed into the method in the
@@ -30,7 +30,7 @@ parser code {:
     public void report_error(String message, Object info)
     {
     String st =  "Error";
-   
+
         if (info instanceof java_cup.runtime.Symbol)
         {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
@@ -40,7 +40,7 @@ parser code {:
              * If either is < 0 the parser may have run off the end of the program
              * and a Syntax Error message without line number may be printed.
          */
-   
+
             if (s.left >= 0)                // Check line number.
         {
                 st += " in line " + (s.left + 1);
@@ -54,15 +54,15 @@ parser code {:
         System.err.println (st);
         lastError = st;
     }
-   
+
     /** Override the report_fatal_error method to use the report_error method. */
     /** @throws SyntaxErrorException                        */
     public void report_fatal_error (String message, Object info) throws SyntaxErrorException
     {
         report_error (message, info);
-        throw new SyntaxErrorException (lastError); 
+        throw new SyntaxErrorException (lastError);
     }
-   
+
 :};
 
 /* User code components 3: initialization code.
@@ -89,9 +89,9 @@ init with {:
  * "left", "right", "nonassoc", "import", and "package".
  */
 
-// DEFINITIONS for CSC488S Source Language  Winter  2013/2014 
+// DEFINITIONS for CSC488S Source Language  Winter  2013/2014
 
-// Terminals returned by the scanner with no value attached.  
+// Terminals returned by the scanner with no value attached.
 terminal    BOOLEAN,        INTEGER,        DO      ;
 terminal    ELSE,   END,    EXIT,   FI,     FORWARD, FUNC ;
 terminal    IF,     GET,    PROCEDURE,      PUT     ;
@@ -258,7 +258,7 @@ pred_expr
     ;
 
 add_expr
-    ::= add_expr PLUS  mul_expr
+    ::= add_expr PLUS mul_expr
     |   add_expr MINUS mul_expr
     |   mul_expr
     ;
@@ -270,7 +270,7 @@ mul_expr
     ;
 
 unr_expr
-    ::= MINUS term_expr 
+    ::= MINUS term_expr
     |   term_expr
     ;
 
