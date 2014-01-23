@@ -1,0 +1,54 @@
+What to submit / How to submit Assignment 2
+
+1) Submit  tar ball named  csc488h.A2.XY.tar  (where XY is your team number).
+   If more than one tar ball is submitted by a team we will use the most
+   recent one.  Like this:
+
+   submit -c csc488h  csc488h.A2.XY.tar
+
+   See "man submit" on CDF for more information.
+
+The tar ball should contain:
+
+a) A README.A2 file that describes what each team member did for this assignment
+
+b) Your  csc488.cups file
+
+   We will use this file with the Assignment 2 starter code to build a parser
+   and run that parser on our test cases.
+
+c) A design document that describes how you designed your csc488.cups file.
+   Explain the issues that arose with the source language reference grammar
+   and how you resolved those issues
+
+d) A tests directory containing all of the test cases that you used to
+   test your compiler.  There should be two subdirectories
+   tests/passing    tests for the correct operation of the parser (legal programs)
+   tests/failing    test to demonstrate handling of syntax errors (invalid programs)
+
+   Include a shell script  RUNALLTESTS.sh  that will run your compiler against
+   all of your test cases.   Model it after the RUNCOMPILER.sh file we provided.
+   We'll adjust the location of your compiler (e.g. WHERE) for our testing.
+
+e) A document describing how you tested your csc488.cups file.
+   Include an index with a one sentence description of each test case.
+
+You should submit the following documents as hard copy to the
+CSC488S drop box in BA2222.
+
+   Only the documentation in part c) above
+
+   We do not want listings of your test cases or your csc488.cup file.
+
+NOTES
+
+1) The file/directory  names and the name of the tarball itself are
+   *case sensitive*.  Please try to hard to get the names exactly
+    right so you don't break our automated processing scripts.
+
+2) The documents you submit in the tarball should be in a format that is 
+   easy to read on CDF.  In general this means  text files or PDF files.
+   Do not submit Microsoft Word files.
+
+
+

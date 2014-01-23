@@ -1,0 +1,32 @@
+Marking Scheme for Assignment 2
+
+-  Package and submission			 5%
+   Was the file/directory structure correct?
+   Did the RUNALLTESTS.sh workg correctly?
+   Was the required hardcopy handed in on time?
+
+-  Grammar  quality/readability			40%
+   Did they appear to correctly handle issues in the reference grammar
+   statement vs. list of statements,  precedence of expressions  etc.
+   Was the grammar complete, correct, readable?
+
+-  Documentation				20%
+   Did they document
+   - their grammar design ?		
+   - their testing ?			 
+   - who did what ?			 
+
+-  The teams testing				25%
+   - how thoroughly did they test their grammar?
+   - did they test with syntacticaly correct programs?
+   - did they test handling of syntax errors?
+
+- Our testing					 10%
+  Our testing of a compiler built using each teams  csc488.cup file
+  Did the compiler build successfully?
+  Does it pass all of our tests?
+
+
+    
+    
+
