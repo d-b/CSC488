@@ -3,7 +3,7 @@
 
 package compiler488.parser;
 
-import java_cup.runtime.*;		// Must always import this.
+import java_cup.runtime.*;      // Must always import this.
 
 /* User code components 1: action code components.
  * Code to be used inside the actions triggered when productions are matched.
@@ -18,8 +18,8 @@ import java_cup.runtime.*;		// Must always import this.
  */
 parser code {:
 
-	String lastError;
-	
+    String lastError;
+    
     /** Override the report_error method so it will display the line and
      * column of where the error occurred in the input as well as the
      * reason for the error which is passed into the method in the
@@ -28,40 +28,40 @@ parser code {:
      * @param info     symbol containing line/column numbers
      */
     public void report_error(String message, Object info)
-	{
-	String st =  "Error";
+    {
+    String st =  "Error";
    
         if (info instanceof java_cup.runtime.Symbol)
-	    {
+        {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
 
-	    /* s.left is supposed to hold the line number of the error.
-	     * s.right is supposed to hold the column number.
+        /* s.left is supposed to hold the line number of the error.
+         * s.right is supposed to hold the column number.
              * If either is < 0 the parser may have run off the end of the program
              * and a Syntax Error message without line number may be printed.
-	     */
+         */
    
-            if (s.left >= 0)				// Check line number.
-		{
+            if (s.left >= 0)                // Check line number.
+        {
                 st += " in line " + (s.left + 1);
-                if (s.right >= 0)			// Check column number.
+                if (s.right >= 0)           // Check column number.
                     st += ", column " + (s.right + 1);
-		}
+        }
             else
                st += " at end of input " ;
            }
-	    st += ": " + message;
+        st += ": " + message;
         System.err.println (st);
         lastError = st;
-	}
+    }
    
     /** Override the report_fatal_error method to use the report_error method. */
-    /** @throws SyntaxErrorException						*/
+    /** @throws SyntaxErrorException                        */
     public void report_fatal_error (String message, Object info) throws SyntaxErrorException
-	{
+    {
         report_error (message, info);
         throw new SyntaxErrorException (lastError); 
-	}
+    }
    
 :};
 
@@ -92,27 +92,36 @@ init with {:
 // DEFINITIONS for CSC488S Source Language  Winter  2013/2014 
 
 // Terminals returned by the scanner with no value attached.  
-terminal 	BOOLEAN,	INTEGER,	DO	;
-terminal	ELSE,	END,	EXIT,   FI,	FORWARD, FUNC	;
-terminal	IF,	GET, 	PROCEDURE,	PUT	;
-terminal	WHILE,	REPEAT,	UNTIL,	VAR,	NEWLINE	;
-terminal	RESULT,	RETURN,	THEN,	WHEN	;
+terminal    BOOLEAN,        INTEGER,        DO      ;
+terminal    ELSE,   END,    EXIT,   FI,     FORWARD, FUNC ;
+terminal    IF,     GET,    PROCEDURE,      PUT     ;
+terminal    WHILE,  REPEAT, UNTIL,  VAR,    NEWLINE ;
+terminal    RESULT, RETURN, THEN,   WHEN            ;
 
 // Special-character terminals, no value attached
-terminal	AND,	OR,	NOT,	TRUE,	FALSE	;
-terminal	L_PAREN	,R_PAREN,L_SQUARE, R_SQUARE, L_CURLEY, R_CURLEY  	;
-terminal	EQUAL,	GREATER,LESS,	COMMA,  DOT, COLON	;
-terminal	PLUS,	MINUS,	TIMES,  DIVIDE, QUESTION	;
+terminal    AND,    OR,     NOT,    TRUE,   FALSE       ;
+terminal    L_PAREN ,R_PAREN,L_SQUARE, R_SQUARE, L_CURLEY, R_CURLEY ;
+terminal    EQUAL,  GREATER,LESS,   COMMA,  DOT, COLON  ;
+terminal    PLUS,   MINUS,  TIMES,  DIVIDE, QUESTION    ;
 
 // Terminals returned by the scanner with a value.
-terminal String  IDENT	;
-terminal Integer INTCONST	;
-terminal String  TEXTCONST	;
+terminal String  IDENT      ;
+terminal Integer INTCONST   ;
+terminal String  TEXTCONST  ;
 
 // Non-terminals that have no value.
 // nonterminal xxx
 
-nonterminal	program ;
+nonterminal program, scope;
+nonterminal declaration_list, statement_list, 
+            variable_declaration_list, 
+            parameter_list,  optional_parameter_list,
+            argument_list,   optional_argument_list,
+            input_list,      output_list;
+nonterminal declaration, functionHead, procedureHead,
+            parameter, variable_declaration, bound, generalBound, type;
+nonterminal statement, variable, output, input, text, expression;
+nonterminal variablename, functionname, procedurename;
 
 // Non-terminals that have a value.
 // nonterminal type  nameList ;
@@ -122,7 +131,7 @@ nonterminal	program ;
 // commented.
 //
 //precedence left PLUS, MINUS;
-//precedence left TIMES, DIVIDE;		// Higher precedence.
+//precedence left TIMES, DIVIDE;        // Higher precedence.
 
 // The grammar section.
 
@@ -135,12 +144,140 @@ start with program;
  * reads one more token before it will act on the production.
  */
 
-program		::=	;				// the main program
+program
+    ::= scope
+    ;
 
-/*****************************************************************************
+scope
+    ::= L_CURLEY declaration_list statement_list R_CURLEY
+    ;
 
-  YOUR CAREFULLY CRAFTED GRAMMAR FOR THE CSC488S SOURCE LANGUAGE
+declaration_list
+    ::= declaration_list declaration
+    |   declaration
+    ;
 
-    GOES HERE
+statement_list
+    ::= statement_list statement
+    |   statement
+    ;
 
-****************************************************************************/
+variable_declaration_list
+    ::= variable_declaration_list COMMA variable_declaration
+    |   variable_declaration
+    ;
+
+parameter_list
+    ::= parameter_list COMMA parameter
+    |   parameter
+    ;
+
+optional_parameter_list
+    ::= parameter_list
+    |
+    ;
+
+argument_list
+    ::= argument_list COMMA expression
+    |   expression
+    ;
+
+optional_argument_list
+    ::= argument_list
+    |
+    ;
+
+input_list
+    ::= input_list COMMA input
+    |   input
+    ;
+
+output_list
+    ::= output_list COMMA output
+    |   output
+    ;
+
+declaration
+    ::= VAR variable_declaration_list COLON type
+    |   functionHead scope
+    |   procedureHead scope
+    |   FORWARD functionHead
+    |   FORWARD procedureHead
+    ;
+
+functionHead
+    ::= FUNC functionname L_PAREN optional_parameter_list R_PAREN COLON type
+    ;
+
+procedureHead
+    ::= PROCEDURE procedurename L_PAREN optional_parameter_list R_PAREN
+    ;
+
+parameter
+    ::= variablename COLON type
+    ;
+
+variable_declaration
+    ::= variablename
+    |   variablename L_SQUARE bound R_SQUARE
+    |   variablename L_SQUARE bound COMMA bound R_SQUARE
+    ;
+
+bound
+    ::= INTCONST
+    |   generalBound DOT DOT generalBound
+    ;
+
+generalBound
+    ::= INTCONST
+    |   MINUS INTCONST
+    ;
+
+type
+    ::= INTEGER
+    |   BOOLEAN
+    ;
+
+statement
+    ::= variable COLON EQUAL expression
+    |   IF expression THEN statement_list FI
+    |   IF expression THEN statement_list ELSE statement_list FI
+    |   WHILE expression DO statement_list END
+    |   REPEAT statement_list UNTIL expression
+    |   EXIT
+    |   EXIT WHEN expression
+    |   RESULT expression
+    |   RETURN
+    |   PUT output_list
+    |   GET input_list
+    |   procedurename L_PAREN optional_argument_list R_PAREN
+    |   scope
+    ;
+
+variable
+    ::= variablename
+    |   variablename L_SQUARE expression R_SQUARE
+    |   variablename L_SQUARE expression COMMA expression R_SQUARE
+    ;
+
+output
+    ::= expression
+    |   NEWLINE
+    |   text
+    ;
+
+input
+    ::= variable
+    ;
+
+text
+    ::= TEXTCONST
+    ;
+
+expression
+    ::= variablename
+    ;
+
+variablename  ::= IDENT;
+functionname  ::= IDENT;
+procedurename ::= IDENT;
