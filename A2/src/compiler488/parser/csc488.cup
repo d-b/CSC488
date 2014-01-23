@@ -114,12 +114,13 @@ terminal String  TEXTCONST  ;
 
 nonterminal program, scope;
 nonterminal declaration_list, statement_list, variable_declaration_list,
-            parameter_list, optional_parameter_list, argument_list, optional_argument_list, input_list, output_list;
+            parameter_list, optional_parameter_list, argument_list, optional_argument_list, not_list, optional_not_list,
+            input_list, output_list;
 nonterminal declaration, functionHead, procedureHead,
             parameter, variable_declaration, bound, generalBound, type;
 nonterminal statement, variable, output, input, text;
 nonterminal variablename, functionname, procedurename;
-nonterminal expression, or_expr, and_expr, not_list, not_expr, pred_expr, add_expr, mul_expr, unr_expr, term_expr;
+nonterminal expression, or_expr, and_expr, not_expr, pred_expr, add_expr, mul_expr, unr_expr, term_expr;
 nonterminal literal, integer_literal, boolean_literal;
 
 // Non-terminals that have a value.
@@ -183,6 +184,16 @@ argument_list
 
 optional_argument_list
     ::= argument_list
+    |
+    ;
+
+not_list
+    ::= not_list NOT
+    |   NOT
+    ;
+
+optional_not_list
+    ::= not_list
     |
     ;
 
@@ -288,13 +299,8 @@ and_expr
     |   not_expr
     ;
 
-not_list
-    ::= not_list NOT
-    |   NOT
-    ;
-
 not_expr
-    ::= not_list pred_expr
+    ::= optional_not_list pred_expr
     ;
 
 pred_expr
