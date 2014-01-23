@@ -1,4 +1,0 @@
-{
-	var i : integer
-	i := 32768
-}
