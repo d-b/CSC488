@@ -33,6 +33,6 @@ submit - Shell script to prepare deliverables tar ball in accordance with submis
 github administration - Creation of private repo, creation & management of issues, etc.
 	Members: g0dbloem
 	
-CSC488.g4 - A quick and dirty ANTLR4 grammar/lexer specifcation. Used to implement a basic recognizer for the CSC488 language.
+CSC488.g4 - A quick and dirty ANTLR4 grammar/lexer specification. Used to implement a basic recognizer for the CSC488 language.
             All above sample programs pass without syntax errors. It is unknown whether or not the grammar is truly equivalent to the provided spec.
 	Authors: g0dbloem
