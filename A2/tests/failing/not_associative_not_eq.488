@@ -1,0 +1,11 @@
+%
+% Not-equals comparison operator does not associate
+%
+% @line=9
+%
+
+{
+    b := x not= y 
+    b := x not= y not= z
+}
+

@@ -1,0 +1,19 @@
+%
+% Exercise the `input` and `output` statements
+%
+
+{
+    var x, y, z : integer
+
+    x := 1
+
+    put "text"
+    put newline
+    put 1, x
+    put "3 times 4 equals ", 3 * 4, newline
+
+    get x
+    get x, y
+    get x, y, z
+}
+

@@ -1,0 +1,11 @@
+%
+% Less-than comparison operator does not associate
+%
+% @line=9
+%
+
+{
+    b := x < y 
+    b := x < y < z
+}
+

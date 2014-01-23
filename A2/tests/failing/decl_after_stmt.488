@@ -1,0 +1,12 @@
+% 
+% Try to declare variables somewhere other than at the top of scope
+%
+% @line=10
+%
+
+{
+    x := 1
+
+    var x : integer
+}
+
