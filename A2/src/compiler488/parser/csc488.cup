@@ -120,8 +120,10 @@ nonterminal declaration_list, statement_list,
             input_list,      output_list;
 nonterminal declaration, functionHead, procedureHead,
             parameter, variable_declaration, bound, generalBound, type;
-nonterminal statement, variable, output, input, text, expression;
+nonterminal statement, variable, output, input, text;
 nonterminal variablename, functionname, procedurename;
+nonterminal expression, or_expr, and_expr, not_list, not_expr, pred_expr, add_expr, mul_expr, unr_expr, term_expr;
+nonterminal literal, integer_literal, boolean_literal;
 
 // Non-terminals that have a value.
 // nonterminal type  nameList ;
@@ -275,7 +277,76 @@ text
     ;
 
 expression
-    ::= variablename
+    ::= or_expr
+    ;
+
+
+or_expr
+    ::= or_expr OR and_expr
+    |   and_expr
+    ;
+
+and_expr
+    ::= and_expr AND not_expr
+    |   not_expr
+    ;
+
+not_list
+    ::= not_list NOT
+    |   NOT
+    ;
+
+not_expr
+    ::= not_list pred_expr
+    ;
+
+pred_expr
+    ::= add_expr EQUAL add_expr
+    |   add_expr NOT EQUAL add_expr
+    |   add_expr LESS add_expr
+    |   add_expr LESS EQUAL add_expr
+    |   add_expr GREATER add_expr
+    |   add_expr GREATER EQUAL add_expr
+    |   add_expr
+    ;
+
+add_expr
+    ::= add_expr PLUS  mul_expr
+    |   add_expr MINUS mul_expr
+    |   mul_expr
+    ;
+
+mul_expr
+    ::= mul_expr TIMES unr_expr
+    |   mul_expr DIVIDE unr_expr
+    |   unr_expr
+    ;
+
+unr_expr
+    ::= MINUS term_expr 
+    |   term_expr
+    ;
+
+term_expr
+    ::= literal
+    |   variable
+    |   functionname L_PAREN argument_list R_PAREN
+    |   L_PAREN expression R_PAREN
+    |   L_PAREN expression QUESTION expression COLON expression R_PAREN
+    ;
+
+literal
+    ::= integer_literal
+    |   boolean_literal
+    ;
+
+integer_literal
+    ::= INTCONST
+    ;
+
+boolean_literal
+    ::= TRUE
+    |   FALSE
     ;
 
 variablename  ::= IDENT;
