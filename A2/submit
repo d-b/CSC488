@@ -1,0 +1,44 @@
+#!/bin/bash
+# Prepares tar ball with assignment 2 deliverables and submits the assignment tar ball
+
+# CSC488 team number
+TEAM_NUMBER="09"
+
+# Assignment deliverables
+DELIVERABLES=(README.A2 csc488.cup tests RUNALLTESTS.sh)
+DELIVERABLES_TARBALL="csc488h.A2.${TEAM_NUMBER}.tar"
+
+# Check for submit
+if which submit > /dev/null 2>&1; then
+    echo "Submit not found... Is this really CDF?" 1>&2
+    exit 1
+fi
+
+# Copy grammar to current directory
+if [ ! -e compiler/src/compiler488/parser/csc488.cup ]; then
+    echo "Error: Grammar file not found!" 1>&2
+    exit 1
+else
+    cp compiler/src/compiler488/parser/csc488.cup ./
+fi
+
+# Check for prerequisites
+for i in "${DELIVERABLES[@]}"; do
+    if ! [ -e $i ]; then
+        echo "Error: Deliverable \"$i\" not found!" 1>&2
+        exit 1
+    fi
+done
+
+# Prepare deliverables tar ball
+tar -cf $DELIVERABLES_TARBALL ${DELIVERABLES[@]}
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to prepare submission tar ball!" 1>&2
+    exit 1
+fi
+
+# Cleanup before submission
+rm csc488.cup > /dev/null 2>&1
+
+# Submit assignment
+submit -c csc488h $DELIVERABLES_TARBALL
