@@ -143,11 +143,25 @@ unr_expr
     ;
 
 term_expr
-    : INTCONST
+    : literal
     | variable
     | functionname '(' arguments? ')'
     | '(' expression ')'
     | '(' expression '?' expression ':' expression ')'
+    ;
+
+literal
+    : integer_literal
+    | boolean_literal
+    ;
+
+integer_literal
+    : INTCONST
+    ;
+
+boolean_literal
+    : 'true'
+    | 'false'
     ;
 
 variablename  : IDENT;
@@ -204,6 +218,9 @@ WHEN      : 'when';
 WHILE     : 'while';
 UNTIL     : 'until';
 VAR       : 'var';
+
+TRUE      : 'true';
+FALSE     : 'false';
 
 IDENT     : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;    
 INTCONST  : '0'..'9'+;

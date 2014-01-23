@@ -55,6 +55,19 @@ public class CSC488BaseListener implements CSC488Listener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterBoolean_literal(@NotNull CSC488Parser.Boolean_literalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitBoolean_literal(@NotNull CSC488Parser.Boolean_literalContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterScope(@NotNull CSC488Parser.ScopeContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -367,6 +380,19 @@ public class CSC488BaseListener implements CSC488Listener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterInteger_literal(@NotNull CSC488Parser.Integer_literalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitInteger_literal(@NotNull CSC488Parser.Integer_literalContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterOutput(@NotNull CSC488Parser.OutputContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -413,6 +439,19 @@ public class CSC488BaseListener implements CSC488Listener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitVariablenames(@NotNull CSC488Parser.VariablenamesContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterLiteral(@NotNull CSC488Parser.LiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitLiteral(@NotNull CSC488Parser.LiteralContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

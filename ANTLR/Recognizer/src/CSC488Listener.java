@@ -41,6 +41,17 @@ public interface CSC488Listener extends ParseTreeListener {
 	void exitAnd_expr(@NotNull CSC488Parser.And_exprContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link CSC488Parser#boolean_literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolean_literal(@NotNull CSC488Parser.Boolean_literalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CSC488Parser#boolean_literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolean_literal(@NotNull CSC488Parser.Boolean_literalContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link CSC488Parser#scope}.
 	 * @param ctx the parse tree
 	 */
@@ -305,6 +316,17 @@ public interface CSC488Listener extends ParseTreeListener {
 	void exitMul_expr(@NotNull CSC488Parser.Mul_exprContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link CSC488Parser#integer_literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterInteger_literal(@NotNull CSC488Parser.Integer_literalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CSC488Parser#integer_literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitInteger_literal(@NotNull CSC488Parser.Integer_literalContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link CSC488Parser#output}.
 	 * @param ctx the parse tree
 	 */
@@ -347,4 +369,15 @@ public interface CSC488Listener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVariablenames(@NotNull CSC488Parser.VariablenamesContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link CSC488Parser#literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterLiteral(@NotNull CSC488Parser.LiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CSC488Parser#literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitLiteral(@NotNull CSC488Parser.LiteralContext ctx);
 }
