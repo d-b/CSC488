@@ -14,7 +14,7 @@ WHERE=./compiler
 #
 # decider(INPUT): Decider for the CSC488 language
 #
-# return (INPUT \in LANGUAGE) ? 0 : 1;
+# return (INPUT \in LANGUAGE) ? 1 : 0;
 #
 function decider() {
     # Argument list
