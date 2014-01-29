@@ -115,7 +115,7 @@ terminal String  TEXTCONST  ;
 nonterminal program, scope;
 nonterminal declaration_list, statement_list, variable_declaration_list,
             parameter_list, argument_list, not_list, input_list, output_list;
-nonterminal optional_declaration_list, optional_statement_list, optional_parameter_list, optional_argument_list, optional_not_list;
+nonterminal optional_parameter_list, optional_argument_list, optional_not_list;
 nonterminal declaration, functionHead, procedureHead,
             parameter, variable_declaration, bound, generalBound, type;
 nonterminal statement, variable, output, input, text;
@@ -149,7 +149,9 @@ program
     ;
 
 scope
-    ::= L_CURLEY optional_declaration_list optional_statement_list R_CURLEY
+    ::= L_CURLEY declaration_list statement_list R_CURLEY
+    |   L_CURLEY statement_list R_CURLEY
+    |   L_CURLEY R_CURLEY
     ;
 
 declaration
@@ -322,11 +324,9 @@ output_list
     |   output
     ;
 
-optional_declaration_list ::= declaration_list | /* lambda */ ;
-optional_statement_list   ::= statement_list   | /* lambda */ ;
-optional_parameter_list   ::= parameter_list   | /* lambda */ ;
-optional_argument_list    ::= argument_list    | /* lambda */ ;
-optional_not_list         ::= not_list         | /* lambda */ ;
+optional_parameter_list ::= parameter_list   | /* lambda */ ;
+optional_argument_list  ::= argument_list    | /* lambda */ ;
+optional_not_list       ::= not_list         | /* lambda */ ;
 
 literal
     ::= integer_literal

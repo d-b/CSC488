@@ -15,7 +15,8 @@ program
     ;
 
 scope
-    : '{' declaration* statement* '}'
+    : '{' declaration+ statement+ '}'
+    | '{' statement* '}'
     ;
 
 declaration
