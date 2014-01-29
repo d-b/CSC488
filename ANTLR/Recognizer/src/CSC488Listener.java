@@ -1,4 +1,4 @@
-// Generated from W:\workspace\CSC488\ANTLR\Grammar\CSC488.g4 by ANTLR 4.1
+// Generated from CSC488.g4 by ANTLR 4.1
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -118,17 +118,6 @@ public interface CSC488Listener extends ParseTreeListener {
 	void exitParametername(@NotNull CSC488Parser.ParameternameContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link CSC488Parser#unr_expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CSC488Parser#unr_expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link CSC488Parser#add_expr}.
 	 * @param ctx the parse tree
 	 */
@@ -138,6 +127,17 @@ public interface CSC488Listener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAdd_expr(@NotNull CSC488Parser.Add_exprContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link CSC488Parser#unr_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CSC488Parser#unr_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link CSC488Parser#parameter}.

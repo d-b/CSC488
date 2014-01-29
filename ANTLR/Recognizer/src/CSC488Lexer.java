@@ -1,4 +1,4 @@
-// Generated from W:\workspace\CSC488\ANTLR\Grammar\CSC488.g4 by ANTLR 4.1
+// Generated from CSC488.g4 by ANTLR 4.1
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

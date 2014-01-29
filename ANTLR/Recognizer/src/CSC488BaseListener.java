@@ -1,4 +1,4 @@
-// Generated from W:\workspace\CSC488\ANTLR\Grammar\CSC488.g4 by ANTLR 4.1
+// Generated from CSC488.g4 by ANTLR 4.1
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -146,19 +146,6 @@ public class CSC488BaseListener implements CSC488Listener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterAdd_expr(@NotNull CSC488Parser.Add_exprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -166,6 +153,19 @@ public class CSC488BaseListener implements CSC488Listener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitAdd_expr(@NotNull CSC488Parser.Add_exprContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitUnr_expr(@NotNull CSC488Parser.Unr_exprContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
