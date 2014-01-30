@@ -1,0 +1,9 @@
+%
+% Declare a variable with no statements following it
+%
+% @line=9
+%
+
+{
+    var variable : integer
+}
