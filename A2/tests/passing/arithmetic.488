@@ -1,0 +1,12 @@
+% Verifiable arithmetic test. 
+{
+    var a,b,c,d,e,f:integer
+    a := 2 -- 3 - 4 
+    b := a + 1
+    c := b * 2 / a - a
+    d := (25 - c * c) / 4
+    e := -40/-5*-3/-2*-3/-2-4
+    f := -(5*5-4*4)-3
+    put a,b,c,d,e,f,newline
+    %output should be 123456
+}
