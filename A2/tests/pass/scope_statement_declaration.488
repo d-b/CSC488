@@ -1,0 +1,8 @@
+%
+% Scope with statements and declarations
+%
+
+{
+    var x : integer
+    x := 1
+}

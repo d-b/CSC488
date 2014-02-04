@@ -1,4 +1,7 @@
-% Verifiable arithmetic test. 
+%
+% Verifiable arithmetic test
+%
+
 {
     var a,b,c,d,e,f:integer
     a := 2 -- 3 - 4 

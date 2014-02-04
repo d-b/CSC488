@@ -1,0 +1,7 @@
+%
+% Scope with statements but no declarations
+%
+
+{
+    x := 1
+}
