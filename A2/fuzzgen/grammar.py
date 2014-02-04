@@ -103,12 +103,29 @@ def expression():
     yield "not", expression
     yield expression, "and", expression
     yield expression, "or", expression
-    yield expression, "=", expression
-    yield expression, "not", "=", expression
-    yield expression, "<", expression
-    yield expression, "<", "=", expression
-    yield expression, ">", expression
-    yield expression, ">", "=", expression
+    yield expression_assoc, "=", expression_assoc
+    yield expression_assoc, "not", "=", expression_assoc
+    yield expression_assoc, "<", expression_assoc
+    yield expression_assoc, "<", "=", expression_assoc
+    yield expression_assoc, ">", expression_assoc
+    yield expression_assoc, ">", "=", expression_assoc
+    yield "(", expression, ")"
+    yield "(", expression, "?", expression, ":", expression, ")"
+    yield variable
+    yield functionname, "(", argumentList, ")"
+
+def expression_assoc():
+    yield integer
+    yield "-", expression
+    yield expression, "+", expression
+    yield expression, "-", expression
+    yield expression, "*", expression
+    yield expression, "/", expression
+    yield "true"
+    yield "false"
+    yield "not", expression
+    yield expression, "and", expression
+    yield expression, "or", expression
     yield "(", expression, ")"
     yield "(", expression, "?", expression, ":", expression, ")"
     yield variable

@@ -83,5 +83,5 @@ if __name__ == '__main__':
     gb.build(grammar.program)
 
     tokens = list(gb.start_term.generate(None))
-    print " ".join(tokens)
+    print(" ".join(tokens))
 
