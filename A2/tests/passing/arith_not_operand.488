@@ -1,0 +1,13 @@
+{
+    var b : boolean
+
+    % This is okay:
+    b := 1 * true
+
+    % The parser chokes on this line:
+    b := 1 * not false
+
+    % Original testcase (care of fuzzgen.py)
+    result 5 * not (xyz())
+}
+
