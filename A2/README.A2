@@ -1,0 +1,24 @@
+CSC488 GROUP 9		Documentation
+
+g2watson - Watson Oren Isaac
+g2scotts - Simon Scott
+g2mccorm - Peter McCormick
+g0dbloem - Daniel Bloemendal
+
+ASSIGNMENT 2 Parser
+
+Deliverables 
+
+
+csc488.cup
+	Authors:
+
+csc488.flex
+	Authors:
+
+
+Non-deliverables
+
+submit - Shell script to prepare deliverables tar ball in accordance with submission specifications and submit it via 'submit' on CDF
+github administration - Creation of private repo, creation & management of issues, etc.
+	Members: g0dbloem 
