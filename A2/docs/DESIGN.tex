@@ -54,7 +54,6 @@
 \lstset {
     basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
     frame=lines,
-    numbers=left,
 }
 % ----------------------------------------------------------------
 
@@ -127,6 +126,8 @@ variablename  ::= IDENT;
 parametername ::= IDENT;
 \end{lstlisting}
 
+
+\lstset{numbers=left}
 \section{Expressions}
 \subsection{Design}
 The expression rules were built as a set of left recursive productions obeying the precedence rules
@@ -172,9 +173,27 @@ from the bottom up. However, it is simpler to describe the design of the grammar
 top down. The final product is a slightly more complicated application of concepts in the simplified
 grammar.
 
+\lstset {
+    basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
+    frame=none,
+    numbers=none
+}
+
 \subsection{Difficulties}
 While designing test cases we encountered a string that belongs to the reference language but is
 not recognized by our parser.
+
+\begin{lstlisting}
+    b := 1 * not false
+\end{lstlisting}
+
+While the string is not semantically valid due to the type mismatch, where a boolean is one of the
+operands of a numeric operator, it is a valid string in the reference language. The expression
+productions rules were designed to obey operator precedence rules. The way the ``not'' rule was
+setup was to expect a predicate expression after a list of ``not'' terminals. While this is
+appropriate for practical purposes as it will accept all semantically valid expressions we have
+tested, it unfortunately will not recognize all syntactically valid expressions. We decided not to
+solve this problem as our only solutions increased grammar complexity for no practical gain.
 
 % ----------------------------------------------------------------
 \end{document}
