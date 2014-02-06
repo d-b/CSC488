@@ -1,0 +1,10 @@
+% 
+% Function declaration with type missing
+%
+% @line=8
+%
+
+{
+    func func_missing_type() {}
+    dummy := true
+}
