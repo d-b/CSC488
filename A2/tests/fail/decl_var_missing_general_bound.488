@@ -1,0 +1,10 @@
+% 
+% Variable declaration with missing general bound
+%
+% @line=8
+%
+
+{
+    var x[1..] : integer
+    x := 1
+}

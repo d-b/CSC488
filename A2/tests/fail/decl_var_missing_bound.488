@@ -1,0 +1,10 @@
+% 
+% Variable declaration with missing bound
+%
+% @line=8
+%
+
+{
+    var x[] : integer
+    x := 1
+}
