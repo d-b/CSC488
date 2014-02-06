@@ -5,22 +5,31 @@
 TEAM_NUMBER="09"
 
 # Assignment deliverables
-DELIVERABLES=(README.A2 csc488.cup tests RUNALLTESTS.sh)
+DELIVERABLES=(README.A2 csc488.cup tests/passing/*.488 tests/failing/*.488 RUNALLTESTS.sh DESIGN.pdf TESTING.pdf)
 DELIVERABLES_TARBALL="csc488h.A2.${TEAM_NUMBER}.tar"
 
 # Check for submit
-if which submit > /dev/null 2>&1; then
+if ! which submit > /dev/null 2>&1; then
     echo "Submit not found... Is this really CDF?" 1>&2
     exit 1
 fi
 
-# Copy grammar to current directory
+# Check for grammar file
 if [ ! -e compiler/src/compiler488/parser/csc488.cup ]; then
     echo "Error: Grammar file not found!" 1>&2
     exit 1
-else
-    cp compiler/src/compiler488/parser/csc488.cup ./
 fi
+
+# Check for documentation
+if [ ! -e docs/DESIGN.pdf ] || [ ! -e docs/TESTING.pdf ]; then
+    echo "Error: Documentation not found!" 1>&2
+    exit 1
+fi
+
+# Copy prerequisites
+cp docs/DESIGN.pdf ./
+cp docs/TESTING.pdf ./
+cp compiler/src/compiler488/parser/csc488.cup ./
 
 # Check for prerequisites
 for i in "${DELIVERABLES[@]}"; do
@@ -38,7 +47,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # Cleanup before submission
-rm csc488.cup > /dev/null 2>&1
+rm csc488.cup  > /dev/null 2>&1
+rm DESIGN.pdf  > /dev/null 2>&1
+rm TESTING.pdf > /dev/null 2>&1
 
 # Submit assignment
 submit -c csc488h $DELIVERABLES_TARBALL
