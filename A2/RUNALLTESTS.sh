@@ -12,6 +12,14 @@
 WHERE=./compiler
 
 #
+# Verify existence of parser
+#
+if [ ! -f $WHERE/dist/compiler488.jar ]; then
+    echo "Parser not found!"
+    exit 1
+fi
+
+#
 # decider(INPUT): Decider for the CSC488 language
 #
 # return (INPUT \in LANGUAGE) ? 1 : 0;
