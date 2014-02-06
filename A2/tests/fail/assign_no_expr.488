@@ -1,0 +1,9 @@
+% 
+% Assignment statement with no expression
+%
+% @line=8
+%
+
+{
+    x := 
+}
