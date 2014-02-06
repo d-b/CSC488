@@ -5,7 +5,7 @@
 TEAM_NUMBER="09"
 
 # Assignment deliverables
-DELIVERABLES=(README.A2 csc488.cup tests/passing/*.488 tests/failing/*.488 RUNALLTESTS.sh DESIGN.pdf TESTING.pdf)
+DELIVERABLES=(README.A2 csc488.cup tests/passing/*.488 tests/failing/*.488 RUNALLTESTS.sh DESIGN.pdf TESTING.pdf fuzzgen)
 DELIVERABLES_TARBALL="csc488h.A2.${TEAM_NUMBER}.tar"
 
 # Check for submit
