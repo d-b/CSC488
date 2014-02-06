@@ -1,0 +1,9 @@
+% 
+% Result statement with no expression
+%
+% @line=8
+%
+
+{
+    result
+}

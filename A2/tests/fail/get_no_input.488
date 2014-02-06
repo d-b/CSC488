@@ -1,0 +1,9 @@
+% 
+% Get with no input
+%
+% @line=8
+%
+
+{
+    get
+}

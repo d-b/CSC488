@@ -1,0 +1,9 @@
+% 
+% Put with no output
+%
+% @line=8
+%
+
+{
+    put
+}

@@ -1,0 +1,12 @@
+% 
+% Declaration in an if statement outside of a new scope
+%
+% @line=9
+%
+
+{
+    if true then
+        var x : integer
+        x := 1
+    fi
+}

@@ -1,0 +1,9 @@
+% 
+% If statement with no expression
+%
+% @line=8
+%
+
+{
+    if then x := 1 fi
+}

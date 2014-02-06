@@ -1,0 +1,9 @@
+% 
+% If statement with no inner statements
+%
+% @line=8
+%
+
+{
+    if true then fi
+}

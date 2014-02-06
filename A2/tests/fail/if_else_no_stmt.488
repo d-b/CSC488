@@ -1,0 +1,9 @@
+% 
+% If else statement with no inner statements in else condition
+%
+% @line=8
+%
+
+{
+    if true then x := 1 else fi
+}

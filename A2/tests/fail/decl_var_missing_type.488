@@ -1,0 +1,9 @@
+% 
+% Variable declaration with type missing
+%
+% @line=8
+%
+
+{
+    var x
+}
