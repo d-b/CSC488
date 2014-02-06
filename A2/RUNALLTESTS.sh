@@ -77,7 +77,7 @@ function tests() {
 #
 function passing() {
     echo "Running passing tests..."
-    tests pass 1
+    tests passing 1
     return $?
 }
 
@@ -88,7 +88,7 @@ function passing() {
 #
 function failing() {
     echo "Running failing tests..."
-    tests fail 0
+    tests failing 0
     return $?
 }
 
