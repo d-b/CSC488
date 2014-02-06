@@ -1,0 +1,9 @@
+% 
+% Function call missing arguments
+%
+% @line=8
+%
+
+{
+    x := dummy_function(,)
+}

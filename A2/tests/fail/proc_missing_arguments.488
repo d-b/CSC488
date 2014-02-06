@@ -1,0 +1,9 @@
+% 
+% Procedure call missing arguments
+%
+% @line=8
+%
+
+{
+    dummy_procedure(,)
+}
