@@ -51,6 +51,12 @@
 \DeclareMathOperator{\sech}{sech}
 \newcolumntype{B}{>{\columncolor{black}\color{white}}c}
 % ----------------------------------------------------------------
+\lstset {
+    basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
+    frame=lines,
+    numbers=left,
+}
+% ----------------------------------------------------------------
 
 \begin{document}
 
@@ -99,7 +105,16 @@ This resolves the issue as a reduction to ``statement\_list'' is only possible i
 remaining statements left to shift on to the stack. This transformation was applied for statements,
 declarations and other such lists.
 
+\newpage
+
 \section{Reduce/Reduce conflicts}
+Another problem encountered during the process of transforming the grammar was an ambiguity when it
+came to variables and parameters. According to the reference grammar both a ``variablename'' and
+and ``parametername'' can be reduced to a ``variable''. However, this is ambiguous as both
+``variablename'' and ``parametername'' reduce from ``IDENT''. So in the case of ``variable'' if
+an ``IDENT'' is shifted on to the stack there is more than one valid reduction. It can be reduced to
+``variablename'' or ``parametername''. This is a reduce/reduce conflict.
+
 \begin{lstlisting}
 variable
     ::= variablename
@@ -107,7 +122,59 @@ variable
     |   variablename L_SQUARE expression R_SQUARE
     |   variablename L_SQUARE expression COMMA expression R_SQUARE
     ;
+
+variablename  ::= IDENT;
+parametername ::= IDENT;
 \end{lstlisting}
+
+\section{Expressions}
+\subsection{Design}
+The expression rules were built as a set of left recursive productions obeying the precedence rules
+set out in the reference grammar documentation. When viewing an expression as a tree, it is easy to
+see that the higher the precedence of an operation the closer it is to the bottom, or the leaves of
+the tree.
+
+\input{expression.tex}
+
+To illustrate how the expression productions were designed, we will explore a simplified grammar
+involving only addition and multiplication. As in the reference grammar, addition has lower
+precedence than multiplication. As seen in figure \ref{fig:expression}, the higher precedence
+multiplication operations are at the leaves of the tree. The production rules can be constructed
+to observe this tree like structure of expressions.
+
+\begin{lstlisting}
+expressions
+    ::= add_expr
+    ;
+
+add_expr
+    ::= add_expr PLUS mul_expr
+    |   mul_expr
+    ;
+
+mul_expr
+    ::= mul_expr TIMES terminal
+    |   terminal
+    ;
+\end{lstlisting}
+
+Working from the top down, in our simplified grammar the root of an expression begins at an addition
+expression, as seen in line 2. This reflects the fact that addition has the lowest precedence. The
+addition production then eats up as many terms as exist in the input sum. This is found in line 6 of
+the simplified grammar. When no terms are left in the sum ``add\_expr'' falls through to ``mul\_expr''
+as seen in line 7 of the simplified grammar. If there is only one term, where no ``+'' operator 
+exists in the expression, ``add\_expr'' immediately falls through to ``mul\_expr''. The  ``mul\_expr''
+eats up all product operations and ends when there are none left. At the end only terminals remain
+and the process is complete.
+
+It should be noted, that we explored the grammar from the top down. The LALR parser of course works
+from the bottom up. However, it is simpler to describe the design of the grammar working from the
+top down. The final product is a slightly more complicated application of concepts in the simplified
+grammar.
+
+\subsection{Difficulties}
+While designing test cases we encountered a string that belongs to the reference language but is
+not recognized by our parser.
 
 % ----------------------------------------------------------------
 \end{document}
