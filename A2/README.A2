@@ -5,20 +5,62 @@ g2scotts - Simon Scott
 g2mccorm - Peter McCormick
 g0dbloem - Daniel Bloemendal
 
-ASSIGNMENT 2 Parser
+ASSIGNMENT 2 Building the grammar
 
 Deliverables 
 
-
 csc488.cup
-	Authors:
+	Authors: g0dbloem
 
-csc488.flex
-	Authors:
+RUNALLTESTS.sh
+    Authors: g2watson, g2mccorm, g0dbloem
 
+DESIGN.pdf
+    Authors: g0dbloem
+
+TESTING.pdf
+    Authors: g0dbloem
+
+README.A1
+    Authors: g2scotts, g0dbloem
+
+tests/passing/arith_not_operand.488
+tests/passing/input_and_output.488
+tests/failing/not_associative_eq.488
+tests/failing/not_associative_gt.488
+tests/failing/not_associative_gteq.488
+tests/failing/not_associative_lt.488
+tests/failing/not_associative_lteq.488
+tests/failing/not_associative_not_eq.488
+    Authors: g2mccorm
+
+tests/passing/scope_empty.488
+tests/passing/scope_statement.488
+tests/passing/scope_statement_declaration.488
+tests/failing/assign_no_expr.488
+tests/failing/decl_func_missing_type.488
+tests/failing/decl_in_if.488
+tests/failing/decl_no_stmt.488
+tests/failing/decl_var_missing_bound.488
+tests/failing/decl_var_missing_general_bound.488
+tests/failing/decl_var_missing_type.488
+tests/failing/func_missing_arguments.488
+tests/failing/get_no_input.488
+tests/failing/if_else_no_stmt.488
+tests/failing/if_no_expr.488
+tests/failing/if_no_stmt.488
+tests/failing/no_program.488
+tests/failing/proc_missing_arguments.488
+tests/failing/put_no_output.488
+tests/failing/result_no_expr.488
+tests/failing/unclosed_scope.488
+    Authors: g0dbloem
 
 Non-deliverables
 
 submit - Shell script to prepare deliverables tar ball in accordance with submission specifications and submit it via 'submit' on CDF
 github administration - Creation of private repo, creation & management of issues, etc.
-	Members: g0dbloem 
+	Members: g0dbloem
+
+fuzzgen - parser "fuzzer", generates random strings from the reference language
+    Authors: g2mccorm
