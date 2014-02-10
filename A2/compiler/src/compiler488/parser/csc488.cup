@@ -1,9 +1,12 @@
+// CSC488S Winter 2013/2014  
+//
+// File:  csc488.cup
 //
 // Package and import specifications section.
 
 package compiler488.parser;
 
-import java_cup.runtime.*;      // Must always import this.
+import java_cup.runtime.*;		// Must always import this.
 
 /* User code components 1: action code components.
  * Code to be used inside the actions triggered when productions are matched.
@@ -13,13 +16,13 @@ import java_cup.runtime.*;      // Must always import this.
 // your code goes HERE
 //:};
 
-/* User code components 2: parser code components.
+/* User code components 2: parser code components. 
  * Modifications to the default generated parser
  */
 parser code {:
 
-    String lastError;
-
+	String lastError;
+	
     /** Override the report_error method so it will display the line and
      * column of where the error occurred in the input as well as the
      * reason for the error which is passed into the method in the
@@ -28,41 +31,41 @@ parser code {:
      * @param info     symbol containing line/column numbers
      */
     public void report_error(String message, Object info)
-    {
-    String st =  "Error";
-
+	{
+	String st =  "Error";
+   
         if (info instanceof java_cup.runtime.Symbol)
-        {
+	    {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
 
-        /* s.left is supposed to hold the line number of the error.
-         * s.right is supposed to hold the column number.
+	    /* s.left is supposed to hold the line number of the error.
+	     * s.right is supposed to hold the column number.
              * If either is < 0 the parser may have run off the end of the program
              * and a Syntax Error message without line number may be printed.
-         */
-
-            if (s.left >= 0)                // Check line number.
-        {
+	     */
+   
+            if (s.left >= 0)				// Check line number.
+		{
                 st += " in line " + (s.left + 1);
-                if (s.right >= 0)           // Check column number.
+                if (s.right >= 0)			// Check column number.
                     st += ", column " + (s.right + 1);
-        }
+		}
             else
                st += " at end of input " ;
            }
-        st += ": " + message;
+	    st += ": " + message;
         System.err.println (st);
         lastError = st;
-    }
-
+	}
+   
     /** Override the report_fatal_error method to use the report_error method. */
-    /** @throws SyntaxErrorException                        */
+    /** @throws SyntaxErrorException						*/
     public void report_fatal_error (String message, Object info) throws SyntaxErrorException
-    {
+	{
         report_error (message, info);
-        throw new SyntaxErrorException (lastError);
-    }
-
+        throw new SyntaxErrorException (lastError); 
+	}
+   
 :};
 
 /* User code components 3: initialization code.
@@ -89,39 +92,42 @@ init with {:
  * "left", "right", "nonassoc", "import", and "package".
  */
 
-// DEFINITIONS for CSC488S Source Language  Winter  2013/2014
+// DEFINITIONS for CSC488S Source Language  Winter  2013/2014 
 
-// Terminals returned by the scanner with no value attached.
-terminal    BOOLEAN,        INTEGER,        DO      ;
-terminal    ELSE,   END,    EXIT,   FI,     FORWARD, FUNC ;
-terminal    IF,     GET,    PROCEDURE,      PUT     ;
-terminal    WHILE,  REPEAT, UNTIL,  VAR,    NEWLINE ;
-terminal    RESULT, RETURN, THEN,   WHEN            ;
+// Terminals returned by the scanner with no value attached.  
+terminal 	BOOLEAN,	INTEGER,	DO	;
+terminal	ELSE,	END,	EXIT,   FI,	FORWARD, FUNC	;
+terminal	IF,	GET, 	PROCEDURE,	PUT	;
+terminal	WHILE,	REPEAT,	UNTIL,	VAR,	NEWLINE	;
+terminal	RESULT,	RETURN,	THEN,	WHEN	;
 
 // Special-character terminals, no value attached
-terminal    AND,    OR,     NOT,    TRUE,   FALSE       ;
-terminal    L_PAREN ,R_PAREN,L_SQUARE, R_SQUARE, L_CURLEY, R_CURLEY ;
-terminal    EQUAL,  GREATER,LESS,   COMMA,  DOT, COLON  ;
-terminal    PLUS,   MINUS,  TIMES,  DIVIDE, QUESTION    ;
+terminal	AND,	OR,	NOT,	TRUE,	FALSE	;
+terminal	L_PAREN	,R_PAREN,L_SQUARE, R_SQUARE, L_CURLEY, R_CURLEY  	;
+terminal	EQUAL,	GREATER,LESS,	COMMA,  DOT, COLON	;
+terminal	PLUS,	MINUS,	TIMES,  DIVIDE, QUESTION	;
 
 // Terminals returned by the scanner with a value.
-terminal String  IDENT      ;
-terminal Integer INTCONST   ;
-terminal String  TEXTCONST  ;
+terminal String  IDENT	;
+terminal Integer INTCONST	;
+terminal String  TEXTCONST	;
 
 // Non-terminals that have no value.
 // nonterminal xxx
 
-nonterminal program, scope;
-nonterminal declaration_list, statement_list, variable_declaration_list,
-            parameter_list, argument_list, not_list, input_list, output_list;
-nonterminal optional_parameter_list, optional_argument_list, optional_not_list;
-nonterminal declaration, functionHead, procedureHead,
-            parameter, variable_declaration, bound, generalBound, type;
-nonterminal statement, variable, output, input, text;
-nonterminal variablename, functionname, procedurename;
-nonterminal expression, or_expr, and_expr, not_expr, pred_expr, add_expr, mul_expr, unr_expr, term_expr;
-nonterminal literal, integer_literal, boolean_literal;
+// Non-terminals that have no value.
+// nonterminal xxx
+
+nonterminal	program,	statement,	statements,	scope	;
+nonterminal	declarations,	declaration,	type,	bound, generalBound 	;
+nonterminal	variablenames,	variablename,	functionHead,	procedureHead	;
+nonterminal	parameterList,  argumentList			;
+nonterminal	arguments,	parameter,	parameters	;
+nonterminal	inputs,		output,		outputs ;
+nonterminal 	expression,	conjunction,	negation,	compareExpn ;
+nonterminal	arithExpn,	term,    	factor		;
+nonterminal	primary,	constant,	variable	;
+
 
 // Non-terminals that have a value.
 // nonterminal type  nameList ;
@@ -131,7 +137,7 @@ nonterminal literal, integer_literal, boolean_literal;
 // commented.
 //
 //precedence left PLUS, MINUS;
-//precedence left TIMES, DIVIDE;        // Higher precedence.
+//precedence left TIMES, DIVIDE;		// Higher precedence.
 
 // The grammar section.
 
@@ -144,204 +150,156 @@ start with program;
  * reads one more token before it will act on the production.
  */
 
-program
-    ::= scope
-    ;
+program		::=	scope	;				// the main program
 
-scope
-    ::= L_CURLEY declaration_list statement_list R_CURLEY
-    |   L_CURLEY statement_list R_CURLEY
-    |   L_CURLEY R_CURLEY
-    ;
+scope		::=	L_CURLEY declarations statements R_CURLEY 
+							// scope with declarations and statements
+		|	L_CURLEY statements  R_CURLEY 		// scope with statments only
+		|	L_CURLEY  R_CURLEY			// empty scope
+		;
 
-declaration
-    ::= VAR variable_declaration_list COLON type
-    |   functionHead scope
-    |   procedureHead scope
-    |   FORWARD functionHead
-    |   FORWARD procedureHead
-    ;
+statements	::=	statement				// sequence of statements
+		|	statements statement
+		;
 
-functionHead
-    ::= FUNC functionname L_PAREN optional_parameter_list R_PAREN COLON type
-    ;
+declarations	::=	declaration				// sequence of declarations
+		|	declarations declaration
+		;
 
-procedureHead
-    ::= PROCEDURE procedurename L_PAREN optional_parameter_list R_PAREN
-    ;
 
-parameter
-    ::= variablename COLON type
-    ;
+statement	::=	variable COLON EQUAL expression		// assignment statement
+		|	IF expression THEN statements FI 	// if statements
+		|	IF expression THEN statements ELSE statements FI	
+		|	WHILE expression DO statements END	// while statement 
+		|       REPEAT statements UNTIL expression	// repeat statement
+		|	EXIT					// exit statements
+		|	EXIT WHEN expression
+		|	RESULT expression 			// return from function
+		|	RETURN 					// return from procedure
+		|	PUT outputs				// output statment
+		|	GET  inputs				// input statement
+		|	IDENT L_PAREN  argumentList  R_PAREN 	// call procedure 
+		|	scope					// embedded scope
+		;
 
-variable_declaration
-    ::= variablename
-    |   variablename L_SQUARE bound R_SQUARE
-    |   variablename L_SQUARE bound COMMA bound R_SQUARE
-    ;
+declaration	::=	VAR variablenames COLON type		// declare scalar/array variables
+		|	functionHead  scope			// function declaration
+		|	procedureHead  scope			// procedure delcaration
+		|       FORWARD  functionHead			// forward function declaration
+		|	FORWARD  procedureHead			// forward procedure declaration
+		;
 
-bound
-    ::= INTCONST
-    |   generalBound DOT DOT generalBound
-    ;
+variablenames	::=	variablename  				// list of variables being declared
+		|	variablenames COMMA variablename 
+		;
 
-generalBound
-    ::= INTCONST
-    |   MINUS INTCONST
-    ;
+variablename	::=	IDENT 					// scalar variable
+		|	IDENT L_SQUARE bound R_SQUARE		// 1 dimensional array
+		|	IDENT L_SQUARE bound COMMA bound  R_SQUARE // 2 dimensional array
+		;
 
-type
-    ::= INTEGER
-    |   BOOLEAN
-    ;
+bound		::=     INTCONST				// integer array bound
+		|       generalBound DOT DOT generalBound	// explicit lower/upper bounds
+		;
 
-statement
-    ::= variable COLON EQUAL expression
-    |   IF expression THEN statement_list FI
-    |   IF expression THEN statement_list ELSE statement_list FI
-    |   WHILE expression DO statement_list END
-    |   REPEAT statement_list UNTIL expression
-    |   EXIT
-    |   EXIT WHEN expression
-    |   RESULT expression
-    |   RETURN
-    |   PUT output_list
-    |   GET input_list
-    |   procedurename L_PAREN optional_argument_list R_PAREN
-    |   scope
-    ;
+generalBound	::=	INTCONST			// positive array bound
+		|	MINUS INTCONST			// negative array bound
+		;
 
-variable
-    ::= variablename
-    |   variablename L_SQUARE expression R_SQUARE
-    |   variablename L_SQUARE expression COMMA expression R_SQUARE
-    ;
+type		::=	INTEGER				// integer type
+		|	BOOLEAN				// boolean type
+		;
 
-output
-    ::= expression
-    |   NEWLINE
-    |   text
-    ;
+functionHead	::=	FUNC IDENT L_PAREN parameterList R_PAREN COLON type	// function head
+		;
 
-input
-    ::= variable
-    ;
+procedureHead	::=	PROCEDURE  IDENT L_PAREN parameterList  R_PAREN		// procedure head
+		;
 
-text
-    ::= TEXTCONST
-    ;
+outputs		::=	output			// list of output expressions
+		|	outputs COMMA output
+		;
 
-expression
-    ::= or_expr
-    ;
+output		::=	expression		// integer expression
+		|	TEXTCONST		// text constant
+		|	NEWLINE			// newline constant
+		;
 
-or_expr
-    ::= or_expr OR and_expr
-    |   and_expr
-    ;
+inputs		::=	variable		// list of variables being read into
+		|	inputs COMMA variable
+		;
 
-and_expr
-    ::= and_expr AND not_expr
-    |   not_expr
-    ;
+argumentList	::=	arguments		//  function/procedure arguments
+		|	//  EMPTY
+		;
 
-not_expr
-    ::= optional_not_list pred_expr
-    ;
+arguments	::=	expression		// list of function/procedure arguments
+		|	arguments COMMA expression
+		;
 
-pred_expr
-    ::= add_expr EQUAL add_expr
-    |   add_expr NOT EQUAL add_expr
-    |   add_expr LESS add_expr
-    |   add_expr LESS EQUAL add_expr
-    |   add_expr GREATER add_expr
-    |   add_expr GREATER EQUAL add_expr
-    |   add_expr
-    ;
+parameterList	::=	parameters		//  function/procedure formal parameters
+		|	//  EMPTY
+		;
 
-add_expr
-    ::= add_expr PLUS mul_expr
-    |   add_expr MINUS mul_expr
-    |   mul_expr
-    ;
+parameters	::=	parameter			// list of function/procedure formal parameters
+		|	parameters COMMA parameter
+		;
 
-mul_expr
-    ::= mul_expr TIMES unr_expr
-    |   mul_expr DIVIDE unr_expr
-    |   unr_expr
-    ;
+parameter	::=	IDENT COLON type		// declare one parameter
+		;
 
-unr_expr
-    ::= MINUS term_expr
-    |   term_expr
-    ;
+expression	::=	conjunction			// disjunctions, associate left-to-right
+		|	expression OR conjunction
+		;
 
-term_expr
-    ::= literal
-    |   variable
-    |   functionname L_PAREN optional_argument_list R_PAREN
-    |   L_PAREN expression R_PAREN
-    |   L_PAREN expression QUESTION expression COLON expression R_PAREN
-    ;
+conjunction	::=	negation			// conjunctions, associate left-to-right
+		|	conjunction AND negation
+		;
 
-declaration_list
-    ::= declaration_list declaration
-    |   declaration
-    ;
+negation	::=	compareExpn 			// negations
+		|	NOT negation
+		;
 
-statement_list
-    ::= statement_list statement
-    |   statement
-    ;
+compareExpn	::=	arithExpn			// comparisons, do not associate
+		|	arithExpn EQUAL arithExpn
+		| 	arithExpn NOT EQUAL arithExpn
+		|	arithExpn LESS arithExpn
+		|	arithExpn LESS EQUAL arithExpn
+		|	arithExpn GREATER arithExpn
+		|	arithExpn GREATER EQUAL arithExpn
+		;
 
-variable_declaration_list
-    ::= variable_declaration_list COMMA variable_declaration
-    |   variable_declaration
-    ;
+arithExpn	::=	term				// expressions, associate + , - left-to-right
+		|	arithExpn  PLUS  term
+		|	arithExpn  MINUS term
+		;
 
-parameter_list
-    ::= parameter_list COMMA parameter
-    |   parameter
-    ;
+term		::=	factor				// terms, associate * , /   left-to-right
+		|	term TIMES factor
+		|	term DIVIDE factor
+		;
 
-argument_list
-    ::= argument_list COMMA expression
-    |   expression
-    ;
+factor		::=	primary				
+		|	MINUS factor			// unary minus
+		;
 
-not_list
-    ::= not_list NOT
-    |   NOT
-    ;
+primary		::=	constant				// integer or boolean constant
+		|	variable				// scalar, array element 
+		| 	L_PAREN  expression  R_PAREN		// parenthesized expression
+		|	L_PAREN  expression QUESTION expression COLON expression R_PAREN
+								// conditional expression
+		|	IDENT L_PAREN argumentList R_PAREN 	// function call
+		;
 
-input_list
-    ::= input_list COMMA input
-    |   input
-    ;
+constant	::=	INTCONST	// integer constant
+		|	TRUE		// constant true
+		|	FALSE		// constant false
+		;
 
-output_list
-    ::= output_list COMMA output
-    |   output
-    ;
+variable	::=	IDENT					// scalar variable or parameter
+		|	IDENT L_SQUARE expression R_SQUARE	// element of 1 dimensional array
+		|       IDENT L_SQUARE expression COMMA expression R_SQUARE
+								// element of 2 dimensional array
+		;
 
-optional_parameter_list ::= parameter_list   | /* lambda */ ;
-optional_argument_list  ::= argument_list    | /* lambda */ ;
-optional_not_list       ::= not_list         | /* lambda */ ;
 
-literal
-    ::= integer_literal
-    |   boolean_literal
-    ;
-
-integer_literal
-    ::= INTCONST
-    ;
-
-boolean_literal
-    ::= TRUE
-    |   FALSE
-    ;
-
-variablename  ::= IDENT;
-functionname  ::= IDENT;
-procedurename ::= IDENT;
