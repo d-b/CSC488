@@ -1,0 +1,9 @@
+% test of syntax error handling
+{
+   forward proc P ( A : integer, B: boolean )
+   proc P( A : integer ,, B: boolean ) {
+   %    extra commas
+      return
+   }
+   P( 3, , false )
+}

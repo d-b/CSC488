@@ -1,0 +1,5 @@
+{{{{
+   var i, j, k : integer
+   i := ( i < j ? i : ( i not = k ? k : ))
+   %  missing expression 
+}}}}

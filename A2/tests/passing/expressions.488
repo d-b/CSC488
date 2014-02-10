@@ -1,0 +1,51 @@
+%  test all forms of correct expressions
+{
+      var I, J, K[10] : integer
+      func F( ) : integer { result 1 }
+      func G( H : integer  , I : boolean  ) : integer { result 2 }
+      var P, Q, R[20] : boolean
+      func S() : boolean { result false }
+      func T( I : integer , P : boolean  ) : boolean { result true }
+	% primaries
+	I : = 1
+	J : = -1
+	P := true
+	Q := false
+	I := K[J]
+        P := R[K[J]]
+        K[J] := 10
+        R[I+1] := false
+	I : = F()
+	J : = G( I , Q )
+	R[F()] := S()
+	R[G(I,false)] := T( J , P )
+	% arithmetic expressions
+	I := - J
+	I := - - J
+	I := J + K[10]
+        I := G(I,false) - I
+        J := J * F()
+        I := I / J
+        K[I+J*10/20] := 3
+	J := K[I+7] * F() / G( I * J , false ) + - - - 3
+	% comparisons
+	P := I < J
+	Q := F() < = G( 7 , true )
+	R[I] := 7 = 10
+	Q := G(7,true) not = G(-7,false)
+	P := I > J
+        P := I > = J
+	% boolean expressions
+	P := not Q
+        P := not not not not Q
+        P := P or S()
+	P := S() or T( I+1, not false )
+	Q := P and Q
+        P := S() and T( - J , not Q )
+        % conditional expressions
+        Q := ( P ? false : true )
+        K[ ( Q ? I + 1 : J - 1 )] := 7
+	% test constants
+        put "Hello World" , newline
+        put "goodby " , "cruel " , "world " , newline, newline
+}

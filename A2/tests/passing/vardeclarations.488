@@ -1,0 +1,25 @@
+%  Test parsing of all forms of variable declarations
+{
+   var A : integer
+   var B : boolean
+   var C, D, E : integer
+   var F, G, H : boolean
+   var I[10], J[200] : integer
+   var K[1 .. 10] , L[ -1 .. 1] : boolean
+   var M[ -100 .. -2] , N[ 32760 .. 32766 ] : integer
+   var O, P[10], R, Q[ -50 .. 50 ], T : integer
+   var U[ -100 .. 100 , 21 .. 35 ] , V[ 24 , 36 ] : integer 
+   var W[ 31 , -10 .. -8 ] , X[ -10 .. 10 , 12 ] : boolean
+   {
+	 var A : integer
+	 var B : boolean
+	 var C, D, E : integer
+	 var F, G, H : boolean
+	 var I[10], J[200] : integer
+	 var K[1 .. 10] , L[ -1 .. 1] : boolean
+	 var M[ -100 .. -2] , N[ 32760 .. 32766 ] : integer
+	 A := 1
+   }
+   A := 1
+}
+

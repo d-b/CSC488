@@ -1,0 +1,33 @@
+% sample of all types of statements
+{
+     var I, J , K[100] : integer
+     var  P, Q, NP, R[100] : boolean
+     % assignment
+     I := 1
+     K[I] := J
+     R[I] := not R[K[I]]
+     % if
+     if P = NP then  Q := true fi
+     if P not= NP then Q := false else I := 13 fi
+     if P = R[J] then  I := 3  J := I else  P := false R[I] := true fi
+     if P = NP then { var I : integer I := J } fi
+     % while and repeat
+     while I <= J do  I := I + J end
+     while J > I do { J := J - I } end 
+     repeat  I := I + 1 until not I < 0
+     repeat  { P := P + 1 } until NP
+     while not false do  {{{ exit }}} end
+     repeat  if true then exit when P or Q fi until R[I]
+     % get, put
+     get I , J , K[I] 
+     put newline , I , newline , J , newline , K[J] 
+     % procedure call, scopes
+     {
+         proc A( B : integer  ) {  if P not= NP then return fi return }
+         {
+	      var  M[100], N : boolean
+              A( I )
+         }
+	 { { {  P := NP   A( 23 ) }  R[I] := false } K[23] := 17 }
+     }
+}

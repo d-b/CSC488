@@ -1,0 +1,6 @@
+% test of syntax error handling 04
+{
+   var A[ -12 .. 23 ] , B [ -2 , 0 .. 3 , -4 .. 16 ] : integer
+   % too many dimensions
+   A[ 0 ] := 0 
+}

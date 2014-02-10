@@ -1,0 +1,6 @@
+{% test of syntax error handling
+   var A[ -32766 .. -32750 , 32750 .. 32766 ] : boolean
+   A[ -32765 , 32764 , 1 ] := false
+   % too many subscripts
+}
+

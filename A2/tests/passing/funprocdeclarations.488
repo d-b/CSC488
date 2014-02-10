@@ -1,0 +1,65 @@
+%  test function and procedure declarations
+{
+    func A ( ) : integer
+	{ result  1 }
+    func B ( ) : boolean 
+	{ result false }
+    func C ( D : integer  ): integer 
+	{ result D }
+    func D ( E : boolean  ) : boolean 
+	{ result E }
+    proc F ( ) { return }
+    proc G ( H : integer  ) 
+	{ return }
+    proc I ( J : boolean  , K : boolean , L : integer  ) 
+	{ return } 
+    forward func Z () : integer
+    forward func Y (  ) : boolean
+    forward func X ( A : integer  , B : boolean  ) : integer
+    forward proc W( ) 
+    forward proc V( C : boolean , D :  integer  )
+    % for sematic correctness, complete forward functions
+    func Z ( ): integer 
+	{ result 0 }
+    func Y ( ) : boolean 
+	{ result true }
+    func X ( A : integer  , B : boolean  ): integer 
+	{ result 2 }
+    proc W ( ) 
+	{ return }
+    proc V( C : boolean , D : integer  ) 
+	{ return }
+    {
+	  forward func Z ( ) : integer
+	  forward func Y ( )  : boolean
+	  func A ( ): integer 
+		{ result  1 }
+	  func B ( ) : boolean 
+		{ result false }
+	  func C ( D : integer  ): integer 
+		{ result D }
+	  func D ( E : boolean  ) : boolean 
+		{ result E }
+	  proc F ( ) 
+		{ return }
+	  proc G ( H :integer  ) 
+		{ return }
+	  proc I ( J : boolean  , K : boolean , L : integer  ) 
+		{ return } 
+	  forward func X ( A : integer  , B : boolean  )  : integer
+	  forward proc W( ) 
+	  forward proc V( C : boolean , D:integer  )
+	  % for sematic correctness, complete forward functions
+	  func Z ( ): integer 
+		{ result 0 }
+	  func Y ( ) : boolean 
+		{ result true }
+	  func X ( A : integer  , B : boolean  ): integer 
+		{ result 2 }
+	  proc W ( ) { return }
+	  proc V( C: boolean , D : integer  ) 
+		{ return }
+	  W()
+	  V( true , 10 )
+    }
+}

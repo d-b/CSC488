@@ -1,0 +1,6 @@
+{
+  % test syntax error detection 2
+  var i , j , : integer
+  %  extra comma
+   i := 3 
+}

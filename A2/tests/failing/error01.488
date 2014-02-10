@@ -1,0 +1,6 @@
+% test of syntax error detection  01
+{
+  var i : integer
+  var b,c,d : boolean
+  % no statements
+}

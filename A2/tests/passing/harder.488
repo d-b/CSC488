@@ -1,0 +1,87 @@
+% test more complicated constructs, more nesting
+{
+   {
+       forward proc P( I : integer , P : boolean  )
+       forward func isTrue( P : boolean  , K : integer  ) : boolean
+       var I, J, K : integer
+       proc Q ( I:integer, J :integer, K : integer, L : integer, M: integer  ) {
+ 	{
+ 		{
+ 		repeat
+			 while 6 > 1 do{ 
+				var  M : integer 
+ 				M := I*J+K/L  
+				exit  when M not= 17 }
+ 			end 
+		until 7 < 5 
+		} 
+	} 
+	return 
+	}
+       func  R() : boolean  { 
+	{ 
+		{ 
+			{ 
+				result not  isTrue( false, 99 ) 
+			} 
+		} 
+	}
+	 }
+       func isTrue( Q : boolean , M : integer  ) : boolean
+ 	{ var X, Y : boolean  
+		X := R() 
+		result not X and Y  or  X and not Y  or  not not not not Q  and  R() not = Q  or  Q or Q and Q or Q and not Q or not Q and Y or not Y 
+	}
+       proc P ( J : integer  , Q : boolean  ) 
+	{ while Q do  
+		{ repeat  exit when not not not Q 
+			{ while not Q do  exit  when ----J <= K end } 
+			return  
+		until false } 
+	end 
+	return }
+       Q( I , J/12 , K*17 , I+J+K*K*K*K , P( 17, false ) )
+   } 
+   {
+       var I, J, K : integer
+       var  P, Q, R, NP : boolean
+       if P then if Q then if  not R then I := 1 fi fi fi
+       if P then I := 7 else if P then if Q then if R then I := 9 fi fi fi fi 
+       if P then if Q then I := 11 fi else I := 13 fi
+       if P then if Q then I := 17 else I := 19 fi else if R then I := 23 else I := 29 fi I:= 1 fi
+       if P then P :=  not P and Q or R  I := I*I*I*K*J*K*L*M/17 else 
+	while true do  
+		repeat  
+			while true do  
+				repeat  exit  when P = NP until false  
+			end 
+		until false  
+	end 
+	fi
+   }
+   {
+       func  F( M:boolean  ) : boolean
+         {
+       	   forward func G( X:integer  ) : boolean
+           func H( B : boolean  ) :integer{ if B then result 7 else result 8 fi }
+           func G( Y : integer  ) : boolean
+            { proc P( Z : integer  ) 
+		{ if Z <= 7 or  Z not= 12 or (Z+1) < (Z+2) then 
+			return fi }
+                  P( Y )
+                  repeat
+                     {
+                         proc Q( Z :boolean  ) 
+				{ if not Z then return else return fi }
+                         Q( Z not= 12 )
+                     }
+                     exit when Y < 7 
+                     Y := Y - 1 
+                  until Z < 6
+            } % G
+            put " in F " 
+         } % F
+       var  W : integer
+       W := F( false )
+   }
+}

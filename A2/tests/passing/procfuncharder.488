@@ -1,0 +1,47 @@
+% more complicated procedure/function declarations
+{{
+   forward proc A() 
+   forward func B( I : integer , J : boolean ) : integer
+   proc C( K : boolean ) {{
+       var I : integer 
+       forward proc D ( L : boolean )
+       func F( ) : boolean 
+          {  D( not true )
+             result ( K not= false ? 
+		( K ? not K : 
+			( K ? K : K or true ) )
+		: not not K ) 
+	}
+	return
+    }}	% end C
+    proc A() {
+	% not a match to forward func B
+       func B( I : boolean , J : integer ) : boolean {
+	   forward proc C( K : integer ) 
+           forward func D ( L : integer ) : integer
+           proc C( M : integer ) {
+                A() 
+                return
+           }
+           func D( N : integer ) : integer {
+              forward func F( F : integer  ) : boolean
+	      func F( H : integer ) : boolean{
+		result H < 17
+              }
+              {{
+              	proc F ( G : boolean ) {
+			return 
+                }	% F
+		F()
+	      }}
+	      result 23
+	    }
+	    result I < J
+        }  % B
+        return
+    }  %A
+    func B ( X : integer , Y : integer ) : integer {{
+       result X - Y 
+    }}
+    A()
+}}
