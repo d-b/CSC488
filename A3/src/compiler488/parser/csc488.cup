@@ -1,0 +1,305 @@
+// CSC488S Winter 2013/2014  
+//
+// File:  csc488.cup
+//
+// Package and import specifications section.
+
+package compiler488.parser;
+
+import java_cup.runtime.*;		// Must always import this.
+
+/* User code components 1: action code components.
+ * Code to be used inside the actions triggered when productions are matched.
+ * If any common code is needed for more than one action , put it here.
+ */
+// action code {:
+// your code goes HERE
+//:};
+
+/* User code components 2: parser code components. 
+ * Modifications to the default generated parser
+ */
+parser code {:
+
+	String lastError;
+	
+    /** Override the report_error method so it will display the line and
+     * column of where the error occurred in the input as well as the
+     * reason for the error which is passed into the method in the
+     * String 'message'.
+     * @param message  error message to print
+     * @param info     symbol containing line/column numbers
+     */
+    public void report_error(String message, Object info)
+	{
+	String st =  "Error";
+   
+        if (info instanceof java_cup.runtime.Symbol)
+	    {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+
+	    /* s.left is supposed to hold the line number of the error.
+	     * s.right is supposed to hold the column number.
+             * If either is < 0 the parser may have run off the end of the program
+             * and a Syntax Error message without line number may be printed.
+	     */
+   
+            if (s.left >= 0)				// Check line number.
+		{
+                st += " in line " + (s.left + 1);
+                if (s.right >= 0)			// Check column number.
+                    st += ", column " + (s.right + 1);
+		}
+            else
+               st += " at end of input " ;
+           }
+	    st += ": " + message;
+        System.err.println (st);
+        lastError = st;
+	}
+   
+    /** Override the report_fatal_error method to use the report_error method. */
+    /** @throws SyntaxErrorException						*/
+    public void report_fatal_error (String message, Object info) throws SyntaxErrorException
+	{
+        report_error (message, info);
+        throw new SyntaxErrorException (lastError); 
+	}
+   
+:};
+
+/* User code components 3: initialization code.
+ * If you want some code to be executed before the parser asks for the first
+ * token, add it here.
+ */
+init with {:
+:};
+
+/* User code components 4: scanner specification code.
+ * If you need to override the way the parser asks the scanner for the
+ * next token, put your preferred method here.  Uncomment the line following
+ * this comment, replace the line after that with your code, and uncomment
+ * the line after that.
+ */
+// scan with {:
+// your code goes here
+// :};
+
+/* Symbol lists section.
+ * The names of terminals and non-terminals are not allowed to be CUP
+ * reserved words.  These include "code", "action", "parser", "terminal",
+ * "non", "nonterminal", "init", "scan", "with", "start", "precedence",
+ * "left", "right", "nonassoc", "import", and "package".
+ */
+
+// DEFINITIONS for CSC488S Source Language  Winter  2013/2014 
+
+// Terminals returned by the scanner with no value attached.  
+terminal 	BOOLEAN,	INTEGER,	DO	;
+terminal	ELSE,	END,	EXIT,   FI,	FORWARD, FUNC	;
+terminal	IF,	GET, 	PROCEDURE,	PUT	;
+terminal	WHILE,	REPEAT,	UNTIL,	VAR,	NEWLINE	;
+terminal	RESULT,	RETURN,	THEN,	WHEN	;
+
+// Special-character terminals, no value attached
+terminal	AND,	OR,	NOT,	TRUE,	FALSE	;
+terminal	L_PAREN	,R_PAREN,L_SQUARE, R_SQUARE, L_CURLEY, R_CURLEY  	;
+terminal	EQUAL,	GREATER,LESS,	COMMA,  DOT, COLON	;
+terminal	PLUS,	MINUS,	TIMES,  DIVIDE, QUESTION	;
+
+// Terminals returned by the scanner with a value.
+terminal String  IDENT	;
+terminal Integer INTCONST	;
+terminal String  TEXTCONST	;
+
+// Non-terminals that have no value.
+// nonterminal xxx
+
+// Non-terminals that have no value.
+// nonterminal xxx
+
+nonterminal	program,	statement,	statements,	scope	;
+nonterminal	declarations,	declaration,	type,	bound, generalBound 	;
+nonterminal	variablenames,	variablename,	functionHead,	procedureHead	;
+nonterminal	parameterList,  argumentList			;
+nonterminal	arguments,	parameter,	parameters	;
+nonterminal	inputs,		output,		outputs ;
+nonterminal 	expression,	conjunction,	negation,	compareExpn ;
+nonterminal	arithExpn,	term,    	factor		;
+nonterminal	primary,	constant,	variable	;
+
+
+// Non-terminals that have a value.
+// nonterminal type  nameList ;
+
+// CSC488S PLEASE NOTE: your grammar CAN NOT use the 'precedence'
+// feature of java-cup. The lines below should remain
+// commented.
+//
+//precedence left PLUS, MINUS;
+//precedence left TIMES, DIVIDE;		// Higher precedence.
+
+// The grammar section.
+
+// This specifies the initial symbol of the grammar.
+start with program;
+
+/* Notice that sometimes the action must be inside the production rule,
+ * not after it.  This is a subtle yet significant difference from YACC.
+ * This is because the CUP parser is looking ahead one token.  It ALWAYS
+ * reads one more token before it will act on the production.
+ */
+
+program		::=	scope	;				// the main program
+
+scope		::=	L_CURLEY declarations statements R_CURLEY 
+							// scope with declarations and statements
+		|	L_CURLEY statements  R_CURLEY 		// scope with statments only
+		|	L_CURLEY  R_CURLEY			// empty scope
+		;
+
+statements	::=	statement				// sequence of statements
+		|	statements statement
+		;
+
+declarations	::=	declaration				// sequence of declarations
+		|	declarations declaration
+		;
+
+
+statement	::=	variable COLON EQUAL expression		// assignment statement
+		|	IF expression THEN statements FI 	// if statements
+		|	IF expression THEN statements ELSE statements FI	
+		|	WHILE expression DO statements END	// while statement 
+		|       REPEAT statements UNTIL expression	// repeat statement
+		|	EXIT					// exit statements
+		|	EXIT WHEN expression
+		|	RESULT expression 			// return from function
+		|	RETURN 					// return from procedure
+		|	PUT outputs				// output statment
+		|	GET  inputs				// input statement
+		|	IDENT L_PAREN  argumentList  R_PAREN 	// call procedure 
+		|	scope					// embedded scope
+		;
+
+declaration	::=	VAR variablenames COLON type		// declare scalar/array variables
+		|	functionHead  scope			// function declaration
+		|	procedureHead  scope			// procedure delcaration
+		|       FORWARD  functionHead			// forward function declaration
+		|	FORWARD  procedureHead			// forward procedure declaration
+		;
+
+variablenames	::=	variablename  				// list of variables being declared
+		|	variablenames COMMA variablename 
+		;
+
+variablename	::=	IDENT 					// scalar variable
+		|	IDENT L_SQUARE bound R_SQUARE		// 1 dimensional array
+		|	IDENT L_SQUARE bound COMMA bound  R_SQUARE // 2 dimensional array
+		;
+
+bound		::=     INTCONST				// integer array bound
+		|       generalBound DOT DOT generalBound	// explicit lower/upper bounds
+		;
+
+generalBound	::=	INTCONST			// positive array bound
+		|	MINUS INTCONST			// negative array bound
+		;
+
+type		::=	INTEGER				// integer type
+		|	BOOLEAN				// boolean type
+		;
+
+functionHead	::=	FUNC IDENT L_PAREN parameterList R_PAREN COLON type	// function head
+		;
+
+procedureHead	::=	PROCEDURE  IDENT L_PAREN parameterList  R_PAREN		// procedure head
+		;
+
+outputs		::=	output			// list of output expressions
+		|	outputs COMMA output
+		;
+
+output		::=	expression		// integer expression
+		|	TEXTCONST		// text constant
+		|	NEWLINE			// newline constant
+		;
+
+inputs		::=	variable		// list of variables being read into
+		|	inputs COMMA variable
+		;
+
+argumentList	::=	arguments		//  function/procedure arguments
+		|	//  EMPTY
+		;
+
+arguments	::=	expression		// list of function/procedure arguments
+		|	arguments COMMA expression
+		;
+
+parameterList	::=	parameters		//  function/procedure formal parameters
+		|	//  EMPTY
+		;
+
+parameters	::=	parameter			// list of function/procedure formal parameters
+		|	parameters COMMA parameter
+		;
+
+parameter	::=	IDENT COLON type		// declare one parameter
+		;
+
+expression	::=	conjunction			// disjunctions, associate left-to-right
+		|	expression OR conjunction
+		;
+
+conjunction	::=	negation			// conjunctions, associate left-to-right
+		|	conjunction AND negation
+		;
+
+negation	::=	compareExpn 			// negations
+		|	NOT negation
+		;
+
+compareExpn	::=	arithExpn			// comparisons, do not associate
+		|	arithExpn EQUAL arithExpn
+		| 	arithExpn NOT EQUAL arithExpn
+		|	arithExpn LESS arithExpn
+		|	arithExpn LESS EQUAL arithExpn
+		|	arithExpn GREATER arithExpn
+		|	arithExpn GREATER EQUAL arithExpn
+		;
+
+arithExpn	::=	term				// expressions, associate + , - left-to-right
+		|	arithExpn  PLUS  term
+		|	arithExpn  MINUS term
+		;
+
+term		::=	factor				// terms, associate * , /   left-to-right
+		|	term TIMES factor
+		|	term DIVIDE factor
+		;
+
+factor		::=	primary				
+		|	MINUS factor			// unary minus
+		;
+
+primary		::=	constant				// integer or boolean constant
+		|	variable				// scalar, array element 
+		| 	L_PAREN  expression  R_PAREN		// parenthesized expression
+		|	L_PAREN  expression QUESTION expression COLON expression R_PAREN
+								// conditional expression
+		|	IDENT L_PAREN argumentList R_PAREN 	// function call
+		;
+
+constant	::=	INTCONST	// integer constant
+		|	TRUE		// constant true
+		|	FALSE		// constant false
+		;
+
+variable	::=	IDENT					// scalar variable or parameter
+		|	IDENT L_SQUARE expression R_SQUARE	// element of 1 dimensional array
+		|       IDENT L_SQUARE expression COMMA expression R_SQUARE
+								// element of 2 dimensional array
+		;
+
+
