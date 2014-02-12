@@ -10,51 +10,65 @@ import compiler488.ast.decl.Declaration;
  * Represents the declarations and instructions of a scope construct.
  */
 public class Scope extends Stmt {
-	private ASTList<Declaration> declarations; // The declarations at the top.
+    private ASTList<Declaration> declarations; // The declarations at the top.
 
-	private ASTList<Stmt> statements; // The statements to execute.
+    private ASTList<Stmt> statements; // The statements to execute.
 
-	public Scope() {
-		declarations = new ASTList<Declaration>();
-		statements = new ASTList<Stmt>();
-	}
+    public Scope() {
+        declarations = new ASTList<Declaration>();
+        statements = new ASTList<Stmt>();
+    }
 
-	/**
-	 * Print a description of the <b>scope</b> construct.
-	 * 
-	 * @param out
-	 *            Where to print the description.
-	 * @param depth
-	 *            How much indentation to use while printing.
-	 */
-	@Override
-	public void printOn(PrintStream out, int depth) {
-		Indentable.printIndentOnLn(out, depth, "{");
-		Indentable.printIndentOnLn(out, depth, "declarations");
+    public Scope(ASTList<Declaration> decls, ASTList<Stmt> stmts) {
+        if (decls == null) {
+            declarations = new ASTList<Declaration>();
+        } else {
+            declarations = decls;
+        }
 
-		declarations.printOnSeperateLines(out, depth + 1);
+        if (stmts == null) {
+            statements = new ASTList<Stmt>();
+        } else {
+            statements = stmts;
+        }
+    }
 
-		Indentable.printIndentOnLn(out, depth, "statements");
+    /**
+     * Print a description of the <b>scope</b> construct.
+     *
+     * @param out
+     *            Where to print the description.
+     * @param depth
+     *            How much indentation to use while printing.
+     */
+    @Override
+    public void printOn(PrintStream out, int depth) {
+        Indentable.printIndentOnLn(out, depth, "{");
+        Indentable.printIndentOnLn(out, depth, "declarations");
 
-		statements.printOnSeperateLines(out, depth + 1);
+        declarations.printOnSeperateLines(out, depth + 1);
 
-		Indentable.printIndentOnLn(out, depth, "}");
-	}
+        Indentable.printIndentOnLn(out, depth, "statements");
 
-	public ASTList<Declaration> getDeclarations() {
-		return declarations;
-	}
+        statements.printOnSeperateLines(out, depth + 1);
 
-	public ASTList<Stmt> getStatements() {
-		return statements;
-	}
+        Indentable.printIndentOnLn(out, depth, "}");
+    }
 
-	public void setDeclarations(ASTList<Declaration> declarations) {
-		this.declarations = declarations;
-	}
+    public ASTList<Declaration> getDeclarations() {
+        return declarations;
+    }
 
-	public void setStatements(ASTList<Stmt> statements) {
-		this.statements = statements;
-	}
+    public ASTList<Stmt> getStatements() {
+        return statements;
+    }
 
+    public void setDeclarations(ASTList<Declaration> declarations) {
+        this.declarations = declarations;
+    }
+
+    public void setStatements(ASTList<Stmt> statements) {
+        this.statements = statements;
+    }
 }
+

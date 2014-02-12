@@ -7,32 +7,39 @@ import compiler488.ast.expn.Expn;
  * Represents calling a procedure.
  */
 public class ProcedureCallStmt extends Stmt {
-	private String name; // The name of the procedure being called.
+    private String name; // The name of the procedure being called.
 
-	private ASTList<Expn> arguments; // The arguments passed to the procedure.
+    private ASTList<Expn> arguments; // The arguments passed to the procedure.
 
-	/** Returns a string describing the procedure call. */
-	@Override
-	public String toString() {
-		if (arguments!=null)
-			return "Procedure call: " + name + " (" + arguments + ")";
-		else
-			return "Procedure call: " + name + " ( ) ";
-	}
+    public ProcedureCallStmt(String name, ASTList<Expn> arguments) {
+        this.name = name;
+        this.arguments = arguments;
+    }
 
-	public ASTList<Expn> getArguments() {
-		return arguments;
-	}
+    /** Returns a string describing the procedure call. */
+    @Override
+    public String toString() {
+        if (arguments != null) {
+            return "Procedure call: " + name + " (" + arguments + ")";
+        } else {
+            return "Procedure call: " + name + " ( ) ";
+        }
+    }
 
-	public void setArguments(ASTList<Expn> args) {
-		this.arguments = args;
-	}
+    public ASTList<Expn> getArguments() {
+        return arguments;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setArguments(ASTList<Expn> args) {
+        this.arguments = args;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
+

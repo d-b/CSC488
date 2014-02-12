@@ -11,41 +11,50 @@ import compiler488.ast.stmt.Scope;
  * function or procedure.
  */
 public class RoutineBody extends Indentable {
-	private ASTList<ScalarDecl> parameters; // The formal parameters of the routine.
+    private ASTList<ScalarDecl> parameters; // The formal parameters of the routine.
 
-	private Scope body; // Execute this scope when routine is called.
+    private Scope body; // Execute this scope when routine is called.
 
-	/**
-	 * Print a description of the formal parameters and the scope for this
-	 * routine.
-	 * 
-	 * @param out
-	 *            Where to print the description.
-	 * @param depth
-	 *            How much indentation to use while printing.
-	 */
-	@Override
-	public void printOn(PrintStream out, int depth) {
-		if (parameters != null)
-			out.println("(" + parameters + ")");
-		else
-			out.println(" ( ) ");
-		body.printOn(out, depth);
-	}
+    public RoutineBody(ASTList<ScalarDecl> parameters, Scope body) {
+        this.parameters = parameters;
+        this.body = body;
+    }
 
-	public Scope getBody() {
-		return body;
-	}
+    /**
+     * Print a description of the formal parameters and the scope for this
+     * routine.
+     *
+     * @param out
+     *            Where to print the description.
+     * @param depth
+     *            How much indentation to use while printing.
+     */
+    @Override
+    public void printOn(PrintStream out, int depth) {
+        if (parameters != null) {
+            out.println("(" + parameters + ")");
+        }
+        else {
+            out.println(" ( ) ");
+        }
 
-	public void setBody(Scope body) {
-		this.body = body;
-	}
+        body.printOn(out, depth);
+    }
 
-	public ASTList<ScalarDecl> getParameters() {
-		return parameters;
-	}
+    public Scope getBody() {
+        return body;
+    }
 
-	public void setParameters(ASTList<ScalarDecl> parameters) {
-		this.parameters = parameters;
-	}
+    public void setBody(Scope body) {
+        this.body = body;
+    }
+
+    public ASTList<ScalarDecl> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(ASTList<ScalarDecl> parameters) {
+        this.parameters = parameters;
+    }
 }
+

@@ -1,34 +1,41 @@
 package compiler488.ast.stmt;
 
-import compiler488.ast.expn.*;
+import compiler488.ast.expn.Expn;
 
 /**
  * Represents the command to exit from a loop.
  */
 
 public class ExitStmt extends Stmt {
+    // condition for 'exit when'
+    private Expn condition = null;
 
-	// condition for 'exit when'
-        private Expn expn = null;
+    public ExitStmt() {
+    }
 
-	/** Returns the string <b>"exit"</b> or <b>"exit when e"</b>" 
-	*/
-	@Override
-	public String toString() {
-		  {
-		    String stmt = "exit " ;
-                    if( expn != null )
-		        stmt = stmt + "when " + expn + " " ;
-		    return stmt ;
-		  }
-	}
+    public ExitStmt(Expn condition) {
+        this.condition = condition;
+    }
 
-	public Expn getExpn() {
-		return expn;
-	}
+    /** Returns the string <b>"exit"</b> or <b>"exit when e"</b>"
+    */
+    @Override
+    public String toString() {
+        String stmt = "exit " ;
 
-	public void setExpn(Expn expn) {
-		this.expn = expn;
-	}
+        if (condition != null) {
+            stmt = stmt + "when " + condition + " " ;
+        }
 
+        return stmt;
+    }
+
+    public Expn getCondition() {
+        return condition;
+    }
+
+    public void setCondition(Expn condition) {
+        this.condition = condition;
+    }
 }
+

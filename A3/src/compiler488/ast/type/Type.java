@@ -6,4 +6,6 @@ import compiler488.ast.AST;
  * A placeholder for types.
  */
 public class Type extends AST {
+    public final static Type TYPE_INTEGER = new IntegerType();
 }
+

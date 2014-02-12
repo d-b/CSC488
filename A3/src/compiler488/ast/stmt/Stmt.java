@@ -7,3 +7,4 @@ import compiler488.ast.Indentable;
  */
 public class Stmt extends Indentable {
 }
+

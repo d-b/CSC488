@@ -6,34 +6,39 @@ import compiler488.ast.ASTList;
  * Represents a function call with or without arguments.
  */
 public class FunctionCallExpn extends Expn {
-	private String ident; // The name of the function.
+    private String ident; // The name of the function.
 
-	private ASTList<Expn> arguments; // The arguments passed to the function.
+    private ASTList<Expn> arguments; // The arguments passed to the function.
 
-	/** Returns a string describing the function call. */
-	@Override
-	public String toString() {
-		if (arguments!=null) {
-			return ident + " (" + arguments + ")";
-		}
-		else
-			return ident + " ( ) " ;
-	}
+    public FunctionCallExpn(String ident, ASTList<Expn> arguments) {
+        this.ident = ident;
+        this.arguments = arguments;
+    }
 
-	public ASTList<Expn> getArguments() {
-		return arguments;
-	}
+    /** Returns a string describing the function call. */
+    @Override
+    public String toString() {
+        if (arguments != null) {
+            return ident + " (" + arguments + ")";
+        } else {
+            return ident + " ( ) ";
+        }
+    }
 
-	public void setArguments(ASTList<Expn> args) {
-		this.arguments = args;
-	}
+    public ASTList<Expn> getArguments() {
+        return arguments;
+    }
 
-	public String getIdent() {
-		return ident;
-	}
+    public void setArguments(ASTList<Expn> args) {
+        this.arguments = args;
+    }
 
-	public void setIdent(String ident) {
-		this.ident = ident;
-	}
+    public String getIdent() {
+        return ident;
+    }
 
+    public void setIdent(String ident) {
+        this.ident = ident;
+    }
 }
+

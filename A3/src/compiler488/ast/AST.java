@@ -6,5 +6,6 @@ package compiler488.ast;
  * @author  Dave Wortman, Marsha Chechik, Danny House
  */
 public class AST {
- 
+
 }
+
