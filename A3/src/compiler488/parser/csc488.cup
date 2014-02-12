@@ -17,6 +17,7 @@ import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.RoutineBody;
 import compiler488.ast.decl.ArrayDeclPart;
+import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
 
@@ -27,6 +28,7 @@ import compiler488.ast.type.IntegerType;
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.stmt.Stmt;
 import compiler488.ast.stmt.IfStmt;
+import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.PutStmt;
 import compiler488.ast.stmt.GetStmt;
 import compiler488.ast.stmt.ExitStmt;
@@ -160,7 +162,7 @@ terminal String  IDENT	;
 terminal Integer INTCONST	;
 terminal String  TEXTCONST	;
 
-nonterminal Scope program;
+nonterminal Program program;
 nonterminal Scope scope;
 
 nonterminal ASTList<Stmt> statements;
@@ -223,7 +225,7 @@ start with program;
 
 program
         ::= scope:scope                                             // the main program
-                {: RESULT = scope; :}
+                {: RESULT = new Program(scope); :}
         ;
 
 scope
@@ -262,7 +264,7 @@ statement
         |   WHILE expression:condition DO statements:body END       // while statement
                 {: RESULT = new WhileDoStmt(body, condition); :}
 
-        |   REPEAT statements:body UNTIL expression:condition END   // repeat statement
+        |   REPEAT statements:body UNTIL expression:condition       // repeat statement
                 {: RESULT = new RepeatUntilStmt(body, condition); :}
 
         |   EXIT                                                    // exit statement (no conditional)
@@ -314,13 +316,13 @@ declaration
                     RESULT = proc;
                 :}
 
-        |   FORWARD functionHead:func scope:scope               // forward function declaration
+        |   FORWARD functionHead:func                           // forward function declaration
                 {:  /* FIXME Ugly */
                     func.setRoutineBody(null);
                     RESULT = func;
                 :}
         
-        |   FORWARD procedureHead:proc scope:scope              // forward procedure declaration
+        |   FORWARD procedureHead:proc                          // forward procedure declaration
                 {:  /* FIXME Ugly */
                     proc.setRoutineBody(null);
                     RESULT = proc;
@@ -337,7 +339,7 @@ variablenames
 
 variablename
         ::= IDENT:id                                                // scalar variable
-                {: :}
+                {: RESULT = new ScalarDeclPart(id); :}
 
         |   IDENT:id L_SQUARE bound:b R_SQUARE                      // 1 dimensional array
                 {: RESULT = new ArrayDeclPart(id, b[0], b[1]); :}
