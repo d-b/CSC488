@@ -160,22 +160,7 @@ terminal String  IDENT	;
 terminal Integer INTCONST	;
 terminal String  TEXTCONST	;
 
-// Non-terminals that have no value.
-// nonterminal xxx
-
-// Non-terminals that have no value.
-// nonterminal xxx
-
-
-
-
-
-
-
-
-
-nonterminal	program;
-//nonterminal Program program;
+nonterminal Scope program;
 nonterminal Scope scope;
 
 nonterminal ASTList<Stmt> statements;
@@ -218,14 +203,6 @@ nonterminal ConstExpn constant;
 
 nonterminal Type type;
 
-
-
-
-
-
-// Non-terminals that have a value.
-// nonterminal type  nameList ;
-
 // CSC488S PLEASE NOTE: your grammar CAN NOT use the 'precedence'
 // feature of java-cup. The lines below should remain
 // commented.
@@ -244,7 +221,10 @@ start with program;
  * reads one more token before it will act on the production.
  */
 
-program		::=	scope	;				// the main program
+program
+        ::= scope:scope                                             // the main program
+                {: RESULT = scope; :}
+        ;
 
 scope
         ::= L_CURLEY declarations:decls statements:stmts R_CURLEY   // scope with declarations and statement
@@ -579,4 +559,6 @@ variable
         |   IDENT:id L_SQUARE expression:sub1 COMMA expression:sub2 R_SQUARE    // element of 2 dimensional array
                 {: RESULT = new SubsExpn(id, sub1, sub2); :}
         ;
+
+/* The End */
 
