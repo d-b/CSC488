@@ -15,7 +15,6 @@ import compiler488.ast.Printable;
 import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.RoutineDecl;
-import compiler488.ast.decl.RoutineBody;
 import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.decl.DeclarationPart;
@@ -304,29 +303,17 @@ declaration
                     }
                 :}
 
-        |   functionHead:func scope:scope                       // function declaration
-                {:  /* FIXME Ugly */
-                    func.getRoutineBody().setBody(scope);
-                    RESULT = func;
-                :}
+        |   functionHead:func scope:body                        // function declaration
+                {:  RESULT = func.withBody(body); :}
         
-        |   procedureHead:proc scope:scope                      // procedure declaration
-                {:  /* FIXME Ugly */
-                    proc.getRoutineBody().setBody(scope);
-                    RESULT = proc;
-                :}
+        |   procedureHead:proc scope:body                       // procedure declaration
+                {:  RESULT = proc.withBody(body); :}
 
         |   FORWARD functionHead:func                           // forward function declaration
-                {:  /* FIXME Ugly */
-                    func.setRoutineBody(null);
-                    RESULT = func;
-                :}
+                {:  RESULT = func; :}
         
         |   FORWARD procedureHead:proc                          // forward procedure declaration
-                {:  /* FIXME Ugly */
-                    proc.setRoutineBody(null);
-                    RESULT = proc;
-                :}
+                {:  RESULT = proc; :}
 		;
 
 variablenames
@@ -373,17 +360,13 @@ type
         ;
 
 functionHead
-        ::= FUNC IDENT:id L_PAREN parameterList:params R_PAREN COLON type:type      // function head
-                {:  /* FIXME Ugly */
-                    RESULT = new RoutineDecl(id, type, new RoutineBody(params, null));
-                :}
+        ::= FUNC IDENT:id L_PAREN parameterList:params R_PAREN COLON type:returnType      // function head
+                {: RESULT = new RoutineDecl(id, returnType, params); :}
         ;
 
 procedureHead
         ::= PROCEDURE IDENT:id L_PAREN parameterList:params R_PAREN                 // function head
-                {:  /* FIXME Ugly */
-                    RESULT = new RoutineDecl(id, null, new RoutineBody(params, null));
-                :}
+                {: RESULT = new RoutineDecl(id, Type.TYPE_NIL, params); :}
         ;
 
 outputs

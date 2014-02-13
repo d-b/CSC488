@@ -33,5 +33,9 @@ public class Declaration extends Indentable {
     public void setType(Type type) {
         this.type = type;
     }
+
+    public String toString() {
+        return  name + " : " + type;
+    }
 }
 

@@ -47,6 +47,10 @@ public class ASTList<E> extends AST {
         return this;
     }
 
+    public LinkedList<E> getList() {
+        return ll;
+    }
+
     /**
      * Ask each element of the list to print itself using
      * <b>printOn(out,depth)</b>.  This should only be used when the
@@ -92,6 +96,16 @@ public class ASTList<E> extends AST {
 
     public E getFirst() {
         return ll.getFirst();
+    }
+
+    public boolean equals(Object other) {
+        if (!(other instanceof ASTList)) {
+            return false;
+        }
+
+        ASTList alist = (ASTList) other;
+
+        return ll.equals(alist.ll);
     }
 }
 
