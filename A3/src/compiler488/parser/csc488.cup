@@ -241,14 +241,14 @@ statements
         ::= statement:stmt
                 {: RESULT = new ASTList<Stmt>(stmt); :}
         |   statements:head statement:tail                          // sequence of statements
-                {: head.addLast(tail); RESULT = head; :}
+                {: RESULT = head.addLast(tail); :}
         ;
 
 declarations
         ::= declaration:stmt
                 {: RESULT = new ASTList<Declaration>(stmt); :}
         |   declarations:head declaration:tail                      // sequence of declarations
-                {: head.addLast(tail); RESULT = head; :}
+                {: RESULT = head.addLast(tail); :}
         ;
 
 statement
@@ -331,10 +331,10 @@ declaration
 
 variablenames
         ::= variablename:var                                        // list of variables being declared
-                {: RESULT = new ASTList<DeclarationPart>(); RESULT.addLast(var); :}
+                {: RESULT = new ASTList<DeclarationPart>().addLast(var); :}
         
         |   variablenames:head COMMA variablename:tail
-                {: head.addLast(tail); RESULT = head; :}
+                {: RESULT = head.addLast(tail); :}
         ;
 
 variablename
@@ -388,10 +388,10 @@ procedureHead
 
 outputs
         ::= output:output                                               // list of output expressions
-                {: RESULT = new ASTList<Printable>(); RESULT.addLast(output); :}
+                {: RESULT = new ASTList<Printable>().addLast(output); :}
 
         |   outputs:head COMMA output:tail
-                {: head.addLast(tail); RESULT = head; :}
+                {: RESULT = head.addLast(tail); :}
         ;
 
 output
@@ -407,9 +407,9 @@ output
 
 inputs
         ::= variable:var                                                // list of variables being read into
-                {: RESULT = new ASTList<Readable>(); RESULT.addLast(var); :}
+                {: RESULT = new ASTList<Readable>().addLast(var); :}
         |   inputs:head COMMA variable:tail
-                {: head.addLast(tail); RESULT = head; :}
+                {: RESULT = head.addLast(tail); :}
         ;
 
 argumentList
@@ -422,10 +422,10 @@ argumentList
 
 arguments
         ::= expression:expr
-                {: RESULT = new ASTList<Expn>(); RESULT.addLast(expr); :}
+                {: RESULT = new ASTList<Expn>().addLast(expr); :}
 
         |   arguments:head COMMA expression:tail                        // list of function/procedure arguments
-                {: head.addLast(tail); RESULT = head; :}
+                {: RESULT = head.addLast(tail); :}
         ;
 
 parameterList
@@ -438,10 +438,10 @@ parameterList
 
 parameters
         ::= parameter:parameter                                         // list of function/procedure formal parameters
-                {: RESULT = new ASTList<ScalarDecl>(); RESULT.addLast(parameter); :}
+                {: RESULT = new ASTList<ScalarDecl>().addLast(parameter); :}
 
         |   parameters:head COMMA parameter:tail
-                {: head.addLast(tail); RESULT = head; :}
+                {: RESULT = head.addLast(tail); :}
         ;
 
 parameter
