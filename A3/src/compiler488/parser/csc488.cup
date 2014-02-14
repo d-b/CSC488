@@ -21,8 +21,6 @@ import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
 
 import compiler488.ast.type.Type;
-import compiler488.ast.type.BooleanType;
-import compiler488.ast.type.IntegerType;
 
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.stmt.Stmt;
@@ -239,6 +237,7 @@ scope
 statements
         ::= statement:stmt
                 {: RESULT = new ASTList<Stmt>(stmt); :}
+
         |   statements:head statement:tail                          // sequence of statements
                 {: RESULT = head.addLast(tail); :}
         ;
@@ -246,6 +245,7 @@ statements
 declarations
         ::= declaration:stmt
                 {: RESULT = new ASTList<Declaration>(stmt); :}
+
         |   declarations:head declaration:tail                      // sequence of declarations
                 {: RESULT = head.addLast(tail); :}
         ;
@@ -295,13 +295,7 @@ statement
 
 declaration
         ::= VAR variablenames:vars COLON type:type               // declare scalar/array variables
-                {:  /* FIXME Ugly */
-                    if (vars.size() == 1) {
-                        RESULT = new Declaration(vars.getFirst().getName(), type);
-                    } else {
-                        RESULT = new MultiDeclarations(vars, type);
-                    }
-                :}
+                {: RESULT = new MultiDeclarations(vars, type); :}
 
         |   functionHead:func scope:body                        // function declaration
                 {:  RESULT = func.withBody(body); :}
@@ -353,10 +347,10 @@ generalBound
 
 type
         ::= INTEGER                 // integer type
-                {: RESULT = new IntegerType(); :}
+                {: RESULT = Type.TYPE_INTEGER; :}
 
         |   BOOLEAN                 // boolean type
-                {: RESULT = new BooleanType(); :}
+                {: RESULT = Type.TYPE_BOOLEAN; :}
         ;
 
 functionHead
