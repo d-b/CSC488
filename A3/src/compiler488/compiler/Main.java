@@ -442,11 +442,10 @@ public class Main {
 	       }
 
 	try{
-	   // INSERT CODE HERE TO DO SEMANTIC ANALYSIS
-           // e.g.
-	   // programAST.doSemantics() ;
-	   // or
-	   // Semantics.doIt( programAST );
+        Semantics semantics = new Semantics();
+        semantics.Initialize();
+        semantics.Analyze(programAST);
+        semantics.Finalize();
 	}
         catch( Exception e) 
 	    {
