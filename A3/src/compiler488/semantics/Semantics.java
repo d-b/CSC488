@@ -111,7 +111,7 @@ public class Semantics {
         return true;
     }
     
-    @Action(number = 14) // Increment parameter count by one.
+    @Action(number = 14) // Set parameter count to zero.
     Boolean actionResetParameterCount(RoutineDecl routineDecl) {
         return true;
     }     
@@ -435,9 +435,9 @@ public class Semantics {
             // Fetch top of the analysis stack
             AST top = analysisStack.peek();
 
-            // If the object has not yet been seen
+            // If the node has not yet been seen
             if(!analysisGrey.contains(top)) {
-                // Add node grey set and invoke preprocessor 
+                // Add node to grey set and invoke preprocessor
                 analysisGrey.add(top);
                 invokePreProcessor(top);
                 
