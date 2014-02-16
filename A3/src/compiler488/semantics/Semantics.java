@@ -111,6 +111,11 @@ public class Semantics {
         return true;
     }
     
+    @Action(number = 14) // Increment parameter count by one.
+    Boolean actionResetParameterCount(RoutineDecl routineDecl) {
+        return true;
+    }     
+    
     @Action(number = 15) // Declare parameter with specified type.
     Boolean actionDeclareParameter(ScalarDecl scalarDecl) {
         WorkingVarList varList = getWorkingVarList();
@@ -270,13 +275,13 @@ public class Semantics {
                 semanticAction(4); // S04: Start function scope.
             else
                 semanticAction(8); // S08: Start procedure scope.
-        }
+        } semanticAction(14); // S14: Set parameter count to zero.
     }
     
     @PostProcessor(target = "RoutineDecl")
     void postRoutineDecl(RoutineDecl routineDecl) {
         if(!routineDecl.isForward())
-            if(!routineDecl.isFunction())
+            if(routineDecl.isFunction())
                 semanticAction(5); // S05: End function scope.
             else
                 semanticAction(9); // S09: End procedure scope.            
