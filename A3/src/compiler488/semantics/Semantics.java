@@ -3,11 +3,10 @@ package compiler488.semantics;
 import java.io.*;
 
 import compiler488.symbol.SymbolTable;
-import compiler488.ast.decl.ArrayDeclPart;
+import compiler488.ast.AST;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
-import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.stmt.Stmt;
@@ -63,9 +62,17 @@ public class Semantics {
     private Map<Integer, Method> actionsMap;
 
     /** Analysis state */
-    private Object        analysisTop;
-    private Set<Object>   analysisGrey;
-    private Stack<Object> analysisStack;
+    private AST        analysisTop;
+    private Set<AST>   analysisGrey;
+    private Stack<AST> analysisStack;
+    
+    //
+    // Stack management
+    //
+    
+    void discoverNode(AST obj) {
+        analysisStack.push(obj);
+    }
     
     //
     // Processor/action management 
@@ -83,15 +90,15 @@ public class Semantics {
         }
     }
     
-    boolean invokePreProcessor(Object obj) {
-        return invokeProcessor(obj, preProcessorsMap);
+    boolean invokePreProcessor(AST node) {
+        return invokeProcessor(node, preProcessorsMap);
     }
     
-    boolean invokePostProcessor(Object obj) {
-        return invokeProcessor(obj, postProcessorsMap);
+    boolean invokePostProcessor(AST node) {
+        return invokeProcessor(node, postProcessorsMap);
     }    
     
-    boolean invokeProcessor(Object obj, Map<String, Method> map) {
+    boolean invokeProcessor(AST obj, Map<String, Method> map) {
         Method m = map.get(obj.getClass().getSimpleName());
         if(m == null) return false;
         analysisTop = obj;
@@ -152,9 +159,8 @@ public class Semantics {
         preProcessorsMap  = new HashMap<String, Method>();
         postProcessorsMap = new HashMap<String, Method>();
         actionsMap        = new HashMap<Integer, Method>();
-        analysisGrey      = new HashSet<Object>();
-        analysisStack     = new Stack<Object>();
-        
+        analysisGrey      = new HashSet<AST>();
+        analysisStack     = new Stack<AST>();
     }    
 
     public void Initialize() {
@@ -168,7 +174,7 @@ public class Semantics {
         // Traverse the AST
         while(!analysisStack.empty()) {
             // Fetch top of the analysis stack
-            Object top = analysisStack.peek();
+            AST top = analysisStack.peek();
 
             // If the object has not yet been seen
             if(!analysisGrey.contains(top)) {
@@ -183,7 +189,7 @@ public class Semantics {
         }
     }
     
-    public void Finalize(){  
+    public void Finalize() {  
     }
     
     //
@@ -196,10 +202,10 @@ public class Semantics {
         LinkedList<Declaration>   decls = scope.getDeclarations().getList();
         ListIterator<Stmt>        si    = stmts.listIterator(stmts.size());
         ListIterator<Declaration> di    = decls.listIterator(decls.size());
-        while(si.hasPrevious()) analysisStack.add(si.previous());
-        while(di.hasPrevious()) analysisStack.add(di.previous());        
+        while(si.hasPrevious()) discoverNode(si.previous());
+        while(di.hasPrevious()) discoverNode(di.previous());
     }
-
+    
     //
     // Processors
     //
@@ -213,6 +219,12 @@ public class Semantics {
     @PostProcessor(target = "Program")
     void postProgram(Program program) {
         semanticAction(01); // S01: End program scope.    
+    }
+    
+    @PreProcessor(target = "MultiDeclarations")
+    void preMultiDeclarations(MultiDeclarations multiDecls) {
+        for(DeclarationPart part : multiDecls.getElements().getList())
+            discoverNode(part);
     }
 
     //
