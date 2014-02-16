@@ -255,7 +255,7 @@ public class Semantics {
     @PostProcessor(target = "RoutineDecl")
     void postRoutineDecl(RoutineDecl routineDecl) {
         if(!routineDecl.isForward())
-            if(!routineDecl.getReturnType().equals(Type.TYPE_NIL))
+            if(!routineDecl.isFunction())
                 semanticAction(5); // S05: End function scope.
             else
                 semanticAction(9); // S09: End procedure scope.            
