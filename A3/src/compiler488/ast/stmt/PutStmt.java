@@ -11,6 +11,7 @@ public class PutStmt extends Stmt {
 
     public PutStmt (ASTList<Printable> outputs) {
         this.outputs = outputs;
+        outputs.setParent(this);
     }
 
     /** Returns a description of the <b>put</b> statement. */

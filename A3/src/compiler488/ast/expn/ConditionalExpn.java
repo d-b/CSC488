@@ -13,6 +13,8 @@ public class ConditionalExpn extends Expn {
         this.condition = condition;
         this.trueValue = trueValue;
         this.falseValue = falseValue;
+        trueValue.setParent(this);
+        falseValue.setParent(this);
     }
 
     /** Returns a string that describes the conditional expression. */

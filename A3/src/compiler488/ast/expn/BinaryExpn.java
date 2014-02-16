@@ -11,6 +11,8 @@ public class BinaryExpn extends Expn {
         this.opSymbol = opSymbol;
         this.left = left;
         this.right = right;
+        left.setParent(this);
+        right.setParent(this);
     }
 
     /** Returns a string that represents the binary expression. */

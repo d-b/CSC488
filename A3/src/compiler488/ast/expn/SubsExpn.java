@@ -13,6 +13,8 @@ public class SubsExpn extends VarRefExpn {
         this.ident = ident;
         this.subscript1 = subscript1;
         this.subscript2 = subscript2;
+        subscript1.setParent(this);
+        if(subscript2 != null) subscript2.setParent(this);
     }
 
     public SubsExpn(String ident, Expn subscript1) {

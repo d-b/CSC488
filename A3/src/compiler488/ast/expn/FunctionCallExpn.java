@@ -13,6 +13,7 @@ public class FunctionCallExpn extends Expn {
     public FunctionCallExpn(String ident, ASTList<Expn> arguments) {
         this.ident = ident;
         this.arguments = arguments;
+        arguments.setParent(this);
     }
 
     /** Returns a string describing the function call. */

@@ -11,6 +11,7 @@ public class GetStmt extends Stmt {
 
     public GetStmt(ASTList<Readable> inputs) {
         this.inputs = inputs;
+        inputs.setParent(this);
     }
 
     /** Returns a string describing the <b>get</b> statement. */

@@ -2,6 +2,7 @@ package compiler488.ast;
 
 import java.io.PrintStream;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 /**
@@ -27,6 +28,8 @@ public class ASTList<E> extends AST {
     public ASTList(E ast) {
         ll = new LinkedList<E>();
         ll.addLast(ast);
+        if(ast instanceof AST)
+            ((AST) ast).setParent(this);
     }
 
     /**
@@ -42,8 +45,10 @@ public class ASTList<E> extends AST {
      * However, we like the conciseness gained when such methods return the
      * target object.
      */
-    public ASTList addLast(E ast) {
+    public ASTList<E> addLast(E ast) {
         ll.addLast(ast);
+        if(ast instanceof AST)
+            ((AST) ast).setParent(this);        
         return this;
     }
 
@@ -64,7 +69,7 @@ public class ASTList<E> extends AST {
      *            How much indentation to use while printing.
      */
     public void printOnSeperateLines(PrintStream out, int depth) {
-        ListIterator iterator = ll.listIterator();
+        ListIterator<E> iterator = ll.listIterator();
         if (iterator.hasNext()) {
             while (iterator.hasNext()) {
                 ((Indentable) iterator.next()).printOn(out, depth);
@@ -103,9 +108,14 @@ public class ASTList<E> extends AST {
             return false;
         }
 
-        ASTList alist = (ASTList) other;
+        ASTList<?> alist = (ASTList<?>) other;
 
         return ll.equals(alist.ll);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<AST> getChildren() {
+        return (List<AST>) getList();
     }
 }
 

@@ -24,6 +24,9 @@ public class IfStmt extends Stmt {
         this.condition = condition;
         this.whenTrue = whenTrue;
         this.whenFalse = whenFalse;
+        condition.setParent(this);
+        whenTrue.setParent(this);
+        if(whenFalse != null) whenFalse.setParent(this);
     }
 
     public IfStmt(Expn condition, ASTList<Stmt> whenTrue) {

@@ -12,6 +12,8 @@ public class FunctionType extends Type {
     public FunctionType(Type returnType, ASTList<Type> arguments) {
         this.returnType = returnType;
         this.arguments = arguments;
+        returnType.setParent(this);
+        arguments.setParent(this);
     }
 
     public String toString() {

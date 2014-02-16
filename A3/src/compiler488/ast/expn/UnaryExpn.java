@@ -13,6 +13,7 @@ public class UnaryExpn extends Expn {
     public UnaryExpn(String opSymbol, Expn operand) {
         this.opSymbol = opSymbol;
         this.operand = operand;
+        operand.setParent(this);
     }
 
     /** Returns a string that represents the unary expression. */

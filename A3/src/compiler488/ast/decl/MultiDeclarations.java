@@ -1,7 +1,10 @@
 package compiler488.ast.decl;
 
 import java.io.PrintStream;
+import java.util.List;
+import java.util.Vector;
 
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
 import compiler488.ast.type.Type;
@@ -18,7 +21,14 @@ public class MultiDeclarations extends Declaration {
         super (null, type);
 
         this.elements = elements;
+        elements.setParent(this);
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(elements);
+        return children;
+    }    
 
     /**
      * Returns a string that describes the array.
@@ -51,4 +61,3 @@ public class MultiDeclarations extends Declaration {
         this.elements = elements;
     }
 }
-

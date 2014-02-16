@@ -1,7 +1,10 @@
 package compiler488.ast.stmt;
 
 import java.io.PrintStream;
+import java.util.List;
+import java.util.Vector;
 
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
 import compiler488.ast.decl.Declaration;
@@ -17,6 +20,8 @@ public class Scope extends Stmt {
     public Scope() {
         declarations = new ASTList<Declaration>();
         statements = new ASTList<Stmt>();
+        declarations.setParent(this);
+        statements.setParent(this);
     }
 
     public Scope(ASTList<Declaration> decls, ASTList<Stmt> stmts) {
@@ -31,6 +36,9 @@ public class Scope extends Stmt {
         } else {
             statements = stmts;
         }
+        
+        declarations.setParent(this);
+        statements.setParent(this);        
     }
 
     /**
@@ -69,6 +77,13 @@ public class Scope extends Stmt {
 
     public void setStatements(ASTList<Stmt> statements) {
         this.statements = statements;
+    }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(declarations);
+        children.add(statements);
+        return children;
     }
 }
 

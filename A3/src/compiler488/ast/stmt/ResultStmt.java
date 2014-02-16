@@ -14,6 +14,7 @@ public class ResultStmt extends Stmt {
 
     public ResultStmt(Expn value) {
         this.value = value;
+        value.setParent(this);
     }
 
     /**

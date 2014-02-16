@@ -6,13 +6,13 @@ import compiler488.symbol.SymbolTable;
 import compiler488.ast.AST;
 import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
-import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ScalarDeclPart;
+import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.Program;
+import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
-import compiler488.ast.stmt.Stmt;
 import compiler488.ast.type.Type;
 
 import java.lang.annotation.ElementType;
@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -108,6 +107,11 @@ public class Semantics {
         return true;
     }
     
+    @Action(number = 34) // Check that variable and expression in assignment are the same type.
+    Boolean actionCheckAssignmentTypes(AssignStmt assignStmt) {
+        return false;
+    }
+    
     @Action(number = 46) // Check that lower bound is <= upper bound.
     Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
         if(arrayDecl.getDimensions() >= 1)
@@ -140,14 +144,24 @@ public class Semantics {
         return true;
     }
     
+    @Action(number = 52) // Check that return statement is directly inside a procedure.
+    Boolean actionCheckReturn(ReturnStmt returnStmt) {
+        // Search for first scope
+        for(AST node = returnStmt; node != null; node = node.getParent()) {
+            if(node instanceof Scope) {
+                if(!(node.getParent() instanceof RoutineDecl)) return false;
+                return !((RoutineDecl) node.getParent()).isFunction();
+            }
+        } return false;
+    }
+    
     //
     // Processors
     //
-    
+       
     @PreProcessor(target = "Program")
     void preProgram(Program program) {
         semanticAction(0); // S00: Start program scope.
-        exploreScope(program);
     }
     
     @PostProcessor(target = "Program")
@@ -158,8 +172,6 @@ public class Semantics {
     @PreProcessor(target = "MultiDeclarations")
     void preMultiDeclarations(MultiDeclarations multiDecls) {
         analysisWorking = new WorkingVarList();
-        for(DeclarationPart part : multiDecls.getElements().getList())
-            discoverNode(part);
     }
     
     @PostProcessor(target = "MultiDeclarations")
@@ -185,11 +197,10 @@ public class Semantics {
     @PreProcessor(target = "RoutineDecl")
     void preRoutineDecl(RoutineDecl routineDecl) {
         if(!routineDecl.isForward()) {
-            if(!routineDecl.getReturnType().equals(Type.TYPE_NIL))
+            if(routineDecl.isFunction())
                 semanticAction(4); // S04: Start function scope.
             else
                 semanticAction(8); // S08: Start procedure scope.
-            exploreScope(routineDecl.getBody());
         }
     }
     
@@ -202,19 +213,15 @@ public class Semantics {
                 semanticAction(9); // S09: End procedure scope.            
     }
     
-    //
-    // Helpers
-    //
-    
-    void exploreScope(Scope scope) {
-        // Add declarations and statements to the stack
-        LinkedList<Stmt>          stmts = scope.getStatements().getList();
-        LinkedList<Declaration>   decls = scope.getDeclarations().getList();
-        ListIterator<Stmt>        si    = stmts.listIterator(stmts.size());
-        ListIterator<Declaration> di    = decls.listIterator(decls.size());
-        while(si.hasPrevious()) discoverNode(si.previous());
-        while(di.hasPrevious()) discoverNode(di.previous());
+    @PostProcessor(target = "ReturnStmt")
+    void postReturnStmt(ReturnStmt returnStmt) {
+        semanticAction(52); // S52: Check that return statement is directly inside a procedure.
     }
+    
+    @PostProcessor(target = "AssignStmt")
+    void postAssignStmt(AssignStmt assignStmt) {
+        semanticAction(34); // S34: Check that variable and expression in assignment are the same type.
+    }    
        
     //
     // State management
@@ -336,8 +343,14 @@ public class Semantics {
 
             // If the object has not yet been seen
             if(!analysisGrey.contains(top)) {
+                // Add node grey set and invoke preprocessor 
                 analysisGrey.add(top);
                 invokePreProcessor(top);
+                
+                // Add children to the stack
+                List<AST> children = top.getChildren();
+                ListIterator<AST> li = children.listIterator(children.size());
+                while(li.hasPrevious()) analysisStack.push(li.previous());
             }
             // Finish processing object and pop it off of the stack
             else {

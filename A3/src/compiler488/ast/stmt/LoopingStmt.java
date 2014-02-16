@@ -13,6 +13,8 @@ public abstract class LoopingStmt extends Stmt {
     public LoopingStmt(ASTList<Stmt> body, Expn condition) {
         this.body = body;
         this.condition = condition;
+        body.setParent(this);
+        condition.setParent(this);
     }
 
     public Expn getExpn() {

@@ -15,6 +15,7 @@ public class ExitStmt extends Stmt {
 
     public ExitStmt(Expn condition) {
         this.condition = condition;
+        condition.setParent(this);
     }
 
     /** Returns the string <b>"exit"</b> or <b>"exit when e"</b>"

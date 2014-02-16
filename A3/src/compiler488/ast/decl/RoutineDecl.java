@@ -1,7 +1,10 @@
 package compiler488.ast.decl;
 
 import java.io.PrintStream;
+import java.util.List;
+import java.util.Vector;
 
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
 import compiler488.ast.type.Type;
@@ -23,17 +26,22 @@ public class RoutineDecl extends Declaration {
 
     public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params, Scope body) {
         super (name, returnType);
+        
+        ASTList<Type> argTypes = new ASTList<Type>();
 
         this.returnType = returnType;
         this.params = params;
         this.body = body;
-
-        ASTList<Type> argTypes = new ASTList<Type>();
-        for (ScalarDecl argDecl : params.getList()) {
+        
+        returnType.setParent(this);
+        params.setParent(this);
+        if(body != null) body.setParent(this);
+        
+        for (ScalarDecl argDecl : params.getList())
             argTypes.addLast(argDecl.getType());
-        }
 
         funcType = new FunctionType(returnType, argTypes);
+        funcType.setParent(this);
     }
 
     public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params) {
@@ -42,6 +50,10 @@ public class RoutineDecl extends Declaration {
 
     public RoutineDecl withBody(Scope body) {
         return new RoutineDecl(name, type, params, body);
+    }
+    
+    public boolean isFunction() {
+        return type != Type.TYPE_NIL;
     }
 
     public boolean isForward() {
@@ -58,7 +70,15 @@ public class RoutineDecl extends Declaration {
     
     public Type getReturnType() {
         return returnType;
-    }    
+    }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(returnType);
+        children.add(params);
+        if(body != null) children.add(body);
+        return children;        
+    }
 
     /**
      * Returns a string indicating that this is a function with
@@ -74,7 +94,7 @@ public class RoutineDecl extends Declaration {
         }
 
 
-        if (type == Type.TYPE_NIL) {
+        if (!isFunction()) {
             s += "proc ";
         } else {
             s += "func ";
@@ -109,4 +129,3 @@ public class RoutineDecl extends Declaration {
         }
     }
 }
-
