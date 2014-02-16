@@ -75,6 +75,19 @@ public class Semantics {
         symbolTable.scopeExit();
         return true;
     }
+    
+    @Action(number = 6) // Start statement scope.
+    Boolean actionMinorScopeStart(Scope scope) {
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Statement);
+        return true;
+    }
+    
+    @Action(number = 7) // End statement scope.
+    Boolean actionMinorScopeEnd(Scope scope) {
+        symbolTable.scopeExit();
+        return true;
+    }
+    
 
     @Action(number = 8) // Start procedure scope.
     Boolean actionProcedureStart(RoutineDecl routineDecl) {
@@ -206,7 +219,15 @@ public class Semantics {
     void preScope(Scope scope) {
         if(scope.getParent() instanceof RoutineDecl)
             semanticAction(54); // S54: Associate parameters if any with scope.
+        else
+            semanticAction(6); // S06: Start statement scope.
     }
+    
+    @PostProcessor(target = "Scope")
+    void postScope(Scope scope) {
+        if(!(scope.getParent() instanceof RoutineDecl))
+            semanticAction(7); // S07: End statement scope.
+    }    
     
     @PreProcessor(target = "MultiDeclarations")
     void preMultiDeclarations(MultiDeclarations multiDecls) {
