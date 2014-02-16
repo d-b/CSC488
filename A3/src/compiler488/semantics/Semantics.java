@@ -107,6 +107,7 @@ public class Semantics {
         return true;
     }
     
+    // TODO: Finish assignment checking after expression checking is finished
     @Action(number = 34) // Check that variable and expression in assignment are the same type.
     Boolean actionCheckAssignmentTypes(AssignStmt assignStmt) {
         return false;
