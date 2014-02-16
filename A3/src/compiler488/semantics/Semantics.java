@@ -4,12 +4,15 @@ import java.io.*;
 
 import compiler488.symbol.SymbolTable;
 import compiler488.ast.AST;
+import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
+import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.stmt.Stmt;
+import compiler488.ast.type.Type;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -19,59 +22,169 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface PreProcessor {
-    String target();
-}
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface PostProcessor {
-    String target();
-}
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface Action {
-    int number();
-}
+import java.util.Vector;
 
 /** Implement semantic analysis for compiler 488 
  *  @author Daniel Bloemendal
  */
 public class Semantics {
+    //
+    // Actions
+    //
     
-    /** flag for tracing semantic analysis */
-    private boolean traceSemantics = false;
-    /** file sink for semantic analysis trace */
-    private String traceFile = new String();
-    private SymbolTable symbolTable;
-    public FileWriter Tracer;
-    public File f;
-
-    /** Maps for processors and actions */
-    private Map<String, Method>  preProcessorsMap;
-    private Map<String, Method>  postProcessorsMap;
-    private Map<Integer, Method> actionsMap;
-
-    /** Analysis state */
-    private AST        analysisTop;
-    private Set<AST>   analysisGrey;
-    private Stack<AST> analysisStack;
+    @Action(number = 00) // Start program scope.
+    Boolean actionProgramStart(Program program) {
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Program);
+        return true;
+    }
+    
+    @Action(number = 01) // End program scope.
+    Boolean actionProgramEnd(Program program) {
+        symbolTable.scopeExit();
+        return true;
+    }
+    
+    @Action(number = 02) // Associate declaration(s) with scope.
+    Boolean actionAssociateDeclarations(Declaration decl) {
+        if(decl instanceof MultiDeclarations) {
+            WorkingVarList varList = getWorkingVarList();
+            for(WorkingVar var : varList.variables)
+                if     (var.dimensions  < 1) symbolTable.declareVariable(var.name, var.type);
+                else if(var.dimensions == 1) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0));
+                else if(var.dimensions >= 2) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0), var.lowerBounds.get(1), var.upperBounds.get(1));
+        } return true;
+    }
+    
+    @Action(number = 10) // Declare scalar variable.
+    Boolean actionDeclareScalar(ScalarDeclPart scalarDecl) {
+        WorkingVarList varList = getWorkingVarList();
+        WorkingVar var = new WorkingVar();
+        var.name = scalarDecl.getName();
+        var.dimensions = 0;
+        varList.variables.add(var);
+        return true;
+    }
+    
+    @Action(number = 19) // Declare one dimensional array with specified bound.
+    Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
+        WorkingVarList varList = getWorkingVarList();
+        WorkingVar var = new WorkingVar();
+        var.name = arrayDecl.getName();
+        var.dimensions = 1;
+        var.lowerBounds.add(arrayDecl.getLowerBoundary1());
+        var.upperBounds.add(arrayDecl.getUpperBoundary1());
+        varList.variables.add(var);
+        return true;
+    }
+    
+    @Action(number = 47) // Associate type with variables.
+    Boolean actionAssociateTypeWithVar(Declaration declaration) {
+        WorkingVarList varList = getWorkingVarList();
+        for(WorkingVar var : varList.variables) {
+            var.type = declaration.getType().equals(Type.TYPE_BOOLEAN)
+                    ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;
+        } return true;
+    }
+    
+    @Action(number = 46) // Check that lower bound is <= upper bound.
+    Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
+        if(arrayDecl.getDimensions() >= 1)
+            if(arrayDecl.getLowerBoundary1() > arrayDecl.getUpperBoundary1()) return false;
+        if(arrayDecl.getDimensions() >= 2)
+            if(arrayDecl.getLowerBoundary2() > arrayDecl.getUpperBoundary2()) return false;
+        return true;
+    }
+    
+    @Action(number = 48) // Declare two dimensional array with specified bound.
+    Boolean actionDeclareArray2D(ArrayDeclPart arrayDecl) {
+        WorkingVarList varList = getWorkingVarList();
+        WorkingVar var = new WorkingVar();
+        var.name = arrayDecl.getName();
+        var.dimensions = 2;
+        var.lowerBounds.add(arrayDecl.getLowerBoundary1());
+        var.lowerBounds.add(arrayDecl.getLowerBoundary2());
+        var.upperBounds.add(arrayDecl.getUpperBoundary1());
+        var.upperBounds.add(arrayDecl.getUpperBoundary2());
+        varList.variables.add(var);
+        return true;
+    }
     
     //
-    // Stack management
+    // Processors
+    //
+    
+    @PreProcessor(target = "Program")
+    void preProgram(Program program) {
+        semanticAction(00); // S00: Start program scope.
+        exploreScope(program);
+    }
+    
+    @PostProcessor(target = "Program")
+    void postProgram(Program program) {
+        semanticAction(01); // S01: End program scope.    
+    }
+    
+    @PreProcessor(target = "MultiDeclarations")
+    void preMultiDeclarations(MultiDeclarations multiDecls) {
+        analysisWorking = new WorkingVarList();
+        for(DeclarationPart part : multiDecls.getElements().getList())
+            discoverNode(part);
+    }
+    
+    @PostProcessor(target = "MultiDeclarations")
+    void postMultiDeclarations(MultiDeclarations multiDecls) {
+        semanticAction(47); // S47: Associate type with variables.
+        semanticAction(02); // S02: Associate declaration(s) with scope.
+    }    
+    
+    @PostProcessor(target = "ScalarDeclPart")
+    void postScalarDeclPart(ScalarDeclPart scalarDeclPart) {
+        semanticAction(10); // S10: Declare scalar variable.
+    }
+    
+    @PostProcessor(target = "ArrayDeclPart")
+    void postArrayDeclPart(ArrayDeclPart arrayDeclPart) {
+        semanticAction(46); // S46: Check that lower bound is <= upper bound.
+        if(arrayDeclPart.getDimensions() == 1)
+            semanticAction(19); // S19: Declare one dimensional array with specified bound.
+        else if(arrayDeclPart.getDimensions() == 2)
+            semanticAction(48); // S48: Declare two dimensional array with specified bound.
+    }
+    
+    //
+    // Helpers
+    //
+    
+    void exploreScope(Scope scope) {
+        // Add declarations and statements to the stack
+        LinkedList<Stmt>          stmts = scope.getStatements().getList();
+        LinkedList<Declaration>   decls = scope.getDeclarations().getList();
+        ListIterator<Stmt>        si    = stmts.listIterator(stmts.size());
+        ListIterator<Declaration> di    = decls.listIterator(decls.size());
+        while(si.hasPrevious()) discoverNode(si.previous());
+        while(di.hasPrevious()) discoverNode(di.previous());
+    }
+       
+    //
+    // State management
     //
     
     void discoverNode(AST obj) {
         analysisStack.push(obj);
+    }
+    
+    WorkingVar getWorkingVar() {
+        return (WorkingVar) analysisWorking;
+    }    
+    
+    WorkingVarList getWorkingVarList() {
+        return (WorkingVarList) analysisWorking;
     }
     
     //
@@ -141,15 +254,14 @@ public class Semantics {
         else {
             // Invoke the semantic action. 
             try {
-                m.invoke(this, analysisTop);
+                Boolean result = (Boolean) m.invoke(this, analysisTop);
+                System.out.println((result ? "Semantic Action: S" : "Semantic Error: S") + actionNumber);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 e.printStackTrace();
             }
-            
-            System.out.println("Semantic Action: S" + actionNumber  );
         }
-    }    
-        
+    }
+
     //
     // Semantic analysis life cycle
     //
@@ -161,6 +273,7 @@ public class Semantics {
         actionsMap        = new HashMap<Integer, Method>();
         analysisGrey      = new HashSet<AST>();
         analysisStack     = new Stack<AST>();
+        analysisWorking   = null;
     }    
 
     public void Initialize() {
@@ -193,51 +306,66 @@ public class Semantics {
     }
     
     //
-    // Helpers
+    // Members
     //
     
-    void exploreScope(Scope scope) {
-        // Add declarations and statements to the stack
-        LinkedList<Stmt>          stmts = scope.getStatements().getList();
-        LinkedList<Declaration>   decls = scope.getDeclarations().getList();
-        ListIterator<Stmt>        si    = stmts.listIterator(stmts.size());
-        ListIterator<Declaration> di    = decls.listIterator(decls.size());
-        while(si.hasPrevious()) discoverNode(si.previous());
-        while(di.hasPrevious()) discoverNode(di.previous());
-    }
-    
-    //
-    // Processors
-    //
-    
-    @PreProcessor(target = "Program")
-    void preProgram(Program program) {
-        semanticAction(00); // S00: Start program scope.
-        exploreScope(program);
-    }
-    
-    @PostProcessor(target = "Program")
-    void postProgram(Program program) {
-        semanticAction(01); // S01: End program scope.    
-    }
-    
-    @PreProcessor(target = "MultiDeclarations")
-    void preMultiDeclarations(MultiDeclarations multiDecls) {
-        for(DeclarationPart part : multiDecls.getElements().getList())
-            discoverNode(part);
-    }
+    /** flag for tracing semantic analysis */
+    private boolean traceSemantics = false;
+    /** file sink for semantic analysis trace */
+    private String traceFile = new String();
+    private SymbolTable symbolTable;
+    public FileWriter Tracer;
+    public File f;
 
-    //
-    // Actions
-    //
-    
-    @Action(number = 00)
-    void actionProgramStart(Program program) {
-        symbolTable.scopeEnter(SymbolTable.ScopeType.Program);
-    }
-    
-    @Action(number = 01)
-    void actionProgramEnd(Program program) {
-        symbolTable.scopeExit();
-    }    
+    /** Maps for processors and actions */
+    private Map<String, Method>  preProcessorsMap;
+    private Map<String, Method>  postProcessorsMap;
+    private Map<Integer, Method> actionsMap;
+
+    /** Analysis state */
+    private AST         analysisTop;
+    private Set<AST>    analysisGrey;
+    private Stack<AST>  analysisStack;
+    private WorkingDecl analysisWorking;    
+}
+
+//
+// Processor/action annotations
+//
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface PreProcessor {
+    String target();
+}
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface PostProcessor {
+    String target();
+}
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Action {
+    int number();
+}
+
+//
+// Working structures
+//
+
+class WorkingDecl{};
+class WorkingVar extends WorkingDecl {
+    public String name;
+    public int dimensions;
+    public Vector<Integer> lowerBounds;
+    public Vector<Integer> upperBounds;
+    public SymbolTable.ScalarType type;
+    WorkingVar() {lowerBounds = new Vector<Integer>();
+                  upperBounds = new Vector<Integer>();}
+}
+class WorkingVarList extends WorkingDecl {
+    public List<WorkingVar> variables;
+    WorkingVarList() {variables = new Vector<WorkingVar>();}
 }

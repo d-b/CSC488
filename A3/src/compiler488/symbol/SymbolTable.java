@@ -51,12 +51,12 @@ public class SymbolTable {
     public void declareVariable(String name, ScalarType type) {   
     }
     
-    public void declareVariable(String name, ScalarType type, int bound) {
+    public void declareVariable(String name, ScalarType type, int lb, int ub) {
     }
     
-    public void declareVariable(String name, ScalarType type, int lowerBound, int upperBound) {
-    }
+    public void declareVariable(String name, ScalarType type, int lb1, int ub1, int lb2, int ub2) {
+    }    
     
-    public void declareFunction(String name, List<ScalarType> parameterList) {
+    public void declareFunction(String name, List<ScalarType> parameterList, ScalarType returnType) {
     }
 }
