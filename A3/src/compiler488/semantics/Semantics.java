@@ -321,10 +321,6 @@ public class Semantics {
     // State management
     //
     
-    void discoverNode(AST obj) {
-        analysisStack.push(obj);
-    }
-    
     void setWorking(Working obj) {
         analysisWorking = obj;
     }
