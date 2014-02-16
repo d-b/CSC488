@@ -72,6 +72,10 @@ public class RoutineDecl extends Declaration {
         return returnType;
     }
     
+    public ASTList<ScalarDecl> getParameters() {
+        return params;
+    }
+    
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(returnType);

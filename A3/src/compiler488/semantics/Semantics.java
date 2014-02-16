@@ -8,9 +8,11 @@ import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.MultiDeclarations;
 import compiler488.ast.decl.RoutineDecl;
+import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.Program;
+import compiler488.ast.stmt.ResultStmt;
 import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.type.Type;
@@ -58,7 +60,8 @@ public class Semantics {
                 if     (var.dimensions  < 1) symbolTable.declareVariable(var.name, var.type);
                 else if(var.dimensions == 1) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0));
                 else if(var.dimensions >= 2) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0), var.lowerBounds.get(1), var.upperBounds.get(1));
-        } return true;
+        } setWorking(null);
+        return true;
     }
     
     @Action(number = 4) // Start function scope.
@@ -95,6 +98,22 @@ public class Semantics {
         return true;
     }
     
+    @Action(number = 15) // Declare parameter with specified type.
+    Boolean actionDeclareParameter(ScalarDecl scalarDecl) {
+        WorkingVarList varList = getWorkingVarList();
+        WorkingVar var = new WorkingVar();
+        var.name = scalarDecl.getName();
+        var.type = translateType(scalarDecl.getType());
+        var.dimensions = 0;
+        varList.variables.add(var);
+        return true;
+    }
+    
+    @Action(number = 16) // Increment parameter count by one.
+    Boolean actionIncrementParameterCount(ScalarDecl scalarDecl) {
+        return true;
+    }    
+    
     @Action(number = 19) // Declare one dimensional array with specified bound.
     Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
         WorkingVarList varList = getWorkingVarList();
@@ -125,10 +144,9 @@ public class Semantics {
     @Action(number = 47) // Associate type with variables.
     Boolean actionAssociateTypeWithVar(Declaration declaration) {
         WorkingVarList varList = getWorkingVarList();
-        for(WorkingVar var : varList.variables) {
-            var.type = declaration.getType().equals(Type.TYPE_BOOLEAN)
-                    ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;
-        } return true;
+        for(WorkingVar var : varList.variables)
+            var.type = translateType(declaration.getType());
+        return true;
     }
     
     @Action(number = 48) // Declare two dimensional array with specified bound.
@@ -145,15 +163,29 @@ public class Semantics {
         return true;
     }
     
+    @Action(number = 51) // Check that result statement is directly inside a function.
+    Boolean actionCheckResult(ResultStmt returnStmt) {
+        Scope scope = (Scope) firstOf(returnStmt, Scope.class);
+        return (scope != null
+             && scope.getParent() instanceof RoutineDecl
+             && ((RoutineDecl) scope.getParent()).isFunction());
+    }    
+    
     @Action(number = 52) // Check that return statement is directly inside a procedure.
     Boolean actionCheckReturn(ReturnStmt returnStmt) {
-        // Search for first scope
-        for(AST node = returnStmt; node != null; node = node.getParent()) {
-            if(node instanceof Scope) {
-                if(!(node.getParent() instanceof RoutineDecl)) return false;
-                return !((RoutineDecl) node.getParent()).isFunction();
-            }
-        } return false;
+        Scope scope = (Scope) firstOf(returnStmt, Scope.class);
+        return (scope != null
+             && scope.getParent() instanceof RoutineDecl
+             && !((RoutineDecl) scope.getParent()).isFunction());
+    }
+    
+    @Action(number = 54) // Associate parameters if any with scope.
+    Boolean actionAssociateParameters(Scope scope) {
+        WorkingVarList varList = getWorkingVarList();
+        for(WorkingVar var : varList.variables)
+            symbolTable.declareVariable(var.name, var.type);
+        setWorking(null);
+        return true;
     }
     
     //
@@ -170,21 +202,35 @@ public class Semantics {
         semanticAction(1); // S01: End program scope.    
     }
     
+    @PreProcessor(target = "Scope")
+    void preScope(Scope scope) {
+        if(scope.getParent() instanceof RoutineDecl)
+            semanticAction(54); // S54: Associate parameters if any with scope.
+    }
+    
     @PreProcessor(target = "MultiDeclarations")
     void preMultiDeclarations(MultiDeclarations multiDecls) {
-        analysisWorking = new WorkingVarList();
+        setWorking(new WorkingVarList());
     }
     
     @PostProcessor(target = "MultiDeclarations")
     void postMultiDeclarations(MultiDeclarations multiDecls) {
         semanticAction(47); // S47: Associate type with variables.
         semanticAction(02); // S02: Associate declaration(s) with scope.
-    }    
+    }
     
     @PostProcessor(target = "ScalarDeclPart")
     void postScalarDeclPart(ScalarDeclPart scalarDeclPart) {
         semanticAction(10); // S10: Declare scalar variable.
     }
+    
+    @PostProcessor(target = "ScalarDecl")
+    void postScalarDecl(ScalarDecl scalarDecl) {
+        if(firstOf(scalarDecl, RoutineDecl.class) != null) {
+            semanticAction(15); // S15: Declare parameter with specified type.
+            semanticAction(16); // S16: Increment parameter count by one.
+        }
+    }    
     
     @PostProcessor(target = "ArrayDeclPart")
     void postArrayDeclPart(ArrayDeclPart arrayDeclPart) {
@@ -197,6 +243,7 @@ public class Semantics {
     
     @PreProcessor(target = "RoutineDecl")
     void preRoutineDecl(RoutineDecl routineDecl) {
+        setWorking(new WorkingVarList());
         if(!routineDecl.isForward()) {
             if(routineDecl.isFunction())
                 semanticAction(4); // S04: Start function scope.
@@ -214,6 +261,11 @@ public class Semantics {
                 semanticAction(9); // S09: End procedure scope.            
     }
     
+    @PostProcessor(target = "ResultStmt")
+    void postResultStmt(ResultStmt resultStmt) {
+        semanticAction(51); // S51: Check that result statement is directly inside a function.
+    }    
+    
     @PostProcessor(target = "ReturnStmt")
     void postReturnStmt(ReturnStmt returnStmt) {
         semanticAction(52); // S52: Check that return statement is directly inside a procedure.
@@ -222,7 +274,22 @@ public class Semantics {
     @PostProcessor(target = "AssignStmt")
     void postAssignStmt(AssignStmt assignStmt) {
         semanticAction(34); // S34: Check that variable and expression in assignment are the same type.
-    }    
+    }
+    
+    //
+    // Helpers
+    //
+    
+    static <T> AST firstOf(AST obj, Class<T> type) {
+        for(AST node = obj; node != null; node = node.getParent())
+            if(type.isInstance(node)) return node; 
+        return null;
+    }
+    
+    static SymbolTable.ScalarType translateType(Type type) {
+        return type.equals(Type.TYPE_BOOLEAN)
+                ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;        
+    }
        
     //
     // State management
@@ -230,6 +297,10 @@ public class Semantics {
     
     void discoverNode(AST obj) {
         analysisStack.push(obj);
+    }
+    
+    void setWorking(Working obj) {
+        analysisWorking = obj;
     }
     
     WorkingVar getWorkingVar() {
@@ -382,10 +453,10 @@ public class Semantics {
     private Map<Integer, Method> actionsMap;
 
     /** Analysis state */
-    private AST         analysisTop;
-    private Set<AST>    analysisGrey;
-    private Stack<AST>  analysisStack;
-    private WorkingDecl analysisWorking;    
+    private AST        analysisTop;
+    private Set<AST>   analysisGrey;
+    private Stack<AST> analysisStack;
+    private Working    analysisWorking;    
 }
 
 //
@@ -414,8 +485,8 @@ public class Semantics {
 // Working structures
 //
 
-class WorkingDecl{};
-class WorkingVar extends WorkingDecl {
+class Working{};
+class WorkingVar extends Working {
     public String name;
     public int dimensions;
     public Vector<Integer> lowerBounds;
@@ -424,7 +495,7 @@ class WorkingVar extends WorkingDecl {
     WorkingVar() {lowerBounds = new Vector<Integer>();
                   upperBounds = new Vector<Integer>();}
 }
-class WorkingVarList extends WorkingDecl {
+class WorkingVarList extends Working {
     public List<WorkingVar> variables;
     WorkingVarList() {variables = new Vector<WorkingVar>();}
 }
