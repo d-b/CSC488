@@ -47,6 +47,18 @@ public class RoutineDecl extends Declaration {
     public boolean isForward() {
         return body == null;
     }
+    
+    public Scope getBody() {
+        return body;
+    }
+    
+    public FunctionType getFunctionType() {
+        return funcType;
+    }
+    
+    public Type getReturnType() {
+        return returnType;
+    }    
 
     /**
      * Returns a string indicating that this is a function with

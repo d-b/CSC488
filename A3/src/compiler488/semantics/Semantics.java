@@ -8,6 +8,7 @@ import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
+import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
@@ -38,19 +39,19 @@ public class Semantics {
     // Actions
     //
     
-    @Action(number = 00) // Start program scope.
+    @Action(number = 0) // Start program scope.
     Boolean actionProgramStart(Program program) {
         symbolTable.scopeEnter(SymbolTable.ScopeType.Program);
         return true;
     }
     
-    @Action(number = 01) // End program scope.
+    @Action(number = 1) // End program scope.
     Boolean actionProgramEnd(Program program) {
         symbolTable.scopeExit();
         return true;
     }
     
-    @Action(number = 02) // Associate declaration(s) with scope.
+    @Action(number = 2) // Associate declaration(s) with scope.
     Boolean actionAssociateDeclarations(Declaration decl) {
         if(decl instanceof MultiDeclarations) {
             WorkingVarList varList = getWorkingVarList();
@@ -59,6 +60,30 @@ public class Semantics {
                 else if(var.dimensions == 1) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0));
                 else if(var.dimensions >= 2) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0), var.lowerBounds.get(1), var.upperBounds.get(1));
         } return true;
+    }
+    
+    @Action(number = 4) // Start function scope.
+    Boolean actionFunctionStart(RoutineDecl routineDecl) {
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Function);
+        return true;
+    }
+    
+    @Action(number = 5) // End function scope.
+    Boolean actionFunctionEnd(RoutineDecl routineDecl) {
+        symbolTable.scopeExit();
+        return true;
+    }
+
+    @Action(number = 8) // Start procedure scope.
+    Boolean actionProcedureStart(RoutineDecl routineDecl) {
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Procedure);
+        return true;
+    }
+    
+    @Action(number = 9) // End procedure scope.
+    Boolean actionProcedureEnd(RoutineDecl routineDecl) {
+        symbolTable.scopeExit();
+        return true;
     }
     
     @Action(number = 10) // Declare scalar variable.
@@ -83,15 +108,6 @@ public class Semantics {
         return true;
     }
     
-    @Action(number = 47) // Associate type with variables.
-    Boolean actionAssociateTypeWithVar(Declaration declaration) {
-        WorkingVarList varList = getWorkingVarList();
-        for(WorkingVar var : varList.variables) {
-            var.type = declaration.getType().equals(Type.TYPE_BOOLEAN)
-                    ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;
-        } return true;
-    }
-    
     @Action(number = 46) // Check that lower bound is <= upper bound.
     Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
         if(arrayDecl.getDimensions() >= 1)
@@ -99,6 +115,15 @@ public class Semantics {
         if(arrayDecl.getDimensions() >= 2)
             if(arrayDecl.getLowerBoundary2() > arrayDecl.getUpperBoundary2()) return false;
         return true;
+    }    
+    
+    @Action(number = 47) // Associate type with variables.
+    Boolean actionAssociateTypeWithVar(Declaration declaration) {
+        WorkingVarList varList = getWorkingVarList();
+        for(WorkingVar var : varList.variables) {
+            var.type = declaration.getType().equals(Type.TYPE_BOOLEAN)
+                    ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;
+        } return true;
     }
     
     @Action(number = 48) // Declare two dimensional array with specified bound.
@@ -121,13 +146,13 @@ public class Semantics {
     
     @PreProcessor(target = "Program")
     void preProgram(Program program) {
-        semanticAction(00); // S00: Start program scope.
+        semanticAction(0); // S00: Start program scope.
         exploreScope(program);
     }
     
     @PostProcessor(target = "Program")
     void postProgram(Program program) {
-        semanticAction(01); // S01: End program scope.    
+        semanticAction(1); // S01: End program scope.    
     }
     
     @PreProcessor(target = "MultiDeclarations")
@@ -155,6 +180,26 @@ public class Semantics {
             semanticAction(19); // S19: Declare one dimensional array with specified bound.
         else if(arrayDeclPart.getDimensions() == 2)
             semanticAction(48); // S48: Declare two dimensional array with specified bound.
+    }
+    
+    @PreProcessor(target = "RoutineDecl")
+    void preRoutineDecl(RoutineDecl routineDecl) {
+        if(!routineDecl.isForward()) {
+            if(!routineDecl.getReturnType().equals(Type.TYPE_NIL))
+                semanticAction(4); // S04: Start function scope.
+            else
+                semanticAction(8); // S08: Start procedure scope.
+            exploreScope(routineDecl.getBody());
+        }
+    }
+    
+    @PostProcessor(target = "RoutineDecl")
+    void postRoutineDecl(RoutineDecl routineDecl) {
+        if(!routineDecl.isForward())
+            if(!routineDecl.getReturnType().equals(Type.TYPE_NIL))
+                semanticAction(5); // S05: End function scope.
+            else
+                semanticAction(9); // S09: End procedure scope.            
     }
     
     //
