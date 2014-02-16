@@ -48,8 +48,8 @@ public class Semantics {
     public File f;
 
     /** Maps for processors and actions */
-    private Map<String, Method>  mapProcessors;
-    private Map<Integer, Method> mapActions;
+    private Map<String, Method>  processorsMap;
+    private Map<Integer, Method> actionsMap;
 
     /** Analysis state */
     private Object        analysisTop;
@@ -64,13 +64,13 @@ public class Semantics {
         for(Method method : thisClass.getDeclaredMethods()) {
             Processor procInfo = method.getAnnotation(Processor.class);
             Action    actInfo  = method.getAnnotation(Action.class);
-            if(procInfo != null) mapProcessors.put(procInfo.target(), method);
-            if(actInfo  != null) mapActions.put(actInfo.number(), method);
+            if(procInfo != null) processorsMap.put(procInfo.target(), method);
+            if(actInfo  != null) actionsMap.put(actInfo.number(), method);
         }
     }
     
     boolean invokeProcessor(Object obj) {
-        Method m = mapProcessors.get(obj.getClass().getSimpleName());
+        Method m = processorsMap.get(obj.getClass().getSimpleName());
         if(m == null) return false;
         analysisTop = obj;
         
@@ -80,25 +80,61 @@ public class Semantics {
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             e.printStackTrace(); return false;
         }
-    }   
-    
-    //
-    // Semantic analysis implementation
-    //
-     
-     /** SemanticAnalyzer constructor */
-    public Semantics (){
-        symbolTable = new SymbolTable();
     }
+    
+    void semanticAction(int actionNumber) {
+        if( traceSemantics ){
+            if(traceFile.length() > 0 ){
+                //output trace to the file represented by traceFile
+                try{
+                    //open the file for writing and append to it
+                    new File(traceFile);
+                    Tracer = new FileWriter(traceFile, true);
+                                  
+                    Tracer.write("Sematics: S" + actionNumber + "\n");
+                    //always be sure to close the file
+                    Tracer.close();
+                }
+                catch (IOException e) {
+                  System.out.println(traceFile + 
+                    " could be opened/created.  It may be in use.");
+                }
+            }
+            else{
+                //output the trace to standard out.
+                System.out.println("Sematics: S" + actionNumber );
+            }
+         
+        }
+        
+        Method m = actionsMap.get(actionNumber);
+        if(m == null) System.out.println("Unhandled Semantic Action: S" + actionNumber );
+        else {
+            // Invoke the semantic action. 
+            try {
+                m.invoke(this, analysisTop);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+            
+            System.out.println("Semantic Action: S" + actionNumber  );
+        }
+    }    
+        
+    //
+    // Semantic analysis life cycle
+    //
+
+    public Semantics () {
+        symbolTable   = new SymbolTable();
+        processorsMap = new HashMap<String, Method>();
+        actionsMap    = new HashMap<Integer, Method>();
+        analysisStack = new Stack<Object>();
+        
+    }    
 
     public void Initialize() {
-        mapProcessors = new HashMap<String, Method>();
-        mapActions = new HashMap<Integer, Method>();
-        analysisStack = new Stack<Object>();
         populateMappings();
-    }
-
-    public void Finalize(){  
     }
 
     public void Analyze(Program ast) {
@@ -109,6 +145,13 @@ public class Semantics {
         while(!analysisStack.empty())
             invokeProcessor(analysisStack.pop());
     }
+    
+    public void Finalize(){  
+    }
+
+    //
+    // Processors
+    //
     
     @Processor(target = "Program")
     void processProgram(Program program) {
@@ -136,54 +179,17 @@ public class Semantics {
     void processDeclaration(Declaration declaration) {
     }
     
+    //
+    // Actions
+    //
+    
     @Action(number = 00)
     void actionProgramStart(Program program) {
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Program);
     }
     
     @Action(number = 01)
     void actionProgramEnd(Program program) {
-    }
-    
-    /**
-     *  Perform one semantic analysis action
-         *  @param  actionNumber  semantic analysis action number
-         */
-    void semanticAction( int actionNumber ) {
-        if( traceSemantics ){
-            if(traceFile.length() > 0 ){
-                //output trace to the file represented by traceFile
-                try{
-                    //open the file for writing and append to it
-                    File f = new File(traceFile);
-                    Tracer = new FileWriter(traceFile, true);
-                                  
-                    Tracer.write("Sematics: S" + actionNumber + "\n");
-                    //always be sure to close the file
-                    Tracer.close();
-                }
-                catch (IOException e) {
-                  System.out.println(traceFile + 
-                    " could be opened/created.  It may be in use.");
-                }
-            }
-            else{
-                //output the trace to standard out.
-                System.out.println("Sematics: S" + actionNumber );
-            }
-         
-        }
-        
-        Method m = mapActions.get(actionNumber);
-        if(m == null) System.out.println("Unhandled Semantic Action: S" + actionNumber );
-        else {
-            // Invoke the semantic action. 
-            try {
-                m.invoke(this, analysisTop);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-            
-            System.out.println("Semantic Action: S" + actionNumber  );
-        }
-    }
+        symbolTable.scopeExit();
+    }    
 }

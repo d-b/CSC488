@@ -1,6 +1,8 @@
 package compiler488.symbol;
 
-import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 /** Symbol Table
  *  This almost empty class is a framework for implementing
@@ -9,48 +11,38 @@ import java.io.*;
  *  Each implementation can change/modify/delete this class
  *  as they see fit.
  *
- *  @author  Daniel Bloemendal
+ *  @author Daniel Bloemendal
  */
 
+class SymbolScope {
+    Map<String, Symbol> symbolsMap;
+    
+    SymbolScope() {
+        symbolsMap = new HashMap<String, Symbol>();
+    }
+}
+
 public class SymbolTable {
-	
-	/** Symbol Table  constructor
-         *  Create and initialize a symbol table 
-	 */
-	public SymbolTable  (){
-	
-	}
+    public enum ScopeType { Program, Function, Statement, Procedure }
+    
+    Stack<SymbolScope> scopeStack;
+    
+    public SymbolTable() {
+        scopeStack = new Stack<SymbolScope>();
+    }
+    
+    public void Initialize() {
+    }
 
-	/**  Initialize - called once by semantic analysis  
-	 *                at the start of  compilation     
-	 *                May be unnecessary if constructor
- 	 *                does all required initialization	
-	 */
-	public void Initialize() {
-	
-	   /**   Initialize the symbol table             
-	    *	Any additional symbol table initialization
-	    *  GOES HERE                                	
-	    */
-	   
-	}
-
-	/**  Finalize - called once by Semantics at the end of compilation
-	 *              May be unnecessary 		
-	 */
-	public void Finalize(){
-	
-	  /**  Additional finalization code for the 
-	   *  symbol table  class GOES HERE.
-	   *  
-	   */
-	}
-	
-
-	/** The rest of Symbol Table
-	 *  Data structures, public and private functions
- 	 *  to implement the Symbol Table
-	 *  GO HERE.				
-	 */
-
+    public void Finalize() {
+    }
+    
+    public void scopeEnter(ScopeType type) {
+        SymbolScope scope = new SymbolScope();
+        scopeStack.push(scope);
+    }
+    
+    public void scopeExit() {
+        scopeStack.pop();
+    }
 }
