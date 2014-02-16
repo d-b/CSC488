@@ -1,6 +1,7 @@
 package compiler488.symbol;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -24,6 +25,7 @@ class SymbolScope {
 
 public class SymbolTable {
     public enum ScopeType { Program, Function, Statement, Procedure }
+    public enum ScalarType { Integer, Boolean }
     
     Stack<SymbolScope> scopeStack;
     
@@ -44,5 +46,17 @@ public class SymbolTable {
     
     public void scopeExit() {
         scopeStack.pop();
+    }
+    
+    public void declareVariable(String name, ScalarType type) {   
+    }
+    
+    public void declareVariable(String name, ScalarType type, int bound) {
+    }
+    
+    public void declareVariable(String name, ScalarType type, int lowerBound, int upperBound) {
+    }
+    
+    public void declareFunction(String name, List<ScalarType> parameterList) {
     }
 }

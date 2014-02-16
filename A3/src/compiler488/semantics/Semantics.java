@@ -3,12 +3,14 @@ package compiler488.semantics;
 import java.io.*;
 
 import compiler488.symbol.SymbolTable;
+import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
+import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
+import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.stmt.Stmt;
-import compiler488.semantics.Processor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,15 +18,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Stack;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@interface Processor {
+@interface PreProcessor {
+    String target();
+}
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface PostProcessor {
     String target();
 }
 
@@ -48,11 +58,13 @@ public class Semantics {
     public File f;
 
     /** Maps for processors and actions */
-    private Map<String, Method>  processorsMap;
+    private Map<String, Method>  preProcessorsMap;
+    private Map<String, Method>  postProcessorsMap;
     private Map<Integer, Method> actionsMap;
 
     /** Analysis state */
     private Object        analysisTop;
+    private Set<Object>   analysisGrey;
     private Stack<Object> analysisStack;
     
     //
@@ -62,15 +74,25 @@ public class Semantics {
     void populateMappings() {
         Class<? extends Semantics> thisClass = this.getClass();
         for(Method method : thisClass.getDeclaredMethods()) {
-            Processor procInfo = method.getAnnotation(Processor.class);
-            Action    actInfo  = method.getAnnotation(Action.class);
-            if(procInfo != null) processorsMap.put(procInfo.target(), method);
-            if(actInfo  != null) actionsMap.put(actInfo.number(), method);
+            PreProcessor  preProcInfo  = method.getAnnotation(PreProcessor.class);
+            PostProcessor postProcInfo = method.getAnnotation(PostProcessor.class);
+            Action        actInfo      = method.getAnnotation(Action.class);
+            if(preProcInfo  != null) preProcessorsMap.put(preProcInfo.target(), method);
+            if(postProcInfo != null) postProcessorsMap.put(postProcInfo.target(), method);
+            if(actInfo      != null) actionsMap.put(actInfo.number(), method);
         }
     }
     
-    boolean invokeProcessor(Object obj) {
-        Method m = processorsMap.get(obj.getClass().getSimpleName());
+    boolean invokePreProcessor(Object obj) {
+        return invokeProcessor(obj, preProcessorsMap);
+    }
+    
+    boolean invokePostProcessor(Object obj) {
+        return invokeProcessor(obj, postProcessorsMap);
+    }    
+    
+    boolean invokeProcessor(Object obj, Map<String, Method> map) {
+        Method m = map.get(obj.getClass().getSimpleName());
         if(m == null) return false;
         analysisTop = obj;
         
@@ -126,10 +148,12 @@ public class Semantics {
     //
 
     public Semantics () {
-        symbolTable   = new SymbolTable();
-        processorsMap = new HashMap<String, Method>();
-        actionsMap    = new HashMap<Integer, Method>();
-        analysisStack = new Stack<Object>();
+        symbolTable       = new SymbolTable();
+        preProcessorsMap  = new HashMap<String, Method>();
+        postProcessorsMap = new HashMap<String, Method>();
+        actionsMap        = new HashMap<Integer, Method>();
+        analysisGrey      = new HashSet<Object>();
+        analysisStack     = new Stack<Object>();
         
     }    
 
@@ -142,43 +166,55 @@ public class Semantics {
         analysisStack.add(ast);
         
         // Traverse the AST
-        while(!analysisStack.empty())
-            invokeProcessor(analysisStack.pop());
+        while(!analysisStack.empty()) {
+            // Fetch top of the analysis stack
+            Object top = analysisStack.peek();
+
+            // If the object has not yet been seen
+            if(!analysisGrey.contains(top)) {
+                analysisGrey.add(top);
+                invokePreProcessor(top);
+            }
+            // Finish processing object and pop it off of the stack
+            else {
+                invokePostProcessor(top);
+                analysisStack.pop();
+            }
+        }
     }
     
     public void Finalize(){  
     }
-
+    
     //
-    // Processors
+    // Helpers
     //
     
-    @Processor(target = "Program")
-    void processProgram(Program program) {
-        semanticAction(00);
-        processScope(program);
-        semanticAction(01);
-    }   
-    
-    @Processor(target = "Scope")
-    void processScope(Scope scope) {
+    void exploreScope(Scope scope) {
         // Add declarations and statements to the stack
         LinkedList<Stmt>          stmts = scope.getStatements().getList();
         LinkedList<Declaration>   decls = scope.getDeclarations().getList();
         ListIterator<Stmt>        si    = stmts.listIterator(stmts.size());
         ListIterator<Declaration> di    = decls.listIterator(decls.size());
         while(si.hasPrevious()) analysisStack.add(si.previous());
-        while(di.hasPrevious()) analysisStack.add(di.previous());
+        while(di.hasPrevious()) analysisStack.add(di.previous());        
+    }
+
+    //
+    // Processors
+    //
+    
+    @PreProcessor(target = "Program")
+    void preProgram(Program program) {
+        semanticAction(00); // S00: Start program scope.
+        exploreScope(program);
     }
     
-    @Processor(target = "MultiDeclarations")
-    void processMultiDeclarations(MultiDeclarations multiDeclarations) {
-    }   
-    
-    @Processor(target = "Declaration")
-    void processDeclaration(Declaration declaration) {
+    @PostProcessor(target = "Program")
+    void postProgram(Program program) {
+        semanticAction(01); // S01: End program scope.    
     }
-    
+
     //
     // Actions
     //
