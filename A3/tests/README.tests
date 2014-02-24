@@ -1,0 +1,8 @@
+pass/A1a.488	Tests all logical, comparison, and arithmetic operators.
+pass/A1b.488	Tests using arrays including both forms of array declaration, positive and negative bounds.
+pass/A1c.488	Tests all forms of loop building and loop exit constructs.
+pass/A1d.488	Tests non-recursive functions and procedures with and without parameters.
+pass/A1e.fixed.488	Tests recursive functions and procedures with and without parameters, including nested procedure and nested function declarations.
+fail/S10.488	Tests duplicate scalar variable definition in a single scope.
+fail/S49.488	Tests type mismatches between function forward declarations and definitions.
+
