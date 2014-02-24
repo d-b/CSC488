@@ -29,6 +29,11 @@ public class SourceLoc {
         this(start_line, start_column, end.getLoc().end_line, end.getLoc().end_column);
     }
 
+    /* NB: Cannot be a constructor because ASTList<T> `is-a` AST for some reason... */
+    public static SourceLoc fromList(int start_line, int start_column, ASTList<? extends AST> nodes) {
+    	return new SourceLoc(start_line, start_column, nodes.getList().getLast());
+    }
+
     public SourceLoc(AST start, AST end) {
         this(start.getLoc().start_line, start.getLoc().start_column, end);
     }

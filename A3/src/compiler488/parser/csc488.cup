@@ -11,7 +11,6 @@ import java_cup.runtime.*;		// Must always import this.
 import compiler488.ast.ASTList;
 import compiler488.ast.Readable;
 import compiler488.ast.SourceLoc;
-import compiler488.ast.Printable;
 
 import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.Declaration;
@@ -171,8 +170,8 @@ nonterminal ASTList<Declaration> declarations;
 nonterminal Stmt statement;
 nonterminal Declaration declaration;
 
-nonterminal ASTList<Printable> outputs;
-nonterminal	Printable output;
+nonterminal ASTList<Expn> outputs;
+nonterminal	Expn output;
 
 nonterminal ASTList<Readable> inputs;
 
@@ -284,7 +283,7 @@ statement
                 {: RESULT = new ReturnStmt(new SourceLoc(_startleft, _startright, "return")); :}
 
         |   PUT:_start outputs:outputs                                                                      // output statement
-                {: RESULT = new PutStmt(outputs, new SourceLoc(_startleft, _startright, outputs)); :}
+                {: RESULT = new PutStmt(outputs, SourceLoc.fromList(_startleft, _startright, outputs)); :}
 
         |   GET:_start inputs:inputs                                                                        // input statement
                 {: RESULT = new GetStmt(inputs, new SourceLoc(_startleft, _startright, inputs)); :}
@@ -368,7 +367,7 @@ procedureHead
 
 outputs
         ::= output:output                                               // list of output expressions
-                {: RESULT = new ASTList<Printable>().addLast(output); :}
+                {: RESULT = new ASTList<Expn>().addLast(output); :}
 
         |   outputs:head COMMA output:tail
                 {: RESULT = head.addLast(tail); :}
