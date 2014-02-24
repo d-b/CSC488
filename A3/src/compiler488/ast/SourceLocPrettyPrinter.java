@@ -28,8 +28,7 @@ public class SourceLocPrettyPrinter {
 		int start = loc.getStartColumn();
 		int num = loc.getEndColumn() - start;
 		
-		output.println("Line " + loc.getStartLine() + ":");	
-		output.println(line);
+		output.println(line);	
 		
 		for (int i = 0; i < start; i++) {
 			output.print(" ");

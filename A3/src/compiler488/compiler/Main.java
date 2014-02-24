@@ -413,6 +413,8 @@ public class Main {
     /* Scan and Parse the program	*/
 	try {
 	    Parser p = new Parser(new Lexer(new FileReader(sourceFileName )));
+	    p.filename = sourceFileName;
+	    
             if(  traceSyntax )
 	         parserResult = p.debug_parse().value;  //DEBUG Output
 	    else

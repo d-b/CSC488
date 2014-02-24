@@ -7,6 +7,7 @@ import compiler488.symbol.Symbol;
 import compiler488.symbol.SymbolTable;
 import compiler488.symbol.VariableSymbol;
 import compiler488.ast.AST;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.SourceLocPrettyPrinter;
 import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
@@ -441,9 +442,10 @@ public class Semantics {
         	
         	if (target instanceof SemanticActionException) {
         		SemanticActionException err = (SemanticActionException) target;
-        		System.out.println("Semantic Error: S" + err.getActionNumber());
+        		SourceLoc loc = obj.getLoc();
+        		System.out.println(loc + ": Semantic Error S" + err.getActionNumber());
         		
-        		SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, source_lines, obj.getLoc());
+        		SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, source_lines, loc);
         		pp.print();
         	} else {
         		e.printStackTrace();
