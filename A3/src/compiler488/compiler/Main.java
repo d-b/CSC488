@@ -1,6 +1,8 @@
 package compiler488.compiler;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import compiler488.parser.*;
 import compiler488.ast.AST ;
@@ -393,8 +395,22 @@ public class Main {
         setTraceStream( compilerTraceFileName  );
 
   	/* sourceFileName must exist or commandLineArgs would have exited */
-
-	/* Scan and Parse the program	*/
+        
+    // FIXME to help pretty-print error reporting later (this is a ugly way to handle this) 
+    List<String> lines = new ArrayList<String>();    
+    try {
+		BufferedReader in = new BufferedReader(new FileReader(sourceFileName));
+		String line;
+		while ((line = in.readLine()) != null) {
+			lines.add(line);
+		}
+	} catch (FileNotFoundException e) {
+		e.printStackTrace();
+	} catch (IOException e) {
+    	e.printStackTrace();
+	}
+    
+    /* Scan and Parse the program	*/
 	try {
 	    Parser p = new Parser(new Lexer(new FileReader(sourceFileName )));
             if(  traceSyntax )
@@ -444,7 +460,7 @@ public class Main {
 	try{
         Semantics semantics = new Semantics();
         semantics.Initialize();
-        semantics.Analyze(programAST);
+        semantics.Analyze(programAST, lines);
         semantics.Finalize();
 	}
         catch( Exception e) 

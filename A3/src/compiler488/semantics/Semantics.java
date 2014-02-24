@@ -7,6 +7,7 @@ import compiler488.symbol.Symbol;
 import compiler488.symbol.SymbolTable;
 import compiler488.symbol.VariableSymbol;
 import compiler488.ast.AST;
+import compiler488.ast.SourceLocPrettyPrinter;
 import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.MultiDeclarations;
@@ -41,6 +42,8 @@ import java.util.Set;
  *  @author Daniel Bloemendal
  */
 public class Semantics {
+	private List<String> source_lines;
+	
     //
     // Actions
     //
@@ -433,7 +436,21 @@ public class Semantics {
         try { m.invoke(this, obj); return true; }
         catch (IllegalAccessException e)    { e.printStackTrace(); return false; }
         catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
-        catch (InvocationTargetException e) { e.printStackTrace(); return false; }
+        catch (InvocationTargetException e) {
+        	Throwable target = e.getTargetException();
+        	
+        	if (target instanceof SemanticActionException) {
+        		SemanticActionException err = (SemanticActionException) target;
+        		System.out.println("Semantic Error: S" + err.getActionNumber());
+        		
+        		SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, source_lines, obj.getLoc());
+        		pp.print();
+        	} else {
+        		e.printStackTrace();
+        	}
+        	
+        	return false;
+        }
     }
     
     void semanticAction(int actionNumber) {
@@ -464,14 +481,22 @@ public class Semantics {
         Method m = actionsMap.get(actionNumber);
         if(m == null) System.out.println("Unhandled Semantic Action: S" + actionNumber );
         else {
+        	Boolean result = false;
+        	
             // Invoke the semantic action. 
             try {
-                Boolean result = (Boolean) m.invoke(this, analysisTop);
-                System.out.println((result ? "Semantic Action: S" : "Semantic Error: S") + actionNumber);
+                result = (Boolean) m.invoke(this, analysisTop);
+                
+                if (result) {
+                	System.out.println("Semantic Action: S" + actionNumber);
+                } else {
+                	throw new SemanticActionException(actionNumber);
+                }
             }
             catch (IllegalAccessException e)    { e.printStackTrace(); }
             catch (IllegalArgumentException e)  { e.printStackTrace(); }
             catch (InvocationTargetException e) { e.printStackTrace(); }
+
         }
     }
 
@@ -493,7 +518,9 @@ public class Semantics {
         populateMappings();
     }
 
-    public void Analyze(Program ast) {
+    public void Analyze(Program ast, List<String> lines) {
+    	source_lines = lines;
+    	
         // Add the initial element to the stack
         analysisStack.add(ast);
         
