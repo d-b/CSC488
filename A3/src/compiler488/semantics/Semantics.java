@@ -115,20 +115,22 @@ public class Semantics {
     
     @Action(number = 12) // Declare function with parameters ( if any ) and specified type. 
     Boolean actionDeclareFunction(RoutineDecl routineDecl) {
-        Symbol symbol = workingFind(routineDecl.getName(), false);
+        Symbol symbol = symbolTable.find(routineDecl.getName(), false);
         if(symbol == null)
             return workingSet(routineDecl.getName(),
                     new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType()));
-        else if (symbol instanceof FunctionSymbol) {
-            ((FunctionSymbol) symbol).hasBody(true); return true;
-        } return false;
+        else return FunctionSymbol.isForward(symbol);
     }
     
     @Action(number = 13) // Associate scope with function/procedure.
-    Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) {
-        Symbol symbol = workingFind(routineDecl.getName(), false /* allScopes */);
-        if(!(symbol instanceof FunctionSymbol)) return false;
-        return symbolTable.scopeSet(routineDecl.getName(), symbol);
+    Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) { 
+        Symbol symbol = symbolTable.find(routineDecl.getName(), false /* allScopes */);
+        if(symbol == null)            
+            return symbolTable.scopeSet(routineDecl.getName(),
+                    workingFind(routineDecl.getName(), false /* allScopes */));
+        else if(FunctionSymbol.isForward(symbol)) {
+            ((FunctionSymbol) symbol).hasBody(true); return true;
+        } return false;
     }
         
     @Action(number = 14) // Set parameter count to zero.
@@ -195,12 +197,11 @@ public class Semantics {
     
     @Action(number = 49) // If function/procedure was declared forward, verify forward declaration matches.
     Boolean actionCheckRoutineDeclaration(RoutineDecl routineDecl) {
-        // Attempt to find a symbol with the given routine's name
+        // Attempt to find a function symbol with the given routine's name
         Symbol symbol = symbolTable.find(routineDecl.getName(), false);
-        if(symbol == null) return true;
-        
+        if(!(symbol instanceof FunctionSymbol)) return true;
+
         // Verify that it is a function symbol and the type matches
-        if(!(symbol instanceof FunctionSymbol)) return false;
         return ((FunctionSymbol) symbol).getType().equals(routineDecl.getFunctionType());
     }    
     

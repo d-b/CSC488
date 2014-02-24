@@ -39,6 +39,14 @@ public class FunctionSymbol extends Symbol {
         defined = value;
     }
     
+    static public Boolean isProcedure(Symbol instance) {
+        return (instance instanceof FunctionSymbol) && !((FunctionSymbol) instance).type.getReturnType().equals(Type.TYPE_NIL);
+    }    
+    
+    static public Boolean isForward(Symbol instance) {
+        return (instance instanceof FunctionSymbol) && !((FunctionSymbol) instance).hasBody();
+    }
+    
     //
     // Members
     //
