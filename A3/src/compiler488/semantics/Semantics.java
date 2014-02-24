@@ -23,13 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.Stack;
 import java.util.Vector;
 
 /** Implement semantic analysis for compiler 488 
@@ -121,7 +122,7 @@ public class Semantics {
         WorkingVarList varList = getWorkingVarList();
         WorkingVar var = new WorkingVar();
         var.name = scalarDecl.getName();
-        var.type = translateType(scalarDecl.getType());
+        var.type = scalarDecl.getType();
         var.dimensions = 0;
         varList.variables.add(var);
         return true;
@@ -163,7 +164,7 @@ public class Semantics {
     Boolean actionAssociateTypeWithVar(Declaration declaration) {
         WorkingVarList varList = getWorkingVarList();
         for(WorkingVar var : varList.variables)
-            var.type = translateType(declaration.getType());
+            var.type = declaration.getType();
         return true;
     }
     
@@ -418,7 +419,7 @@ public class Semantics {
         postProcessorsMap = new HashMap<String, Method>();
         actionsMap        = new HashMap<Integer, Method>();
         analysisGrey      = new HashSet<AST>();
-        analysisStack     = new Stack<AST>();
+        analysisStack     = new LinkedList<AST>();
         analysisWorking   = null;
     }    
 
@@ -431,7 +432,7 @@ public class Semantics {
         analysisStack.add(ast);
         
         // Traverse the AST
-        while(!analysisStack.empty()) {
+        while(!analysisStack.isEmpty()) {
             // Fetch top of the analysis stack
             AST top = analysisStack.peek();
 
@@ -446,7 +447,7 @@ public class Semantics {
                 ListIterator<AST> li = children.listIterator(children.size());
                 while(li.hasPrevious()) analysisStack.push(li.previous());
             }
-            // Finish processing object and pop it off of the stack
+            // Finish processing node and pop it off of the stack
             else {
                 invokePostProcessor(top);
                 analysisStack.pop();
@@ -477,7 +478,7 @@ public class Semantics {
     /** Analysis state */
     private AST        analysisTop;
     private Set<AST>   analysisGrey;
-    private Stack<AST> analysisStack;
+    private Deque<AST> analysisStack;
     private Working    analysisWorking;    
 }
 
@@ -513,7 +514,7 @@ class WorkingVar extends Working {
     public int dimensions;
     public Vector<Integer> lowerBounds;
     public Vector<Integer> upperBounds;
-    public SymbolTable.ScalarType type;
+    public Type type;
     WorkingVar() {lowerBounds = new Vector<Integer>();
                   upperBounds = new Vector<Integer>();}
 }
