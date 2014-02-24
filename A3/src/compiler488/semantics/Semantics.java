@@ -109,7 +109,7 @@ public class Semantics {
     
     @Action(number = 11) // Declare forward function.
     Boolean actionDeclareForwardFunction(RoutineDecl routineDecl) {
-        return workingSet(routineDecl.getName(),
+        return symbolTable.scopeSet(routineDecl.getName(),
                 new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType(), false));
     }
     
@@ -429,11 +429,10 @@ public class Semantics {
         analysisTop = obj;
         
         // Invoke the processor on object
-        try {
-            m.invoke(this, obj); return true;
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            e.printStackTrace(); return false;
-        }
+        try { m.invoke(this, obj); return true; }
+        catch (IllegalAccessException e)    { e.printStackTrace(); return false; }
+        catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
+        catch (InvocationTargetException e) { e.printStackTrace(); return false; }
     }
     
     void semanticAction(int actionNumber) {
@@ -468,9 +467,10 @@ public class Semantics {
             try {
                 Boolean result = (Boolean) m.invoke(this, analysisTop);
                 System.out.println((result ? "Semantic Action: S" : "Semantic Error: S") + actionNumber);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                e.printStackTrace();
             }
+            catch (IllegalAccessException e)    { e.printStackTrace(); }
+            catch (IllegalArgumentException e)  { e.printStackTrace(); }
+            catch (InvocationTargetException e) { e.printStackTrace(); }
         }
     }
 
