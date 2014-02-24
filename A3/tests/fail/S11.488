@@ -1,0 +1,10 @@
+%
+% Test action S11
+%
+{
+	forward func foo() : integer
+	forward func foo() : integer
+	func foo() : integer {result 1}
+	var x : integer
+	x := foo()
+}
