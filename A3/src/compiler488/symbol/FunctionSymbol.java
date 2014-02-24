@@ -39,7 +39,7 @@ public class FunctionSymbol extends Symbol {
         defined = value;
     }
     
-    static public Boolean isProcedure(Symbol instance) {
+    static public Boolean isFunction(Symbol instance) {
         return (instance instanceof FunctionSymbol) && !((FunctionSymbol) instance).type.getReturnType().equals(Type.TYPE_NIL);
     }    
     
