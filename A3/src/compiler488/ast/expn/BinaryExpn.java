@@ -1,5 +1,7 @@
 package compiler488.ast.expn;
 
+import compiler488.ast.SourceLoc;
+
 /**
  * The common features of binary expressions.
  */
@@ -7,7 +9,8 @@ public class BinaryExpn extends Expn {
     Expn left, right;	/* Left and right operands of the binary operator. */
     String opSymbol;	/* Name of the operator. */
 
-    public BinaryExpn(String opSymbol, Expn left, Expn right) {
+    public BinaryExpn(String opSymbol, Expn left, Expn right, SourceLoc loc) {
+    	super(loc);
         this.opSymbol = opSymbol;
         this.left = left;
         this.right = right;

@@ -1,6 +1,7 @@
 package compiler488.ast.type;
 
 import compiler488.ast.ASTList;
+import compiler488.ast.SourceLoc;
 
 /**
  *
@@ -9,7 +10,8 @@ public class FunctionType extends Type {
     private Type returnType;
     private ASTList<Type> arguments;
 
-    public FunctionType(Type returnType, ASTList<Type> arguments) {
+    public FunctionType(Type returnType, ASTList<Type> arguments, SourceLoc loc) {
+    	super(loc);
         this.returnType = returnType;
         this.arguments = arguments;
         returnType.setParent(this);

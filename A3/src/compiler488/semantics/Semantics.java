@@ -18,6 +18,7 @@ import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.ResultStmt;
 import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
+import compiler488.ast.type.BooleanType;
 import compiler488.ast.type.Type;
 
 import java.lang.annotation.ElementType;
@@ -396,8 +397,7 @@ public class Semantics {
     }
     
     static SymbolTable.ScalarType translateType(Type type) {
-        return type.equals(Type.TYPE_BOOLEAN)
-                ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;        
+        return type instanceof BooleanType ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;
     }
        
     //

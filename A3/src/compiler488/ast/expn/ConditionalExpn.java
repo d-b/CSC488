@@ -1,5 +1,6 @@
 package compiler488.ast.expn;
 
+import compiler488.ast.SourceLoc;
 
 /** Represents a conditional expression (i.e., x>0?3:4). */
 public class ConditionalExpn extends Expn {
@@ -9,7 +10,8 @@ public class ConditionalExpn extends Expn {
 
     private Expn falseValue; // Otherwise, the value is this.
 
-    public ConditionalExpn(Expn condition, Expn trueValue, Expn falseValue) {
+    public ConditionalExpn(Expn condition, Expn trueValue, Expn falseValue, SourceLoc loc) {
+    	super(loc);
         this.condition = condition;
         this.trueValue = trueValue;
         this.falseValue = falseValue;

@@ -3,12 +3,14 @@ package compiler488.ast.stmt;
 import java.io.PrintStream;
 
 import compiler488.ast.Indentable;
+import compiler488.ast.SourceLoc;
 
 /**
  * The command to return from a procedure.
  */
 public class ReturnStmt extends Stmt {
-    public ReturnStmt() {
+    public ReturnStmt(SourceLoc loc) {
+    	super(loc);
     }
 
     /**

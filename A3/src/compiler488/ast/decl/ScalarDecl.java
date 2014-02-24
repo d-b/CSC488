@@ -1,5 +1,6 @@
 package compiler488.ast.decl;
 
+import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
 
 /**
@@ -7,8 +8,8 @@ import compiler488.ast.type.Type;
  */
 
 public class ScalarDecl extends Declaration {
-    public ScalarDecl(String name, Type type) {
-        super(name, type);
+    public ScalarDecl(String name, Type type, SourceLoc loc) {
+        super(name, type, loc);
     }
 
     /**

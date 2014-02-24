@@ -1,5 +1,7 @@
 package compiler488.ast.expn;
 
+import compiler488.ast.SourceLoc;
+
 /**
  * The common features of unary expressions.
  */
@@ -10,7 +12,8 @@ public class UnaryExpn extends Expn {
     private Expn operand;	/* operand of the unary  operator. */
     private String opSymbol;	/* Name of the operator. */
 
-    public UnaryExpn(String opSymbol, Expn operand) {
+    public UnaryExpn(String opSymbol, Expn operand, SourceLoc loc) {
+    	super(loc);
         this.opSymbol = opSymbol;
         this.operand = operand;
         operand.setParent(this);

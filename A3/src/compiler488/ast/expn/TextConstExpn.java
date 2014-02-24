@@ -1,6 +1,7 @@
 package compiler488.ast.expn;
 
 import compiler488.ast.Printable;
+import compiler488.ast.SourceLoc;
 
 /**
  * Represents a literal text constant.
@@ -8,7 +9,8 @@ import compiler488.ast.Printable;
 public class TextConstExpn extends ConstExpn implements Printable {
     private String value; // The value of this literal.
 
-    public TextConstExpn(String value) {
+    public TextConstExpn(String value, SourceLoc loc) {
+    	super(loc);
         this.value = value;
     }
 

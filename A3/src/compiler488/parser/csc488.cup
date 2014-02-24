@@ -10,6 +10,7 @@ import java_cup.runtime.*;		// Must always import this.
 
 import compiler488.ast.ASTList;
 import compiler488.ast.Readable;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.Printable;
 
 import compiler488.ast.decl.ScalarDecl;
@@ -21,6 +22,8 @@ import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
 
 import compiler488.ast.type.Type;
+import compiler488.ast.type.BooleanType;
+import compiler488.ast.type.IntegerType;
 
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.stmt.Stmt;
@@ -221,17 +224,19 @@ start with program;
  */
 
 program
-        ::= scope:scope                                             // the main program
-                {: RESULT = new Program(scope); :}
+        ::= scope:scope                                                         // the main program
+                {: RESULT = new Program(scope, new SourceLoc(scope)); :}
         ;
 
 scope
-        ::= L_CURLEY declarations:decls statements:stmts R_CURLEY   // scope with declarations and statement
-                {: RESULT = new Scope(decls, stmts); :}
-        |   L_CURLEY statements:stmts R_CURLEY                      // scope with statments only
-                {: RESULT = new Scope(null, stmts); :}
-        |   L_CURLEY R_CURLEY                                       // empty scope
-                {: RESULT = new Scope(null, null); :}
+        ::= L_CURLEY:_start declarations:decls statements:stmts R_CURLEY:_end   // scope with declarations and statement
+                {: RESULT = new Scope(decls, stmts, new SourceLoc(_startleft, _startright, _endleft, _endright + 1)); :}
+
+        |   L_CURLEY:_start statements:stmts R_CURLEY:_end                      // scope with statments only
+                {: RESULT = new Scope(null, stmts, new SourceLoc(_startleft, _startright, _endleft, _endright + 1)); :}
+
+        |   L_CURLEY:_start R_CURLEY:_end                                       // empty scope
+                {: RESULT = new Scope(null, null, new SourceLoc(_startleft, _startright, _endleft, _endright + 1)); :}
         ;
 
 statements
@@ -251,57 +256,55 @@ declarations
         ;
 
 statement
-        ::= variable:lval COLON EQUAL expression:rval               // assignment statement
-                {: RESULT = new AssignStmt(lval, rval); :}
+        ::= variable:lval COLON EQUAL expression:rval                                                       // assignment statement
+                {: RESULT = new AssignStmt(lval, rval, new SourceLoc(lval, rval)); :}
 
-		|   IF expression:condition THEN statements:whenTrue FI     // if statements
-                {: RESULT = new IfStmt(condition, whenTrue); :}
+		|   IF:_start expression:condition THEN statements:whenTrue FI:_end                                 // if-then statements
+                {: RESULT = new IfStmt(condition, whenTrue, new SourceLoc(_startleft, _startright, _endleft, _endright + 2)); :}
 		
-        |   IF expression:condition THEN statements:whenTrue ELSE statements:whenFalse FI     // if statements
-                {: RESULT = new IfStmt(condition, whenTrue, whenFalse); :}
+        |   IF:_start expression:condition THEN statements:whenTrue ELSE statements:whenFalse FI:_end       // if-then-else statements
+                {: RESULT = new IfStmt(condition, whenTrue, whenFalse, new SourceLoc(_startleft, _startright, _endleft, _endright + 2)); :}
 
-        |   WHILE expression:condition DO statements:body END       // while statement
-                {: RESULT = new WhileDoStmt(body, condition); :}
+        |   WHILE:_start expression:condition DO statements:body END:_end                                   // while statement
+                {: RESULT = new WhileDoStmt(body, condition, new SourceLoc(_startleft, _startright, _endleft, _endright + 3)); :}
 
-        |   REPEAT statements:body UNTIL expression:condition       // repeat statement
-                {: RESULT = new RepeatUntilStmt(body, condition); :}
+        |   REPEAT:_start statements:body UNTIL expression:condition                                        // repeat statement
+                {: RESULT = new RepeatUntilStmt(body, condition, new SourceLoc(_startleft, _startright, condition)); :}
 
-        |   EXIT                                                    // exit statement (no conditional)
-                {: RESULT = new ExitStmt(); :}
+        |   EXIT:_start                                                                                     // exit statement (no conditional)
+                {: RESULT = new ExitStmt(new SourceLoc(_startleft, _startright, "exit")); :}
 
-        |   EXIT WHEN expression:condition                          // exit statement (with conditional)
-                {: RESULT = new ExitStmt(condition); :}
+        |   EXIT:_start WHEN expression:condition                                                           // exit statement (with conditional)
+                {: RESULT = new ExitStmt(condition, new SourceLoc(_startleft, _startright, condition)); :}
 
-        |   RESULT expression:value                                 // return from function
-                {: RESULT = new ResultStmt(value); :}
+        |   RESULT:_start expression:value                                                                  // return from function
+                {: RESULT = new ResultStmt(value, new SourceLoc(_startleft, _startright, value)); :}
 
-        |   RETURN                                                  // return from procedure
-                {: RESULT = new ReturnStmt(); :}
+        |   RETURN:_start                                                                                   // return from procedure
+                {: RESULT = new ReturnStmt(new SourceLoc(_startleft, _startright, "return")); :}
 
-        |   PUT outputs:outputs                                     // output statement
-                {: RESULT = new PutStmt(outputs); :}
+        |   PUT:_start outputs:outputs                                                                      // output statement
+                {: RESULT = new PutStmt(outputs, new SourceLoc(_startleft, _startright, outputs)); :}
 
-        |   GET inputs:inputs                                       // input statement
-                {: RESULT = new GetStmt(inputs); :}
+        |   GET:_start inputs:inputs                                                                        // input statement
+                {: RESULT = new GetStmt(inputs, new SourceLoc(_startleft, _startright, inputs)); :}
 
-        |   IDENT:name L_PAREN argumentList:arguments R_PAREN       // call procedure
-                {: RESULT = new ProcedureCallStmt(name, arguments); :}
+        |   IDENT:name L_PAREN argumentList:arguments R_PAREN:_end                                          // call procedure
+                {: RESULT = new ProcedureCallStmt(name, arguments, new SourceLoc(nameleft, nameright, _endleft, _endright + 1)); :}
 
-        |   scope:scope                                             // embedded scope
+        |   scope:scope                                                                                     // embedded scope
                 {: RESULT = scope; :}
 		;
 
-/** TODO The whole declaration AST needs to be thoroughly revised. */
-
 declaration
-        ::= VAR variablenames:vars COLON type:type               // declare scalar/array variables
-                {: RESULT = new MultiDeclarations(vars, type); :}
+        ::= VAR:_start variablenames:vars COLON type:type       // declare scalar/array variables
+                {: RESULT = new MultiDeclarations(vars, type, new SourceLoc(_startleft, _startright, type)); :}
 
         |   functionHead:func scope:body                        // function declaration
-                {:  RESULT = func.withBody(body); :}
+                {:  RESULT = func.withBody(body, new SourceLoc(func, body)); :}
         
         |   procedureHead:proc scope:body                       // procedure declaration
-                {:  RESULT = proc.withBody(body); :}
+                {:  RESULT = proc.withBody(body, new SourceLoc(proc, body)); :}
 
         |   FORWARD functionHead:func                           // forward function declaration
                 {:  RESULT = func; :}
@@ -311,7 +314,7 @@ declaration
 		;
 
 variablenames
-        ::= variablename:var                                        // list of variables being declared
+        ::= variablename:var                                    // list of variables being declared
                 {: RESULT = new ASTList<DeclarationPart>().addLast(var); :}
         
         |   variablenames:head COMMA variablename:tail
@@ -319,18 +322,18 @@ variablenames
         ;
 
 variablename
-        ::= IDENT:id                                                // scalar variable
-                {: RESULT = new ScalarDeclPart(id); :}
+        ::= IDENT:id                                                    // scalar variable
+                {: RESULT = new ScalarDeclPart(id, new SourceLoc(idleft, idright, id)); :}
 
-        |   IDENT:id L_SQUARE bound:b R_SQUARE                      // 1 dimensional array
-                {: RESULT = new ArrayDeclPart(id, b[0], b[1]); :}
+        |   IDENT:id L_SQUARE bound:b R_SQUARE:_end                     // 1 dimensional array
+                {: RESULT = new ArrayDeclPart(id, b[0], b[1], new SourceLoc(idleft, idright, _endleft, _endright + 1)); :}
 
-        |   IDENT:id L_SQUARE bound:b1 COMMA bound:b2 R_SQUARE      // 1 dimensional array
-                {: RESULT = new ArrayDeclPart(id, b1[0], b1[1], b2[0], b2[1]); :}
+        |   IDENT:id L_SQUARE bound:b1 COMMA bound:b2 R_SQUARE:_end     // 1 dimensional array
+                {: RESULT = new ArrayDeclPart(id, b1[0], b1[1], b2[0], b2[1], new SourceLoc(idleft, idright, _endleft, _endright + 1)); :}
         ;
 
 bound
-        ::= INTCONST:ub                                             // integer array bound
+        ::= INTCONST:ub                                     // integer array bound
                 {: RESULT = new Integer[]{ 1, ub }; :}
 
         |   generalBound:lb DOT DOT generalBound:ub
@@ -338,29 +341,29 @@ bound
         ;
 
 generalBound
-        ::= INTCONST:i                                              // positive array bound
+        ::= INTCONST:i                                      // positive array bound
                 {: RESULT = i; :}
 
-        |   MINUS INTCONST:i                                        // negative array bound
+        |   MINUS INTCONST:i                                // negative array bound
                 {: RESULT = -i; :}
         ;
 
 type
-        ::= INTEGER                 // integer type
-                {: RESULT = Type.TYPE_INTEGER; :}
+        ::= INTEGER:_start                                                                      // integer type
+                {: RESULT = new IntegerType(new SourceLoc(_startleft, _startright, "integer")); :}
 
-        |   BOOLEAN                 // boolean type
-                {: RESULT = Type.TYPE_BOOLEAN; :}
+        |   BOOLEAN:_start                                                                      // boolean type
+                {: RESULT = new BooleanType(new SourceLoc(_startleft, _startright, "boolean")); :}
         ;
 
 functionHead
-        ::= FUNC IDENT:id L_PAREN parameterList:params R_PAREN COLON type:returnType      // function head
-                {: RESULT = new RoutineDecl(id, returnType, params); :}
+        ::= FUNC:_start IDENT:id L_PAREN parameterList:params R_PAREN COLON type:returnType     // function head
+                {: RESULT = new RoutineDecl(id, returnType, params, new SourceLoc(_startleft, _startright, returnType)); :}
         ;
 
 procedureHead
-        ::= PROCEDURE IDENT:id L_PAREN parameterList:params R_PAREN                 // function head
-                {: RESULT = new RoutineDecl(id, Type.TYPE_NIL, params); :}
+        ::= PROCEDURE:_start IDENT:id L_PAREN parameterList:params R_PAREN:_end                 // function head
+                {: RESULT = new RoutineDecl(id, Type.TYPE_NIL, params, new SourceLoc(_startleft, _startright, _endleft, _endright + 1)); :}
         ;
 
 outputs
@@ -376,10 +379,10 @@ output
                 {: RESULT = expr; :}
 
         |   TEXTCONST:text                                              // text constant
-                {: RESULT = new TextConstExpn(text); :}
+                {: RESULT = new TextConstExpn(text, new SourceLoc(textleft, textright, text)); :}
 
-        |   NEWLINE                                                     // newline constant
-                {: RESULT = new NewlineConstExpn(); :}
+        |   NEWLINE:_start                                              // newline constant
+                {: RESULT = new NewlineConstExpn(new SourceLoc(_startleft, _startright)); :}
         ;
 
 inputs
@@ -423,7 +426,7 @@ parameters
 
 parameter
         ::= IDENT:name COLON type:type                                  // declare one parameter
-                {: RESULT = new ScalarDecl(name, type); :}
+                {: RESULT = new ScalarDecl(name, type, new SourceLoc(nameleft, nameright, type)); :}
         ;
 
 expression
@@ -431,7 +434,7 @@ expression
                 {: RESULT = expr; :}
 
         |   expression:left OR conjunction:right
-                {: RESULT = new BoolExpn(BoolExpn.OP_OR, left, right); :}
+                {: RESULT = new BoolExpn(BoolExpn.OP_OR, left, right, new SourceLoc(left, right)); :}
 		;
 
 conjunction
@@ -439,15 +442,15 @@ conjunction
                 {: RESULT = expr; :}
 
         |   conjunction:left AND negation:right
-                {: RESULT = new BoolExpn(BoolExpn.OP_AND, left, right); :}
+                {: RESULT = new BoolExpn(BoolExpn.OP_AND, left, right, new SourceLoc(left, right)); :}
         ;
 
 negation
         ::= compareExpn:expr                                            // negations
                 {: RESULT = expr; :}
 
-        |   NOT negation:expr
-                {: RESULT = new NotExpn(expr); :}
+        |   NOT:_start negation:expr
+                {: RESULT = new NotExpn(expr, new SourceLoc(_startleft, _startright, expr)); :}
         ;
 
 compareExpn
@@ -455,22 +458,22 @@ compareExpn
                 {: RESULT = expr; :}
 
         |   arithExpn:left EQUAL arithExpn:right
-                {: RESULT = new EqualsExpn(EqualsExpn.OP_EQUAL, left, right); :}
+                {: RESULT = new EqualsExpn(EqualsExpn.OP_EQUAL, left, right, new SourceLoc(left, right)); :}
 
         |   arithExpn:left NOT EQUAL arithExpn:right
-                {: RESULT = new EqualsExpn(EqualsExpn.OP_NOT_EQUAL, left, right); :}
+                {: RESULT = new EqualsExpn(EqualsExpn.OP_NOT_EQUAL, left, right, new SourceLoc(left, right)); :}
 
         |   arithExpn:left LESS arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_LESS, left, right); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_LESS, left, right, new SourceLoc(left, right)); :}
 
         |   arithExpn:left LESS EQUAL arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_LESS_EQUAL, left, right); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_LESS_EQUAL, left, right, new SourceLoc(left, right)); :}
 
         |   arithExpn:left GREATER EQUAL arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER_EQUAL, left, right); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER_EQUAL, left, right, new SourceLoc(left, right)); :}
 
         |   arithExpn:left GREATER arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER, left, right); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER, left, right, new SourceLoc(left, right)); :}
         ;
 
 arithExpn
@@ -478,10 +481,10 @@ arithExpn
                 {: RESULT = expr; :}
 
         |   arithExpn:left PLUS term:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_PLUS, left, right); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_PLUS, left, right, new SourceLoc(left, right)); :}
  
         |   arithExpn:left MINUS term:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_MINUS, left, right); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_MINUS, left, right, new SourceLoc(left, right)); :}
         ;
 
 term
@@ -489,17 +492,18 @@ term
                 {: RESULT = expr; :}
 
         |   term:left TIMES factor:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_TIMES, left, right); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_TIMES, left, right, new SourceLoc(left, right)); :}
 
         |   term:left DIVIDE factor:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_DIVIDE, left, right); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_DIVIDE, left, right, new SourceLoc(left, right)); :}
         ;
 
 factor
         ::= primary:expr
                 {: RESULT = expr; :}
-        |   MINUS factor:expr
-                {: RESULT = new UnaryMinusExpn(expr); :}                // unary minus
+
+        |   MINUS:_start factor:expr                                    // unary minus
+                {: RESULT = new UnaryMinusExpn(expr, new SourceLoc(_startleft, _startright, expr)); :}
         ;
 
 primary
@@ -512,31 +516,33 @@ primary
         |   L_PAREN expression:expr R_PAREN                             // parenthesized expression
                 {: RESULT = expr; :}
 
-        |   L_PAREN expression:condition QUESTION expression:trueValue COLON expression:falseValue R_PAREN    // conditional expression
-                {: RESULT = new ConditionalExpn(condition, trueValue, falseValue); :}
+        |   L_PAREN:_start expression:condition QUESTION:s expression:trueValue COLON expression:falseValue R_PAREN:_end    // conditional expression
+                {: RESULT = new ConditionalExpn(condition, trueValue, falseValue, new SourceLoc(_startleft, _startright + 1)); :}
 
-        |   IDENT:name L_PAREN argumentList:arguments R_PAREN           // function call
-                {: RESULT = new FunctionCallExpn(name, arguments); :}
+        |   IDENT:name L_PAREN argumentList:arguments R_PAREN:_end      // function call
+                {: RESULT = new FunctionCallExpn(name, arguments, new SourceLoc(nameleft, nameright, _endleft, _endright + 1)); :}
         ;
 
 constant
-        ::= INTCONST:i  // integer constant
-                {: RESULT = new IntConstExpn(i); :}
-        |   TRUE        // constant true
-                {: RESULT = new BoolConstExpn(true); :}
-        |   FALSE       // constant false
-                {: RESULT = new BoolConstExpn(false); :}
+        ::= INTCONST:i                                                  // integer constant
+                {: RESULT = new IntConstExpn(i, new SourceLoc(ileft, iright)); :}
+
+        |   TRUE:_start                                                 // constant true
+                {: RESULT = new BoolConstExpn(true, new SourceLoc(_startleft, _startright, "true")); :}
+
+        |   FALSE:_start                                                // constant false
+                {: RESULT = new BoolConstExpn(false, new SourceLoc(_startleft, _startright, "false")); :}
         ;
 
 variable
-        ::= IDENT:id                                                            // scalar variable or parameter
-                {: RESULT = new IdentExpn(id); :}
+        ::= IDENT:id                                                                // scalar variable or parameter
+                {: RESULT = new IdentExpn(id, new SourceLoc(idleft, idright, id)); :}
 
-        |   IDENT:id L_SQUARE expression:sub1 R_SQUARE                          // element of 1 dimensional array
-                {: RESULT = new SubsExpn(id, sub1); :}
+        |   IDENT:id L_SQUARE expression:sub1 R_SQUARE:_end                         // element of 1 dimensional array
+                {: RESULT = new SubsExpn(id, sub1, new SourceLoc(idleft, idright, _endleft, _endright + 1)); :}
 
-        |   IDENT:id L_SQUARE expression:sub1 COMMA expression:sub2 R_SQUARE    // element of 2 dimensional array
-                {: RESULT = new SubsExpn(id, sub1, sub2); :}
+        |   IDENT:id L_SQUARE expression:sub1 COMMA expression:sub2 R_SQUARE:_end   // element of 2 dimensional array
+                {: RESULT = new SubsExpn(id, sub1, sub2, new SourceLoc(idleft, idright, _endleft, _endright + 1)); :}
         ;
 
 /* The End */

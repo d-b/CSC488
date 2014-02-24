@@ -7,6 +7,7 @@ import java.util.Vector;
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
 import compiler488.ast.type.FunctionType;
 import compiler488.ast.stmt.Scope;
@@ -24,8 +25,8 @@ public class RoutineDecl extends Declaration {
     private Scope body;
     private FunctionType funcType;
 
-    public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params, Scope body) {
-        super (name, returnType);
+    public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params, Scope body, SourceLoc loc) {
+        super(name, returnType, loc);
         
         ASTList<Type> argTypes = new ASTList<Type>();
 
@@ -40,16 +41,16 @@ public class RoutineDecl extends Declaration {
         for (ScalarDecl argDecl : params.getList())
             argTypes.addLast(argDecl.getType());
 
-        funcType = new FunctionType(returnType, argTypes);
+        funcType = new FunctionType(returnType, argTypes, loc);
         funcType.setParent(this);
     }
 
-    public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params) {
-        this(name, returnType, params, null);
+    public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params, SourceLoc loc) {
+        this(name, returnType, params, null, loc);
     }
 
-    public RoutineDecl withBody(Scope body) {
-        return new RoutineDecl(name, type, params, body);
+    public RoutineDecl withBody(Scope body, SourceLoc wider_loc) {
+        return new RoutineDecl(name, type, params, body, wider_loc);
     }
     
     public boolean isFunction() {

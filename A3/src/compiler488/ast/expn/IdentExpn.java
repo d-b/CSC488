@@ -1,12 +1,15 @@
 package compiler488.ast.expn;
 
+import compiler488.ast.SourceLoc;
+
 /**
  *  References to a scalar variable.
  */
 public class IdentExpn extends VarRefExpn {
     private String ident;
 
-    public IdentExpn(String ident) {
+    public IdentExpn(String ident, SourceLoc loc) {
+    	super(loc);
         this.ident = ident;
     }
 

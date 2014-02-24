@@ -1,6 +1,7 @@
 package compiler488.ast.stmt;
 
 import compiler488.ast.ASTList;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
 /**
@@ -11,7 +12,8 @@ public class ProcedureCallStmt extends Stmt {
 
     private ASTList<Expn> arguments; // The arguments passed to the procedure.
 
-    public ProcedureCallStmt(String name, ASTList<Expn> arguments) {
+    public ProcedureCallStmt(String name, ASTList<Expn> arguments, SourceLoc loc) {
+    	super(loc);
         this.name = name;
         this.arguments = arguments;
         arguments.setParent(this);

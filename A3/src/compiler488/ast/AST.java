@@ -10,9 +10,18 @@ import java.util.List;
  */
 public class AST {
     AST parent;
+    protected SourceLoc loc;
+
     public AST(){parent = null;}
+    
+    public AST(SourceLoc loc) {
+    	this.loc = loc;
+    }
+    
     public AST  getParent() {return parent;}
     public void setParent(AST parent) {this.parent = parent;}
+
+    public SourceLoc getLoc() { return loc; }
     
     public List<AST> getChildren() {
         return Collections.emptyList();

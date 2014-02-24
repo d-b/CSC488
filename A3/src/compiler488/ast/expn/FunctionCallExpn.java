@@ -1,6 +1,7 @@
 package compiler488.ast.expn;
 
 import compiler488.ast.ASTList;
+import compiler488.ast.SourceLoc;
 
 /**
  * Represents a function call with or without arguments.
@@ -10,7 +11,8 @@ public class FunctionCallExpn extends Expn {
 
     private ASTList<Expn> arguments; // The arguments passed to the function.
 
-    public FunctionCallExpn(String ident, ASTList<Expn> arguments) {
+    public FunctionCallExpn(String ident, ASTList<Expn> arguments, SourceLoc loc) {
+    	super(loc);
         this.ident = ident;
         this.arguments = arguments;
         arguments.setParent(this);

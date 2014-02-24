@@ -4,6 +4,7 @@ import java.io.PrintStream;
 
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
+import compiler488.ast.SourceLoc;
 
 import compiler488.ast.expn.Expn;
 
@@ -20,7 +21,8 @@ public class IfStmt extends Stmt {
     // Represents the statement to execute when the condition is false.
     private ASTList<Stmt> whenFalse = null;
 
-    public IfStmt(Expn condition, ASTList<Stmt> whenTrue, ASTList<Stmt> whenFalse) {
+    public IfStmt(Expn condition, ASTList<Stmt> whenTrue, ASTList<Stmt> whenFalse, SourceLoc loc) {
+    	super(loc);
         this.condition = condition;
         this.whenTrue = whenTrue;
         this.whenFalse = whenFalse;
@@ -29,8 +31,8 @@ public class IfStmt extends Stmt {
         if(whenFalse != null) whenFalse.setParent(this);
     }
 
-    public IfStmt(Expn condition, ASTList<Stmt> whenTrue) {
-        this(condition, whenTrue, null);
+    public IfStmt(Expn condition, ASTList<Stmt> whenTrue, SourceLoc loc) {
+        this(condition, whenTrue, null, loc);
     }
 
     /**

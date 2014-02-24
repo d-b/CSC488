@@ -1,6 +1,7 @@
 package compiler488.ast.decl;
 
 import compiler488.ast.Indentable;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
 
 /**
@@ -13,7 +14,8 @@ public class Declaration extends Indentable {
     /** The name of the thing being declared. */
     protected String name;
 
-    public Declaration(String name, Type type) {
+    public Declaration(String name, Type type, SourceLoc loc) {
+    	super(loc);
         this.name = name;
         this.type = type;
     }

@@ -1,5 +1,6 @@
 package compiler488.ast.stmt;
 
+import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
 /**
@@ -10,10 +11,12 @@ public class ExitStmt extends Stmt {
     // condition for 'exit when'
     private Expn condition = null;
 
-    public ExitStmt() {
+    public ExitStmt(SourceLoc loc) {
+    	super(loc);
     }
 
-    public ExitStmt(Expn condition) {
+    public ExitStmt(Expn condition, SourceLoc loc) {
+    	this(loc);
         this.condition = condition;
         condition.setParent(this);
     }

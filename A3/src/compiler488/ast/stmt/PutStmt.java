@@ -2,6 +2,7 @@ package compiler488.ast.stmt;
 
 import compiler488.ast.ASTList;
 import compiler488.ast.Printable;
+import compiler488.ast.SourceLoc;
 
 /**
  * The command to write data on the output device.
@@ -9,7 +10,8 @@ import compiler488.ast.Printable;
 public class PutStmt extends Stmt {
     private ASTList<Printable> outputs; // The objects to be printed.
 
-    public PutStmt (ASTList<Printable> outputs) {
+    public PutStmt (ASTList<Printable> outputs, SourceLoc loc) {
+    	super(loc);
         this.outputs = outputs;
         outputs.setParent(this);
     }

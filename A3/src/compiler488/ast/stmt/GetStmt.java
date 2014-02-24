@@ -2,6 +2,7 @@ package compiler488.ast.stmt;
 
 import compiler488.ast.ASTList;
 import compiler488.ast.Readable;
+import compiler488.ast.SourceLoc;
 
 /**
  * The command to read data into one or more variables.
@@ -9,7 +10,8 @@ import compiler488.ast.Readable;
 public class GetStmt extends Stmt {
     private ASTList<Readable> inputs; // A list of locations to put the values read.
 
-    public GetStmt(ASTList<Readable> inputs) {
+    public GetStmt(ASTList<Readable> inputs, SourceLoc loc) {
+    	super(loc);
         this.inputs = inputs;
         inputs.setParent(this);
     }

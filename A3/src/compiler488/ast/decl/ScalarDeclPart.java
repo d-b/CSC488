@@ -1,11 +1,13 @@
 package compiler488.ast.decl;
 
+import compiler488.ast.SourceLoc;
+
 /**
  * Represents the declaration of a simple variable.
  */
 public class ScalarDeclPart extends DeclarationPart {
-    public ScalarDeclPart(String name) {
-        super (name);
+    public ScalarDeclPart(String name, SourceLoc loc) {
+        super(name, loc);
     }
 
     /**

@@ -7,6 +7,7 @@ import java.util.Vector;
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
 
 
@@ -17,8 +18,8 @@ public class MultiDeclarations extends Declaration {
     /* The elements being declared */
     private ASTList<DeclarationPart> elements;
 
-    public MultiDeclarations(ASTList<DeclarationPart> elements, Type type) {
-        super (null, type);
+    public MultiDeclarations(ASTList<DeclarationPart> elements, Type type, SourceLoc loc) {
+        super(null, type, loc);
 
         this.elements = elements;
         elements.setParent(this);

@@ -1,5 +1,6 @@
 package compiler488.ast.stmt;
 
+import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
 /**
@@ -12,7 +13,8 @@ public class AssignStmt extends Stmt {
      */
     private Expn lval, rval;
 
-    public AssignStmt(Expn lval, Expn rval) {
+    public AssignStmt(Expn lval, Expn rval, SourceLoc loc) {
+    	super(loc);
         this.lval = lval;
         this.rval = rval;
         lval.setParent(this);

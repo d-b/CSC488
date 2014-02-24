@@ -3,6 +3,7 @@ package compiler488.ast.stmt;
 import java.io.PrintStream;
 
 import compiler488.ast.Indentable;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
 /**
@@ -12,7 +13,8 @@ public class ResultStmt extends Stmt {
     // The value to be returned by a function.
     private Expn value = null;
 
-    public ResultStmt(Expn value) {
+    public ResultStmt(Expn value, SourceLoc loc) {
+    	super(loc);
         this.value = value;
         value.setParent(this);
     }

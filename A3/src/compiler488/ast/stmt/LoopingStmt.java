@@ -1,6 +1,7 @@
 package compiler488.ast.stmt;
 
 import compiler488.ast.ASTList;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
 /**
@@ -10,7 +11,8 @@ public abstract class LoopingStmt extends Stmt {
     protected ASTList<Stmt> body;	  // body of the loop
     protected Expn condition;          // Loop condition
 
-    public LoopingStmt(ASTList<Stmt> body, Expn condition) {
+    public LoopingStmt(ASTList<Stmt> body, Expn condition, SourceLoc loc) {
+    	super(loc);
         this.body = body;
         this.condition = condition;
         body.setParent(this);

@@ -7,6 +7,7 @@ import java.util.Vector;
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
+import compiler488.ast.SourceLoc;
 import compiler488.ast.decl.Declaration;
 
 /**
@@ -17,14 +18,18 @@ public class Scope extends Stmt {
 
     private ASTList<Stmt> statements; // The statements to execute.
 
-    public Scope() {
+    public Scope(SourceLoc loc) {
+    	super(loc);
+    	
         declarations = new ASTList<Declaration>();
         statements = new ASTList<Stmt>();
         declarations.setParent(this);
         statements.setParent(this);
     }
 
-    public Scope(ASTList<Declaration> decls, ASTList<Stmt> stmts) {
+    public Scope(ASTList<Declaration> decls, ASTList<Stmt> stmts, SourceLoc loc) {
+    	super(loc);
+    	
         if (decls == null) {
             declarations = new ASTList<Declaration>();
         } else {

@@ -1,5 +1,7 @@
 package compiler488.ast.decl;
 
+import compiler488.ast.SourceLoc;
+
 /**
  * Holds the declaration part of an array.
  */
@@ -12,16 +14,16 @@ public class ArrayDeclPart extends DeclarationPart {
     /* The number of objects the array holds. */
     private Integer size;
 
-    public ArrayDeclPart(String name, Integer lb1, Integer ub1) {
-        super (name);
+    public ArrayDeclPart(String name, Integer lb1, Integer ub1, SourceLoc loc) {
+        super(name, loc);
 
         this.lb1 = lb1;
         this.ub1 = ub1;
         this.isTwoDimensional = false;
     }
 
-    public ArrayDeclPart(String name, Integer lb1, Integer ub1, Integer lb2, Integer ub2) {
-        this(name, lb1, ub1);
+    public ArrayDeclPart(String name, Integer lb1, Integer ub1, Integer lb2, Integer ub2, SourceLoc loc) {
+        this(name, lb1, ub1, loc);
 
         this.lb2 = lb2;
         this.ub2 = ub2;

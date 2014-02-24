@@ -1,5 +1,7 @@
 package compiler488.ast.expn;
 
+import compiler488.ast.SourceLoc;
+
 /**
  * References to an array element variable
  *
@@ -9,7 +11,8 @@ public class SubsExpn extends VarRefExpn {
     private Expn subscript1;	 // first subscript
     private Expn subscript2 = null;	// second subscript (if any)
 
-    public SubsExpn(String ident, Expn subscript1, Expn subscript2) {
+    public SubsExpn(String ident, Expn subscript1, Expn subscript2, SourceLoc loc) {
+    	super(loc);
         this.ident = ident;
         this.subscript1 = subscript1;
         this.subscript2 = subscript2;
@@ -17,8 +20,8 @@ public class SubsExpn extends VarRefExpn {
         if(subscript2 != null) subscript2.setParent(this);
     }
 
-    public SubsExpn(String ident, Expn subscript1) {
-        this(ident, subscript1, null);
+    public SubsExpn(String ident, Expn subscript1, SourceLoc loc) {
+        this(ident, subscript1, null, loc);
     }
 
     /** Returns a string that represents the array subscript. */
