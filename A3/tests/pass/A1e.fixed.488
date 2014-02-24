@@ -1,0 +1,100 @@
+% Assignment : 1
+% Group      : 09
+% Members    : g0dbloem, g2mccorm, g2scotts, g2watson
+% File       : A1e.488
+
+% A program using recursive functions and procedures with and without parameters
+% include at least one nested procedure and one nested function declaration
+
+{
+	% recursive procedure with parameters -- find triangle number
+	var triangle : integer
+	proc recursive_proc (n : integer) {
+		if n <= 0 then
+			triangle := 0
+			return 
+		fi
+		recursive_proc ( n - 1 )
+		triangle := triangle + n
+		return
+	}
+	
+	% recursive function with parameters -- find triangle number
+	func recursive_func (n : integer) : integer {
+		if n <= 0 then result 0 fi
+		result recursive_func ( n - 1 ) + n	
+	}
+	
+	% recursive procedure without parameters -- print n parenthesis pairs
+	var number_to_print : integer 
+	proc print_parentheses () {
+		put "("
+		number_to_print := number_to_print - 1
+		if number_to_print not = 0 then 
+			print_parentheses ()
+		fi
+		put ")"
+		return
+	}
+
+	% recursive function no parameters -- find triangle number
+	var which_triangle : integer 
+	func find_triangle () : integer {
+		var x : integer
+		x := which_triangle
+		if which_trangle <= 0 then 
+			result 0
+		else
+			which_triangle := which_triangle - 1
+			result find_triangle () + x
+		fi
+	}
+	
+	% function with inner helper function -- finding square roots by brute force
+	func sqrt_brute_force (n : integer) : integer {
+		func is_sqrt_of (sqrt : integer, n : integer) : boolean {
+			if sqrt * sqrt = n then 
+				result true 
+			else 
+				result false
+			fi
+		}
+		var i : integer
+		if n < 0 then result -1 fi
+		if n <= 1  then result n fi
+		i := 0
+		while i <= n do
+			if is_sqrt_of(i,n) then
+				result i
+			fi
+			i := i + 1
+		end 
+		result -1
+	}
+
+	% procedure with inner procedure, no parameters -- calculate the fibonacci numbers and store to array
+	var fibonacci[100] : integer
+	proc populate_fibonacci () {
+		var i , j , k : integer
+		proc add_and_swap () {
+			var t : integer
+			t := j + k
+			k := j
+			j := t
+			return
+		}
+		i := 1
+		j := 1
+		k := 1
+		while i <= 100 do
+			fibonacci[i] := j
+			add_and_swap()
+			i := i + 1
+		end
+		return
+	}
+
+	var dummy : integer
+	dummy := 0	
+}
+

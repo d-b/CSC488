@@ -1,0 +1,14 @@
+% 
+% Duplicate scalar variable definition
+%
+% @line=[8, 10]
+%
+
+{
+    var x, x : integer
+    var y : integer
+    var y : integer
+
+    x : = 0
+    y : = 0
+}
