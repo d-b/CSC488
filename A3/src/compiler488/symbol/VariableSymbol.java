@@ -3,15 +3,13 @@ package compiler488.symbol;
 import compiler488.ast.type.Type;
 
 public class VariableSymbol extends Symbol {
-    VariableSymbol(String name, Type type) {
+    public VariableSymbol(String name) {
         this.name = name;
-        this.type = type;
         this.dimensions = 0;
     }
     
-    VariableSymbol(String name, Type type, int lb, int ub) {
+    public VariableSymbol(String name, int lb, int ub) {
         this.name = name;
-        this.type = type;
         this.dimensions = 1;
         this.lowerBounds = new int[this.dimensions];
         this.upperBounds = new int[this.dimensions];
@@ -19,9 +17,8 @@ public class VariableSymbol extends Symbol {
         this.upperBounds[0] = ub;
     }
     
-    VariableSymbol(String name, Type type, int lb1, int ub1, int lb2, int ub2) {
+    public VariableSymbol(String name, int lb1, int ub1, int lb2, int ub2) {
         this.name = name;
-        this.type = type;
         this.dimensions = 2;
         this.lowerBounds = new int[this.dimensions];
         this.upperBounds = new int[this.dimensions];
@@ -39,6 +36,11 @@ public class VariableSymbol extends Symbol {
     @Override
     public Type getType() {
         return type;
+    }
+    
+    @Override
+    public void setType(Type type) {
+        this.type = type;
     }
     
     //

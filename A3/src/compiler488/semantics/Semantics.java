@@ -2,7 +2,10 @@ package compiler488.semantics;
 
 import java.io.*;
 
+import compiler488.symbol.FunctionSymbol;
+import compiler488.symbol.Symbol;
 import compiler488.symbol.SymbolTable;
+import compiler488.symbol.VariableSymbol;
 import compiler488.ast.AST;
 import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
@@ -30,8 +33,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Vector;
 
 /** Implement semantic analysis for compiler 488 
  *  @author Daniel Bloemendal
@@ -54,14 +57,10 @@ public class Semantics {
     }
     
     @Action(number = 2) // Associate declaration(s) with scope.
-    Boolean actionAssociateDeclarations(Declaration decl) {
-        if(decl instanceof MultiDeclarations) {
-            WorkingVarList varList = getWorkingVarList();
-            for(WorkingVar var : varList.variables)
-                if     (var.dimensions  < 1) symbolTable.declareVariable(var.name, var.type);
-                else if(var.dimensions == 1) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0));
-                else if(var.dimensions >= 2) symbolTable.declareVariable(var.name, var.type, var.lowerBounds.get(0), var.upperBounds.get(0), var.lowerBounds.get(1), var.upperBounds.get(1));
-        } setWorking(null);
+    Boolean actionAssociateVariableDeclarations(Declaration decl) {
+        if(decl instanceof MultiDeclarations)
+            for(Entry<String, Symbol> entry: workingEntries())
+                if(!symbolTable.scopeSet(entry.getKey(), entry.getValue())) return false;
         return true;
     }
     
@@ -104,51 +103,70 @@ public class Semantics {
     
     @Action(number = 10) // Declare scalar variable.
     Boolean actionDeclareScalar(ScalarDeclPart scalarDecl) {
-        WorkingVarList varList = getWorkingVarList();
-        WorkingVar var = new WorkingVar();
-        var.name = scalarDecl.getName();
-        var.dimensions = 0;
-        varList.variables.add(var);
-        return true;
+        return workingSet(scalarDecl.getName(),
+                new VariableSymbol(scalarDecl.getName()));
     }
     
+    @Action(number = 11) // Declare forward function.
+    Boolean actionDeclareForwardFunction(RoutineDecl routineDecl) {
+        return workingSet(routineDecl.getName(),
+                new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType(), false));
+    }
+    
+    @Action(number = 12) // Declare function with parameters ( if any ) and specified type. 
+    Boolean actionDeclareFunction(RoutineDecl routineDecl) {
+        Symbol symbol = workingFind(routineDecl.getName(), false);
+        if(symbol == null)
+            return workingSet(routineDecl.getName(),
+                    new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType()));
+        else if (symbol instanceof FunctionSymbol) {
+            ((FunctionSymbol) symbol).hasBody(true); return true;
+        } return false;
+    }
+    
+    @Action(number = 13) // Associate scope with function/procedure.
+    Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) {
+        Symbol symbol = workingFind(routineDecl.getName(), false /* allScopes */);
+        if(!(symbol instanceof FunctionSymbol)) return false;
+        return symbolTable.scopeSet(routineDecl.getName(), symbol);
+    }
+        
     @Action(number = 14) // Set parameter count to zero.
     Boolean actionResetParameterCount(RoutineDecl routineDecl) {
         return true;
-    }     
+    }
     
     @Action(number = 15) // Declare parameter with specified type.
     Boolean actionDeclareParameter(ScalarDecl scalarDecl) {
-        WorkingVarList varList = getWorkingVarList();
-        WorkingVar var = new WorkingVar();
-        var.name = scalarDecl.getName();
-        var.type = scalarDecl.getType();
-        var.dimensions = 0;
-        varList.variables.add(var);
-        return true;
+        return workingSet(scalarDecl.getName(), new VariableSymbol(scalarDecl.getName()), true /* newScope */);
     }
     
     @Action(number = 16) // Increment parameter count by one.
     Boolean actionIncrementParameterCount(ScalarDecl scalarDecl) {
         return true;
+    }
+    
+    @Action(number = 17) // Declare forward procedure.
+    Boolean actionDeclareForwardProcedure(RoutineDecl routineDecl) {
+        return actionDeclareForwardFunction(routineDecl);
     }    
+    
+    @Action(number = 18) // Declare procedure with parameters ( if any ).
+    Boolean actionDeclareProcedure(RoutineDecl routineDecl) {
+        return actionDeclareFunction(routineDecl);
+    }
     
     @Action(number = 19) // Declare one dimensional array with specified bound.
     Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
-        WorkingVarList varList = getWorkingVarList();
-        WorkingVar var = new WorkingVar();
-        var.name = arrayDecl.getName();
-        var.dimensions = 1;
-        var.lowerBounds.add(arrayDecl.getLowerBoundary1());
-        var.upperBounds.add(arrayDecl.getUpperBoundary1());
-        varList.variables.add(var);
-        return true;
+        return workingSet(arrayDecl.getName(),
+                new VariableSymbol(arrayDecl.getName(),
+                                   arrayDecl.getLowerBoundary1(), arrayDecl.getUpperBoundary1()));
     }
     
     // TODO: Finish assignment checking after expression checking is finished
     @Action(number = 34) // Check that variable and expression in assignment are the same type.
     Boolean actionCheckAssignmentTypes(AssignStmt assignStmt) {
-        return false;
+        return true;
     }
     
     @Action(number = 46) // Check that lower bound is <= upper bound.
@@ -162,25 +180,29 @@ public class Semantics {
     
     @Action(number = 47) // Associate type with variables.
     Boolean actionAssociateTypeWithVar(Declaration declaration) {
-        WorkingVarList varList = getWorkingVarList();
-        for(WorkingVar var : varList.variables)
-            var.type = declaration.getType();
+        for(Entry<String, Symbol> entry : workingEntries())
+            ((VariableSymbol) entry.getValue()).setType(declaration.getType());
         return true;
     }
     
     @Action(number = 48) // Declare two dimensional array with specified bound.
     Boolean actionDeclareArray2D(ArrayDeclPart arrayDecl) {
-        WorkingVarList varList = getWorkingVarList();
-        WorkingVar var = new WorkingVar();
-        var.name = arrayDecl.getName();
-        var.dimensions = 2;
-        var.lowerBounds.add(arrayDecl.getLowerBoundary1());
-        var.lowerBounds.add(arrayDecl.getLowerBoundary2());
-        var.upperBounds.add(arrayDecl.getUpperBoundary1());
-        var.upperBounds.add(arrayDecl.getUpperBoundary2());
-        varList.variables.add(var);
-        return true;
+        return workingSet(arrayDecl.getName(),
+                new VariableSymbol(arrayDecl.getName(),
+                                   arrayDecl.getLowerBoundary1(), arrayDecl.getUpperBoundary1(),
+                                   arrayDecl.getLowerBoundary2(), arrayDecl.getUpperBoundary2()));
     }
+    
+    @Action(number = 49) // If function/procedure was declared forward, verify forward declaration matches.
+    Boolean actionCheckRoutineDeclaration(RoutineDecl routineDecl) {
+        // Attempt to find a symbol with the given routine's name
+        Symbol symbol = symbolTable.find(routineDecl.getName(), false);
+        if(symbol == null) return true;
+        
+        // Verify that it is a function symbol and the type matches
+        if(!(symbol instanceof FunctionSymbol)) return false;
+        return ((FunctionSymbol) symbol).getType().equals(routineDecl.getFunctionType());
+    }    
     
     @Action(number = 51) // Check that result statement is directly inside a function.
     Boolean actionCheckResult(ResultStmt returnStmt) {
@@ -200,11 +222,10 @@ public class Semantics {
     
     @Action(number = 54) // Associate parameters if any with scope.
     Boolean actionAssociateParameters(Scope scope) {
-        WorkingVarList varList = getWorkingVarList();
-        for(WorkingVar var : varList.variables)
-            symbolTable.declareVariable(var.name, var.type);
-        setWorking(null);
-        return true;
+        for(Entry<String, Symbol> entry: workingEntries()) {
+            if(!(entry.getValue() instanceof VariableSymbol)
+            || !symbolTable.scopeSet(entry.getKey(), entry.getValue())) return false;
+        } return true;
     }
     
     //
@@ -237,13 +258,14 @@ public class Semantics {
     
     @PreProcessor(target = "MultiDeclarations")
     void preMultiDeclarations(MultiDeclarations multiDecls) {
-        setWorking(new WorkingVarList());
+        workingPush(); // Prepare for variable declarations.
     }
     
     @PostProcessor(target = "MultiDeclarations")
     void postMultiDeclarations(MultiDeclarations multiDecls) {
         semanticAction(47); // S47: Associate type with variables.
         semanticAction(02); // S02: Associate declaration(s) with scope.
+        workingPop(); // Exit variable declaration scope.
     }
     
     @PostProcessor(target = "ScalarDeclPart")
@@ -270,22 +292,29 @@ public class Semantics {
     
     @PreProcessor(target = "RoutineDecl")
     void preRoutineDecl(RoutineDecl routineDecl) {
-        setWorking(new WorkingVarList());
+        workingPush(); // Prepare for routine declarations.
+        semanticAction(14); // S14: Set parameter count to zero.
+        if(routineDecl.isFunction()) semanticAction(12); // S12: Declare function with parameters ( if any ) and specified type.
+        else                         semanticAction(18); // S18: Declare procedure with parameters ( if any ).         
         if(!routineDecl.isForward()) {
-            if(routineDecl.isFunction())
-                semanticAction(4); // S04: Start function scope.
-            else
-                semanticAction(8); // S08: Start procedure scope.
-        } semanticAction(14); // S14: Set parameter count to zero.
+            semanticAction(49); // S49: If function/procedure was declared forward, verify forward declaration matches.
+            if(routineDecl.isFunction()) semanticAction(4); // S04: Start function scope.
+            else                         semanticAction(8); // S08: Start procedure scope.
+        }
+        workingPush(); // Prepare for parameter declarations.
     }
     
     @PostProcessor(target = "RoutineDecl")
     void postRoutineDecl(RoutineDecl routineDecl) {
-        if(!routineDecl.isForward())
-            if(routineDecl.isFunction())
-                semanticAction(5); // S05: End function scope.
-            else
-                semanticAction(9); // S09: End procedure scope.            
+        workingPop(); // Exit parameter scope.
+        if(!routineDecl.isForward()) {
+            if(routineDecl.isFunction()) semanticAction(5); // S05: End function scope.
+            else                         semanticAction(9); // S09: End procedure scope.
+            semanticAction(13); // S13: Associate scope with function/procedure.
+        }
+        else if(routineDecl.isFunction()) semanticAction(11); // S11: Declare forward function.
+             else                         semanticAction(17); // S17: Declare forward procedure.
+        workingPop(); // Exit routine scope. 
     }
     
     @PostProcessor(target = "ResultStmt")
@@ -304,6 +333,58 @@ public class Semantics {
     }
     
     //
+    // Working scope
+    //
+    
+    void workingPush() {
+        analysisWorking.push(new HashMap<String, Symbol>());
+    }
+    
+    void workingPop() {
+        analysisWorking.pop();
+    }
+    
+    @SuppressWarnings("unchecked")
+    Map<String, Symbol> workingTop() {
+        return (Map<String, Symbol>) analysisWorking.peek();
+    }
+        
+    Set<Entry<String, Symbol>> workingEntries() {
+        return workingTop().entrySet();
+    }
+    
+    Boolean workingSet(String name, Symbol symbol) {
+        return workingSet(name, symbol, false);
+    }    
+    
+    Boolean workingSet(String name, Symbol symbol, Boolean newScope) {
+        // If we are not working in a new scope, ensure the symbol is not yet defined
+        if(!newScope && symbolTable.find(name, false) != null) return false;
+        // Ensure symbol was not yet defined in working scope
+        if(workingTop().get(name) != null) return false;
+        // Add symbol to working scope
+        workingTop().put(name, symbol); return true;
+    }
+    
+    Symbol workingFind(String name) {
+        return workingFind(name, true);
+    }
+    
+    @SuppressWarnings("unchecked")
+    Symbol workingFind(String name, Boolean allScopes) {
+        if(!allScopes) return workingTop().get(name);
+        for(Object scope : analysisWorking) {
+            Symbol symbol = ((Map<String, Symbol>) scope).get(name);
+            if(symbol != null) return symbol;
+        } return null;
+    }
+    
+    void workingClear() {
+        analysisWorking.clear();
+        workingPush();
+    }
+    
+    //
     // Helpers
     //
     
@@ -318,22 +399,6 @@ public class Semantics {
                 ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;        
     }
        
-    //
-    // State management
-    //
-    
-    void setWorking(Working obj) {
-        analysisWorking = obj;
-    }
-    
-    WorkingVar getWorkingVar() {
-        return (WorkingVar) analysisWorking;
-    }    
-    
-    WorkingVarList getWorkingVarList() {
-        return (WorkingVarList) analysisWorking;
-    }
-    
     //
     // Processor/action management 
     //
@@ -420,7 +485,7 @@ public class Semantics {
         actionsMap        = new HashMap<Integer, Method>();
         analysisGrey      = new HashSet<AST>();
         analysisStack     = new LinkedList<AST>();
-        analysisWorking   = null;
+        analysisWorking   = new LinkedList<Object>();
     }    
 
     public void Initialize() {
@@ -476,10 +541,10 @@ public class Semantics {
     private Map<Integer, Method> actionsMap;
 
     /** Analysis state */
-    private AST        analysisTop;
-    private Set<AST>   analysisGrey;
-    private Deque<AST> analysisStack;
-    private Working    analysisWorking;    
+    private AST           analysisTop;
+    private Set<AST>      analysisGrey;
+    private Deque<AST>    analysisStack;
+    private Deque<Object> analysisWorking;
 }
 
 //
@@ -502,23 +567,4 @@ public class Semantics {
 @Retention(RetentionPolicy.RUNTIME)
 @interface Action {
     int number();
-}
-
-//
-// Working structures
-//
-
-class Working{};
-class WorkingVar extends Working {
-    public String name;
-    public int dimensions;
-    public Vector<Integer> lowerBounds;
-    public Vector<Integer> upperBounds;
-    public Type type;
-    WorkingVar() {lowerBounds = new Vector<Integer>();
-                  upperBounds = new Vector<Integer>();}
-}
-class WorkingVarList extends Working {
-    public List<WorkingVar> variables;
-    WorkingVarList() {variables = new Vector<WorkingVar>();}
 }
