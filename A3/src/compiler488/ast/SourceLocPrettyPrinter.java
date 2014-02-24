@@ -22,6 +22,9 @@ public class SourceLocPrettyPrinter {
 		
 		String line = lines.get(loc.getStartLine());
 		
+		// If a tab appears in the source line, convert to a single space to correspond to the single tab character!
+		line = line.replace("\t", " ");
+		
 		int start = loc.getStartColumn();
 		int num = loc.getEndColumn() - start;
 		
