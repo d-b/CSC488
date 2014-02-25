@@ -1,0 +1,7 @@
+%
+% Test Error S52
+% return statement outside procedure 
+%
+{
+  return
+}

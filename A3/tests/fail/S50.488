@@ -1,0 +1,9 @@
+%
+% Test error S50
+% exit statemnet improperly used.
+%
+{
+  var x : integer
+  x := 2
+  exit when x = 2
+}

@@ -1,0 +1,7 @@
+%
+% Test Error S51
+% result statemnt outside function.
+%
+{
+  result 40
+}
