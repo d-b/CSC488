@@ -1,0 +1,10 @@
+%
+% Test Error S40
+% undeclared function
+%
+{
+  func xyzzy() : integer {result baz() + 2}
+  func baz() :integer {result 3}
+  var x : integer
+  x := xyzzy()
+}

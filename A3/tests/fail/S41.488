@@ -1,0 +1,8 @@
+%
+% Test Error S41
+% undeclared procedure
+{
+  proc bar() {put "bar(" foo() put ")"}
+  proc foo() {put "foo()"}
+  bar() 
+}
