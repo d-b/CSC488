@@ -9,6 +9,7 @@ public class BooleanType extends Type {
     public BooleanType() {
         super();
     }
+
     public BooleanType(SourceLoc loc) {
         super(loc);
     }
@@ -18,3 +19,4 @@ public class BooleanType extends Type {
         return "boolean";
     }
 }
+

@@ -13,6 +13,7 @@ public class DeclarationPart extends AST {
 
     public DeclarationPart(IdentNode ident, SourceLoc loc) {
         super(loc);
+
         this.ident = ident;
         ident.setParent(this);
     }
@@ -29,3 +30,4 @@ public class DeclarationPart extends AST {
         return ident.toString();
     }
 }
+

@@ -9,6 +9,7 @@ public class IntegerType extends Type {
     public IntegerType() {
         super();
     }
+
     public IntegerType(SourceLoc loc) {
         super(loc);
     }
@@ -18,3 +19,4 @@ public class IntegerType extends Type {
         return "integer";
     }
 }
+

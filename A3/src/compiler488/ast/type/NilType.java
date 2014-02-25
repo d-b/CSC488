@@ -6,3 +6,4 @@ public class NilType extends Type {
         return "><";
     }
 }
+

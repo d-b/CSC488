@@ -6,10 +6,11 @@ import compiler488.ast.SourceLoc;
  * Boolean literal constants.
  */
 public class BoolConstExpn extends ConstExpn {
-    private boolean  value;	/* value of the constant */
+    private boolean value;	/* value of the constant */
 
     public BoolConstExpn(boolean value, SourceLoc loc) {
         super(loc);
+
         this.value = value;
     }
 
@@ -23,3 +24,4 @@ public class BoolConstExpn extends ConstExpn {
         return value;
     }
 }
+

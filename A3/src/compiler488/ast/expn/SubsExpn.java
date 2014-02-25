@@ -32,9 +32,9 @@ public class SubsExpn extends VarRefExpn {
     /** Returns a string that represents the array subscript. */
     @Override
     public String toString() {
-        return (ident + "[" + subscript1 +
+        return ident + "[" + subscript1 +
                 ( subscript2 != null ? "," + subscript2 : "" )
-                + "]");
+                + "]";
     }
 
     public Expn getSubscript1() {
@@ -47,8 +47,14 @@ public class SubsExpn extends VarRefExpn {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(subscript1);
-        if(subscript2 != null) children.add(subscript2);
+
+        if (subscript2 != null) {
+            children.add(subscript2);
+        }
+
         return children;
     }
 }
+

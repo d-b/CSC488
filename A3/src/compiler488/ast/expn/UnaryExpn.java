@@ -41,7 +41,10 @@ public class UnaryExpn extends Expn {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(operand);
+
         return children;
     }
 }
+

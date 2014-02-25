@@ -43,7 +43,9 @@ public class ResultStmt extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(value);
+
         return children;
     }
 }

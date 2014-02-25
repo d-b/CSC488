@@ -8,3 +8,4 @@ public interface SourceLoc {
     public int getEndLine();
     public int getEndColumn();
 }
+

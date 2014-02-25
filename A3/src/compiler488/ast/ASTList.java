@@ -28,8 +28,10 @@ public class ASTList<E extends SourceLoc> extends AST {
     public ASTList(E ast) {
         ll = new LinkedList<E>();
         ll.addLast(ast);
-        if(ast instanceof AST)
+
+        if (ast instanceof AST) {
             ((AST) ast).setParent(this);
+        }
     }
 
     /**
@@ -47,8 +49,11 @@ public class ASTList<E extends SourceLoc> extends AST {
      */
     public ASTList<E> addLast(E ast) {
         ll.addLast(ast);
-        if(ast instanceof AST)
+
+        if (ast instanceof AST) {
             ((AST) ast).setParent(this);
+        }
+
         return this;
     }
 
@@ -70,12 +75,12 @@ public class ASTList<E extends SourceLoc> extends AST {
      */
     public void printOnSeperateLines(PrintStream out, int depth) {
         ListIterator<E> iterator = ll.listIterator();
+
         if (iterator.hasNext()) {
             while (iterator.hasNext()) {
                 ((Indentable) iterator.next()).printOn(out, depth);
             }
-        }
-        else {
+        } else {
             Indentable.printIndentOn(out, depth, ">>empty<<\n");
         }
     }
@@ -86,14 +91,15 @@ public class ASTList<E extends SourceLoc> extends AST {
      */
     @Override
     public String toString() {
-        if (0 == ll.size())
+        if (0 == ll.size()) {
             return "";
-        else {
+        } else {
             ListIterator<E> iterator = ll.listIterator();
-
             StringBuffer result = new StringBuffer(iterator.next().toString());
-            while (iterator.hasNext())
+
+            while (iterator.hasNext()) {
                 result.append(", " + iterator.next());
+            }
 
             return result.toString();
         }
@@ -137,6 +143,5 @@ public class ASTList<E extends SourceLoc> extends AST {
     public int getEndColumn() {
         return ll.getLast().getEndColumn();
     }
-
 }
 

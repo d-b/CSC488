@@ -5,6 +5,7 @@ public class IdentNode extends AST {
 
     public IdentNode(String id, SourceLoc loc) {
         super(loc);
+
         this.id = id;
     }
 
@@ -16,3 +17,4 @@ public class IdentNode extends AST {
         return id;
     }
 }
+

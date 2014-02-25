@@ -76,9 +76,14 @@ public class IfStmt extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(condition);
         children.add(whenTrue);
-        if(whenFalse != null) children.add(whenFalse);
+
+        if (whenFalse != null) {
+            children.add(whenFalse);
+        }
+
         return children;
     }
 }

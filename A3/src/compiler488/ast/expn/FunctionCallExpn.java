@@ -50,7 +50,10 @@ public class FunctionCallExpn extends Expn {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(arguments);
+
         return children;
     }
 }
+

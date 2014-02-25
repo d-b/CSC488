@@ -39,7 +39,6 @@ public class MultiDeclarations extends Declaration {
         return  elements + " : " + type ;
     }
 
-
     /**
      * Print the multiple declarations of the same type.
      *
@@ -58,3 +57,4 @@ public class MultiDeclarations extends Declaration {
         return elements;
     }
 }
+

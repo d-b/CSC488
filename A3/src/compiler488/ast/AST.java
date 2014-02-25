@@ -12,30 +12,34 @@ import compiler488.ast.type.Type;
  * @author  Dave Wortman, Marsha Chechik, Danny House
  */
 public class AST implements SourceLoc {
-    Type type;
-    AST  parent;
+    protected Type type;
+    protected AST parent;
+    protected SourceLoc loc;
 
     public AST() {
         parent = null;
-        type   = Type.TYPE_NIL;
-        loc    = new SourceLocNull();
+        type = Type.TYPE_NIL;
+        loc = new SourceLocNull();
     }
 
-    protected SourceLoc loc;
     public AST(SourceLoc loc) {
         this();
+
         this.loc = loc;
     }
 
-    public Type getType()             {
+    public Type getType() {
         return type;
     }
-    public void setType(Type type)    {
+
+    public void setType(Type type) {
         this.type = type;
     }
-    public AST  getParent()           {
+
+    public AST getParent() {
         return parent;
     }
+
     public void setParent(AST parent) {
         this.parent = parent;
     }
@@ -68,3 +72,4 @@ public class AST implements SourceLoc {
         return loc.getEndColumn();
     }
 }
+

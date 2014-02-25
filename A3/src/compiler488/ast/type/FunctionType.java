@@ -17,6 +17,7 @@ public class FunctionType extends Type {
 
     public FunctionType(Type returnType, ASTList<Type> arguments, SourceLoc loc) {
         this(returnType, arguments);
+
         this.loc = loc;
     }
 
@@ -44,6 +45,7 @@ public class FunctionType extends Type {
         FunctionType func = (FunctionType) other;
 
         return returnType.equals(func.returnType) &&
-               arguments.equals(func.arguments);
+            arguments.equals(func.arguments);
     }
 }
+

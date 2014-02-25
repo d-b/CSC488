@@ -26,8 +26,7 @@ public class SourceLocPrettyPrinter {
         if (loc.getStartLine() == loc.getEndLine()) {
             // Range fits on one line
             num = loc.getEndColumn() - start;
-        }
-        else {
+        } else {
             // Show only the first line
             num = line.length() - start;
         }
@@ -49,3 +48,4 @@ public class SourceLocPrettyPrinter {
         return loc.getFilename() + ":" + (loc.getStartLine() + 1) + ":" + (loc.getStartColumn() + 1);
     }
 }
+

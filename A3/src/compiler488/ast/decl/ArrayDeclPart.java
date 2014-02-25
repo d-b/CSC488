@@ -7,7 +7,6 @@ import compiler488.ast.SourceLoc;
  * Holds the declaration part of an array.
  */
 public class ArrayDeclPart extends DeclarationPart {
-
     /* The lower and upper boundaries of the array. */
     private ArrayBound b1, b2;
     private Boolean is2D = false;
@@ -56,3 +55,4 @@ public class ArrayDeclPart extends DeclarationPart {
         return size;
     }
 }
+

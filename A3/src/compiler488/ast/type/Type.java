@@ -14,6 +14,7 @@ abstract public class Type extends AST {
     public Type() {
         super();
     }
+
     public Type(SourceLoc loc) {
         super(loc);
     }

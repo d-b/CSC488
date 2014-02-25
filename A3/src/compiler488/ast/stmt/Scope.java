@@ -78,8 +78,10 @@ public class Scope extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(declarations);
         children.add(statements);
+
         return children;
     }
 }

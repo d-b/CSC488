@@ -10,7 +10,6 @@ import compiler488.ast.expn.Expn;
 /**
  * Represents the command to exit from a loop.
  */
-
 public class ExitStmt extends Stmt {
     // condition for 'exit when'
     private Expn condition = null;
@@ -45,7 +44,9 @@ public class ExitStmt extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(condition);
+
         return children;
     }
 }

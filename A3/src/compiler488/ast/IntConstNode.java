@@ -5,6 +5,7 @@ public class IntConstNode extends AST {
 
     public IntConstNode(Integer i, SourceLoc loc) {
         super(loc);
+
         this.i = i;
     }
 
@@ -24,3 +25,4 @@ public class IntConstNode extends AST {
         return i.toString();
     }
 }
+

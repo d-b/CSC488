@@ -51,7 +51,9 @@ public class ProcedureCallStmt extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(arguments);
+
         return children;
     }
 }

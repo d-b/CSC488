@@ -74,9 +74,14 @@ public class RoutineDecl extends Declaration {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(type);
         children.add(params);
-        if(body != null) children.add(body);
+
+        if (body != null) {
+            children.add(body);
+        }
+
         return children;
     }
 
@@ -92,7 +97,6 @@ public class RoutineDecl extends Declaration {
         if (body == null) {
             s = "forward ";
         }
-
 
         if (!isFunction()) {
             s += "proc ";
@@ -119,8 +123,7 @@ public class RoutineDecl extends Declaration {
 
         if (params != null) {
             out.println("(" + params + ")");
-        }
-        else {
+        } else {
             out.println("( ) ");
         }
 
@@ -129,3 +132,4 @@ public class RoutineDecl extends Declaration {
         }
     }
 }
+

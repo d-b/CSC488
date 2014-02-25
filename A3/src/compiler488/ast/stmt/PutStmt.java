@@ -33,7 +33,9 @@ public class PutStmt extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(outputs);
+
         return children;
     }
 }

@@ -56,15 +56,6 @@ public class ArrayBound extends AST {
         }
     }
 
-    public boolean isValid() {
-
-        if (implicit_lb) {
-            return ub.getInteger() >= 1;
-        } else {
-            return lb.getInteger() <= ub.getInteger();
-        }
-    }
-
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(lb);
@@ -72,3 +63,4 @@ public class ArrayBound extends AST {
         return children;
     }
 }
+

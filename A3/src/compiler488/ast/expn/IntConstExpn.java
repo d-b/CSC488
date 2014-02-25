@@ -25,3 +25,4 @@ public class IntConstExpn extends ConstExpn {
         return intconst.getInteger();
     }
 }
+

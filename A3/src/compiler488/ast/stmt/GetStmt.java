@@ -33,7 +33,10 @@ public class GetStmt extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(inputs);
+
         return children;
     }
 }
+

@@ -10,3 +10,4 @@ public class NotExpn extends UnaryExpn {
         super(UnaryExpn.OP_NOT, operand, loc);
     }
 }
+

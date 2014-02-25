@@ -47,9 +47,12 @@ public class ConditionalExpn extends Expn {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(condition);
         children.add(trueValue);
         children.add(falseValue);
+
         return children;
     }
 }
+

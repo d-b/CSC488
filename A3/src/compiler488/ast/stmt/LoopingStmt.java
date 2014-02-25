@@ -35,8 +35,10 @@ public abstract class LoopingStmt extends Stmt {
 
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(body);
         children.add(condition);
+
         return children;
     }
 }

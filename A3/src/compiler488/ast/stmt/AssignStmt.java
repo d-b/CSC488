@@ -43,11 +43,13 @@ public class AssignStmt extends Stmt {
         return rval;
     }
 
-
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
+
         children.add(lval);
         children.add(rval);
+
         return children;
     }
 }
+
