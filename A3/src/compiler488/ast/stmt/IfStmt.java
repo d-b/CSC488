@@ -66,26 +66,14 @@ public class IfStmt extends Stmt {
         return condition;
     }
 
-    public void setCondition(Expn condition) {
-        this.condition = condition;
-    }
-
     public ASTList<Stmt> getWhenFalse() {
         return whenFalse;
-    }
-
-    public void setWhenFalse(ASTList<Stmt> whenFalse) {
-        this.whenFalse = whenFalse;
     }
 
     public ASTList<Stmt> getWhenTrue() {
         return whenTrue;
     }
 
-    public void setWhenTrue(ASTList<Stmt> whenTrue) {
-        this.whenTrue = whenTrue;
-    }
-    
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(condition);

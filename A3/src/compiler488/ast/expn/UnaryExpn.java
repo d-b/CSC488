@@ -35,18 +35,10 @@ public class UnaryExpn extends Expn {
         return operand;
     }
 
-    public void setOperand(Expn operand) {
-        this.operand = operand;
-    }
-
     public String getOpSymbol() {
         return opSymbol;
     }
 
-    public void setOpSymbol(String opSymbol) {
-        this.opSymbol = opSymbol;
-    }
-    
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(operand);

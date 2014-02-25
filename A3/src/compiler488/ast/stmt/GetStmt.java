@@ -31,10 +31,6 @@ public class GetStmt extends Stmt {
         return inputs;
     }
 
-    public void setInputs(ASTList<Readable> inputs) {
-        this.inputs = inputs;
-    }
-    
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(inputs);

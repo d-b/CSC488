@@ -35,26 +35,14 @@ public class BinaryExpn extends Expn {
         return left;
     }
 
-    public void setLeft(Expn left) {
-        this.left = left;
-    }
-
     public String getOpSymbol() {
         return opSymbol;
-    }
-
-    public void setOpSymbol(String opSymbol) {
-        this.opSymbol = opSymbol;
     }
 
     public Expn getRight() {
         return right;
     }
 
-    public void setRight(Expn right) {
-        this.right = right;
-    }
-    
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(left);

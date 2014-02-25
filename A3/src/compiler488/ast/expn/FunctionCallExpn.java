@@ -40,10 +40,6 @@ public class FunctionCallExpn extends Expn {
         return arguments;
     }
 
-    public void setArguments(ASTList<Expn> args) {
-        this.arguments = args;
-    }
-
     public String getName() {
     	return ident.getId();
     }

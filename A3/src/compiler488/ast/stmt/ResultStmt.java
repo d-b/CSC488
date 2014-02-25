@@ -41,10 +41,6 @@ public class ResultStmt extends Stmt {
         return value;
     }
 
-    public void setValue(Expn value) {
-        this.value = value;
-    }
-    
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(value);

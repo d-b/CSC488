@@ -24,8 +24,4 @@ public class TextConstExpn extends ConstExpn implements Printable {
     public String getValue() {
         return value;
     }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
 }

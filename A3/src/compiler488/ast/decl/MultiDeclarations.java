@@ -57,8 +57,4 @@ public class MultiDeclarations extends Declaration {
     public ASTList<DeclarationPart> getElements() {
         return elements;
     }
-
-    public void setElements(ASTList<DeclarationPart> elements) {
-        this.elements = elements;
-    }
 }
