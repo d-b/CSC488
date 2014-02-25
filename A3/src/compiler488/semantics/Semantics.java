@@ -479,7 +479,8 @@ public class Semantics {
                 } else {
                     SourceLoc loc = analysisTop.getLoc();
                     String errorMessage = Errors.getError(actionNumber);
-                    if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber; 
+                    if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber;
+                    else errorMessage = "S" + actionNumber + ": " + errorMessage;
                     SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, analysisSource, loc);
                     System.out.println(pp.getFileRef() + ": " + errorMessage);
                     pp.print();

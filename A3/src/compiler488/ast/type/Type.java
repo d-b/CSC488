@@ -18,7 +18,7 @@ abstract public class Type extends AST {
     }
 
     public boolean equals(Object o) {
-        return this == o;
+        return this.getClass().equals(o.getClass());
     }
 }
 
