@@ -45,6 +45,7 @@ import java.util.Vector;
 
 /** Implement semantic analysis for compiler 488 
  *  @author Daniel Bloemendal
+ *  @author pdmccormick
  */
 public class Semantics {
     //
@@ -116,28 +117,46 @@ public class Semantics {
     
     @Action(number = 11) // Declare forward function.
     Boolean actionDeclareForwardFunction(RoutineDecl routineDecl) {
-        return symbolTable.scopeSet(routineDecl.getName(),
-                new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType(), false));
+    	Symbol sym = new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType(), false);
+    	
+    	// NB: This is only used if workingSet returns false!
+    	errorLoc = routineDecl.getIdent();
+    	
+    	return symbolTable.scopeSet(routineDecl.getName(), sym);
     }
     
     @Action(number = 12) // Declare function with parameters ( if any ) and specified type. 
     Boolean actionDeclareFunction(RoutineDecl routineDecl) {
         Symbol symbol = symbolTable.find(routineDecl.getName(), false);
-        if(symbol == null)
+        
+        // NB: This is only used if we return false!
+    	errorLoc = routineDecl.getIdent();
+    	
+        if (symbol == null) {
             return workingSet(routineDecl.getName(),
                     new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType()));
-        else return FunctionSymbol.isForward(symbol);
+        } else {
+        	return FunctionSymbol.isForward(symbol);
+        }
     }
     
     @Action(number = 13) // Associate scope with function/procedure.
     Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) { 
+    	// NB: This is only used if we return false!
+    	errorLoc = routineDecl.getIdent();
+   
         Symbol symbol = symbolTable.find(routineDecl.getName(), false /* allScopes */);
-        if(symbol == null)            
+        if (symbol == null) {    
             return symbolTable.scopeSet(routineDecl.getName(),
                     workingFind(routineDecl.getName(), false /* allScopes */));
-        else if(FunctionSymbol.isForward(symbol)) {
-            ((FunctionSymbol) symbol).hasBody(true); return true;
-        } return false;
+        } else if (FunctionSymbol.isForward(symbol)) {
+            ((FunctionSymbol) symbol).hasBody(true);
+            return true;
+        } else {
+        	// TODO attempting to re-define function body; is this S12?
+        }
+        
+        return false;
     }
         
     @Action(number = 14) // Set parameter count to zero.
@@ -147,7 +166,10 @@ public class Semantics {
     
     @Action(number = 15) // Declare parameter with specified type.
     Boolean actionDeclareParameter(ScalarDecl scalarDecl) {
-        return workingSet(scalarDecl.getName(), new VariableSymbol(scalarDecl.getName()), true /* newScope */);
+    	// NB: This is only used if workingSet returns false!
+    	errorLoc = scalarDecl.getIdent();
+    	
+    	return workingSet(scalarDecl.getName(), new VariableSymbol(scalarDecl.getName()), true /* newScope */);
     }
     
     @Action(number = 16) // Increment parameter count by one.
@@ -169,9 +191,12 @@ public class Semantics {
     Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
     	ArrayBound b1 = arrayDecl.getBound1();
     	Symbol sym = new VariableSymbol(arrayDecl.getName(),
-                b1.getLowerboundValue(), b1.getUpperboundValue()); 
+                b1.getLowerboundValue(), b1.getUpperboundValue());
     	
-        return workingSet(arrayDecl.getName(), sym);
+    	// NB: This is only used if workingSet returns false!
+    	errorLoc = arrayDecl.getIdent();
+    	
+    	return workingSet(arrayDecl.getName(), sym);
     }
     
     // TODO: Finish assignment checking after expression checking is finished
@@ -186,10 +211,19 @@ public class Semantics {
 
     @Action(number = 46) // Check that lower bound is <= upper bound.
     Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
-        if(arrayDecl.getDimensions() >= 1)
-            if (!isBoundValid(arrayDecl.getBound1())) return false;
-        if(arrayDecl.getDimensions() >= 2)
-        	if (!isBoundValid(arrayDecl.getBound2())) return false;
+    	ArrayBound b1 = arrayDecl.getBound1();
+    	ArrayBound b2 = arrayDecl.getBound2();
+
+        if (arrayDecl.getDimensions() >= 1 && !isBoundValid(b1)) {
+        	errorLoc = b1;
+            return false;
+        }
+         
+        if (arrayDecl.getDimensions() >= 2 && !isBoundValid(b2)) {
+        	errorLoc = b2;
+        	return false;
+        }
+
         return true;
     }    
     
@@ -204,9 +238,13 @@ public class Semantics {
     Boolean actionDeclareArray2D(ArrayDeclPart arrayDecl) {
     	ArrayBound b1 = arrayDecl.getBound1();
     	ArrayBound b2 = arrayDecl.getBound2();
+
     	Symbol sym = new VariableSymbol(arrayDecl.getName(),
                 b1.getLowerboundValue(), b1.getUpperboundValue(),
                 b2.getLowerboundValue(), b2.getUpperboundValue());
+    	
+    	// NB: This is only used if workingSet returns false!
+    	errorLoc = arrayDecl.getIdent();
     	
         return workingSet(arrayDecl.getName(), sym);
     }
@@ -218,7 +256,12 @@ public class Semantics {
         if(!(symbol instanceof FunctionSymbol)) return true;
 
         // Verify that it is a function symbol and the type matches
-        return ((FunctionSymbol) symbol).getType().equals(routineDecl.getFunctionType());
+        if (!((FunctionSymbol) symbol).getType().equals(routineDecl.getFunctionType())) {
+        	errorLoc = routineDecl.getParameters();
+        	return false;
+        }
+        
+        return true;
     }    
     
     @Action(number = 51) // Check that result statement is directly inside a function.
@@ -374,6 +417,13 @@ public class Semantics {
         return workingSet(name, symbol, false);
     }    
     
+    /**
+     * 
+     * @param name
+     * @param symbol
+     * @param newScope
+     * @return false if name was previously defined, otherwise true
+     */
     Boolean workingSet(String name, Symbol symbol, Boolean newScope) {
         // If we are not working in a new scope, ensure the symbol is not yet defined
         if(!newScope && symbolTable.find(name, false) != null) return false;
@@ -412,7 +462,7 @@ public class Semantics {
     }
     
     static SymbolTable.ScalarType translateType(Type type) {
-        return type instanceof BooleanType ? SymbolTable.ScalarType.Boolean : SymbolTable.ScalarType.Integer;
+        return type.isBoolean() ? SymbolTable.ScalarType.Boolean : (type.isInteger() ? SymbolTable.ScalarType.Integer : null);
     }
        
     //
@@ -483,16 +533,16 @@ public class Semantics {
 
             // Invoke the semantic action. 
             try {
+            	errorLoc = analysisTop;
                 result = (Boolean) m.invoke(this, analysisTop);
 
                 if (result) {
                     System.out.println("Semantic Action: S" + actionNumber);
                 } else {
-                    SourceLoc loc = analysisTop.getLoc();
                     String errorMessage = Errors.getError(actionNumber);
                     if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber;
                     else errorMessage = "S" + actionNumber + ": " + errorMessage;
-                    SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, analysisSource, loc);
+                    SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, analysisSource, errorLoc);
                     System.out.println(pp.getFileRef() + ": " + errorMessage);
                     pp.print();
                     analysisErrors += 1;
@@ -588,6 +638,9 @@ public class Semantics {
     private Deque<Object> analysisWorking;
     private List<String>  analysisSource;
     private Integer       analysisErrors;
+    
+    // Error locations
+    SourceLoc errorLoc;
 }
 
 //
