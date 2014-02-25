@@ -1,10 +1,13 @@
 %
-% Test Error S40
-% undeclared function
+% Call to undeclared function
 %
+% @line=8
+%
+
 {
-  func xyzzy() : integer {result baz() + 2}
-  func baz() :integer {result 3}
-  var x : integer
-  x := xyzzy()
+    func xyzzy() : integer {result baz() + 2}
+    func baz() : integer {result 3}
+
+    var x : integer
+    x := xyzzy()
 }

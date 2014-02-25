@@ -1,9 +1,11 @@
 %
-% Test error S50
-% exit statemnet improperly used.
+% Exit statement outside of a loop
 %
+% @line=10
+%
+
 {
-  var x : integer
-  x := 2
-  exit when x = 2
+    var x : integer
+    x := 2
+    exit when x = 2
 }

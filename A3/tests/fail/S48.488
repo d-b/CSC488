@@ -1,9 +1,11 @@
 %
-% Test Error S19
-% matrixes with same name
+% Duplicate two dimensional array declaration
 %
+% @line=9
+%
+
 {
-  var a[0..3,5..6] : boolean
-  var a[0..3,5..6] : boolean
-  a[2,3] := true
+    var a[0..3,5..6] : boolean
+    var a[0..3,5..6] : boolean
+    a[2,3] := true
 }

@@ -1,7 +1,9 @@
 %
-% Test Error S52
-% return statement outside procedure 
+% Return statement outside of a procedure.
 %
+% @line=8
+%
+
 {
-  return
+    return
 }

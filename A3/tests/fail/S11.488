@@ -8,7 +8,7 @@
 	forward func foo() : integer
 	forward func foo() : integer
 	func foo() : integer {result 1}
-
-	var x : integer
+	
+    var x : integer
 	x := foo()
 }

@@ -1,8 +1,10 @@
 %
-% Tests Error S46
-% array with lower bound above upper bound
-%
+% Array with lower bound above upper bound
+% 
+% @line=8
+% 
+
 {
-  var x[3..0] : integer
-  x[0] := 0 
+    var x[3..0] : integer
+    x[0] := 0 
 }

@@ -1,7 +1,9 @@
 %
-% Test Error S51
-% result statemnt outside function.
+% Result statement outside of a function.
 %
+% @line=8
+%
+
 {
-  result 40
+    result 0
 }
