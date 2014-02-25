@@ -1,9 +1,9 @@
 package compiler488.symbol;
 
-import compiler488.ast.type.Type;
+import compiler488.langtypes.LangType;
 
 public abstract class Symbol {
     public abstract String getName();
-    public abstract Type   getType();
-    public abstract void   setType(Type type);
+    public abstract LangType   getType();
+    public abstract void   setType(LangType type);
 }

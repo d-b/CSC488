@@ -2,6 +2,8 @@ package compiler488.semantics;
 
 import java.io.*;
 
+import compiler488.langtypes.FunctionType;
+import compiler488.langtypes.LangType;
 import compiler488.symbol.FunctionSymbol;
 import compiler488.symbol.Symbol;
 import compiler488.symbol.SymbolTable;
@@ -37,8 +39,6 @@ import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.ResultStmt;
 import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
-import compiler488.ast.type.FunctionType;
-import compiler488.ast.type.Type;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -170,7 +170,7 @@ public class Semantics {
     	analysisErrorLoc = scalarDecl.getIdent();
 
         Symbol symbol = new VariableSymbol(scalarDecl.getName());
-        symbol.setType(scalarDecl.getType());
+        symbol.setType(scalarDecl.getLangType());
         return workingSet(scalarDecl.getName(), symbol, true /* newScope */);
     }
 
@@ -200,35 +200,35 @@ public class Semantics {
     }
 
     @Action(number = 20) // Set result type to boolean.
-    Boolean actionSetToBoolean(AST node) {
-        node.setType(Type.TYPE_BOOLEAN); return true;
+    Boolean actionSetToBoolean(Expn expr) {
+        expr.setEvalType(LangType.TYPE_BOOLEAN); return true;
     }
 
     @Action(number = 21) // Set result type to integer.
-    Boolean actionSetToInteger(AST node) {
-        node.setType(Type.TYPE_INTEGER); return true;
+    Boolean actionSetToInteger(Expn expr) {
+        expr.setEvalType(LangType.TYPE_INTEGER); return true;
     }
 
     @Action(number = 24) // Set result type to type of conditional expressions.
     Boolean actionSetToConditional(ConditionalExpn conditionalExpn) {
-        conditionalExpn.setType(conditionalExpn.getTrueValue().getType()); return true;
+        conditionalExpn.setEvalType(conditionalExpn.getTrueValue().getEvalType()); return true;
     }
 
     @Action(number = 26) // Set result type to type of variablename.
     Boolean actionSetToVariable(IdentExpn identExpn) {
         Symbol symbol = symbolTable.find(identExpn.getIdent().getId());
         if(symbol == null) return false;
-        identExpn.setType(symbol.getType());
+        identExpn.setEvalType(symbol.getType());
         return true;
     }
 
     @Action(number = 28) // Set result type to result type of function.
     Boolean actionSetToFunction(FunctionCallExpn functionCallExpn) {
         Symbol symbol = symbolTable.find(functionCallExpn.getIdent().getId());
-        Type   type   = symbol.getType();
+        LangType type   = symbol.getType();
         if(symbol == null
         || !(type instanceof FunctionType)) return false;
-        functionCallExpn.setType(((FunctionType) type).getReturnType());
+        functionCallExpn.setEvalType(((FunctionType) type).getReturnType());
         return true;
     }
 
@@ -240,22 +240,22 @@ public class Semantics {
 
     @Action(number = 30) // Check that type of expression or variable is boolean.
     Boolean actionTypeCheckBoolean(Expn expn) {
-        return expn.getType().isBoolean();
+        return expn.getEvalType().isBoolean();
     }
 
     @Action(number = 31) // Check that type of expression or variable is integer.
     Boolean actionTypeCheckInteger(Expn expn) {
-        return expn.getType().isInteger();
+        return expn.getEvalType().isInteger();
     }
 
     @Action(number = 32) // Check that left and right operand expressions are the same type.
     Boolean actionCheckEqualitySides(BinaryExpn binaryExpn) {
-        return binaryExpn.getLeft().getType().equals(binaryExpn.getRight().getType());
+        return binaryExpn.getLeft().getEvalType().equals(binaryExpn.getRight().getEvalType());
     }
 
     @Action(number = 33) // Check that both expressions in conditional are the same type.
     Boolean actionCheckConditionalSides(ConditionalExpn conditionalExpn) {
-        return conditionalExpn.getTrueValue().getType().equals(conditionalExpn.getFalseValue().getType());
+        return conditionalExpn.getTrueValue().getEvalType().equals(conditionalExpn.getFalseValue().getEvalType());
     }
 
     @Action(number = 34) // Check that variable and expression in assignment are the same type.
@@ -266,7 +266,7 @@ public class Semantics {
           // undeclared variable!
           return false;
         }
-        return leftSymbol.getType().equals(assignStmt.getRval().getType());
+        return leftSymbol.getType().equals(assignStmt.getRval().getEvalType());
     }
 
     @Action(number = 37) // Check that identifier has been declared as a scalar variable.
@@ -317,7 +317,7 @@ public class Semantics {
     @Action(number = 47) // Associate type with variables.
     Boolean actionAssociateTypeWithVar(Declaration declaration) {
         for(Entry<String, Symbol> entry : workingEntries())
-            ((VariableSymbol) entry.getValue()).setType(declaration.getType());
+            ((VariableSymbol) entry.getValue()).setType(declaration.getLangType());
         return true;
     }
 

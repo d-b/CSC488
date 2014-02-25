@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import compiler488.ast.SourceLocNull;
-import compiler488.ast.type.Type;
 
 /**
  * This is a placeholder at the top of the Abstract Syntax Tree hierarchy. It is
@@ -12,13 +11,11 @@ import compiler488.ast.type.Type;
  * @author  Dave Wortman, Marsha Chechik, Danny House
  */
 public class AST implements SourceLoc, ASTPrettyPrintable {
-    protected Type type;
     protected AST parent;
     protected SourceLoc loc;
 
     public AST() {
         parent = null;
-        type = Type.TYPE_NIL;
         loc = new SourceLocNull();
     }
 
@@ -26,14 +23,6 @@ public class AST implements SourceLoc, ASTPrettyPrintable {
         this();
 
         this.loc = loc;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
     }
 
     public AST getParent() {

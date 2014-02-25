@@ -1,6 +1,6 @@
 package compiler488.symbol;
 
-import compiler488.ast.type.Type;
+import compiler488.langtypes.LangType;
 
 public class VariableSymbol extends Symbol {
     public VariableSymbol(String name) {
@@ -34,12 +34,12 @@ public class VariableSymbol extends Symbol {
     }
     
     @Override
-    public Type getType() {
+    public LangType getType() {
         return type;
     }
     
     @Override
-    public void setType(Type type) {
+    public void setType(LangType type) {
         this.type = type;
     }
     
@@ -52,7 +52,7 @@ public class VariableSymbol extends Symbol {
     //
     
     String name;
-    Type   type;
+    LangType   type;
     int    dimensions;
     int    lowerBounds[];
     int    upperBounds[];

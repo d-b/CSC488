@@ -2,14 +2,14 @@ package compiler488.ast.decl;
 
 import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
-import compiler488.ast.type.Type;
+import compiler488.langtypes.LangType;
 
 /**
  * Represents the declaration of a simple variable.
  */
 public class ScalarDecl extends Declaration {
-    public ScalarDecl(IdentNode ident, Type type, SourceLoc loc) {
-        super(ident, type, loc);
+    public ScalarDecl(IdentNode ident, TypeDecl typeDecl, SourceLoc loc) {
+        super(ident, typeDecl, loc);
     }
 
     /**
@@ -17,7 +17,7 @@ public class ScalarDecl extends Declaration {
      * declared.
      */
     public String toString() {
-        return ident + " : " + type;
+        return ident + " : " + typeDecl;
     }
     
     public boolean equals(Object o) {
@@ -30,6 +30,6 @@ public class ScalarDecl extends Declaration {
     
     public boolean equals(ScalarDecl o) {
         return ident.equals(o.ident) &&
-                type.equals(o.type); 
+                typeDecl.equals(o.typeDecl); 
     }
 }

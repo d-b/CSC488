@@ -1,7 +1,7 @@
 package compiler488.symbol;
 
-import compiler488.ast.type.Type;
-import compiler488.ast.type.FunctionType;
+import compiler488.langtypes.FunctionType;
+import compiler488.langtypes.LangType;
 
 public class FunctionSymbol extends Symbol {
     public FunctionSymbol(String name, FunctionType type) {
@@ -22,12 +22,12 @@ public class FunctionSymbol extends Symbol {
     }
 
     @Override
-    public Type getType() {
+    public LangType getType() {
         return type;
     }
     
     @Override
-    public void setType(Type type) {
+    public void setType(LangType type) {
         this.type = (FunctionType) type;
     }    
     

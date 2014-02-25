@@ -1,6 +1,7 @@
 package compiler488.ast.decl;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -9,9 +10,9 @@ import compiler488.ast.ASTList;
 import compiler488.ast.ASTPrettyPrinterContext;
 import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
-import compiler488.ast.type.Type;
-import compiler488.ast.type.FunctionType;
 import compiler488.ast.stmt.Scope;
+import compiler488.langtypes.FunctionType;
+import compiler488.langtypes.LangType;
 
 /**
  * Represents the declaration of a function or procedure.
@@ -23,25 +24,30 @@ public class RoutineDecl extends Declaration {
      */
     private ASTList<ScalarDecl> params; // The formal parameters of the routine.
     private Scope body = null;
+    private LangType returnType;
     private FunctionType funcType;
 
-    public RoutineDecl(IdentNode ident, Type returnType, ASTList<ScalarDecl> params, SourceLoc loc) {
-        super(ident, returnType, loc);
-
-        ASTList<Type> argTypes = new ASTList<Type>();
-
+    public RoutineDecl(IdentNode ident, TypeDecl returnTypeDecl, ASTList<ScalarDecl> params, SourceLoc loc) {
+        super(ident, returnTypeDecl, loc);
+        
         this.params = params;
         params.setParent(this);
+        
+        returnType = (returnTypeDecl == null) ? LangType.TYPE_NIL : returnTypeDecl.getLangType();
 
+        List<LangType> argTypes = new ArrayList<LangType>();
         for (ScalarDecl argDecl : params.getList()) {
-            argTypes.addLast(argDecl.getType());
+            argTypes.add(argDecl.getTypeDecl().getLangType());
         }
 
-        funcType = new FunctionType(returnType, argTypes, loc);
-        funcType.setParent(this);
+        funcType = new FunctionType(returnType, argTypes);
     }
-
-    public RoutineDecl(IdentNode ident, Type returnType, ASTList<ScalarDecl> params, Scope body, SourceLoc loc) {
+    
+    public RoutineDecl(IdentNode ident, ASTList<ScalarDecl> params, SourceLoc loc) {
+        this(ident, null, params, loc);
+    }
+    
+    public RoutineDecl(IdentNode ident, TypeDecl returnType, ASTList<ScalarDecl> params, Scope body, SourceLoc loc) {
         this(ident, returnType, params, loc);
 
         this.body = body;
@@ -49,11 +55,11 @@ public class RoutineDecl extends Declaration {
     }
 
     public RoutineDecl withBody(Scope body, SourceLoc wider_loc) {
-        return new RoutineDecl(ident, type, params, body, wider_loc);
+        return new RoutineDecl(ident, typeDecl, params, body, wider_loc);
     }
 
     public boolean isFunction() {
-        return !type.isNil();
+        return !returnType.isNil();
     }
 
     public boolean isForward() {
@@ -75,7 +81,7 @@ public class RoutineDecl extends Declaration {
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
 
-        children.add(type);
+        children.add(typeDecl);
         children.add(params);
 
         if (body != null) {
@@ -107,7 +113,7 @@ public class RoutineDecl extends Declaration {
         
         if (isFunction()) {
             p.print(" : ");
-            type.prettyPrint(p);
+            typeDecl.prettyPrint(p);
         }
 
         if (body != null) {
@@ -126,7 +132,8 @@ public class RoutineDecl extends Declaration {
     
     public boolean equals(RoutineDecl o) {
         return ident.equals(o.ident) &&
-                type.equals(o.type) && 
-                params.equals(o.params);
+                typeDecl.equals(o.typeDecl) && 
+                params.equals(o.params) && 
+                ((body == null) ? (o.body == null) : body.equals(o.body));
     }
 }
