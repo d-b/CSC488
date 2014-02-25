@@ -452,7 +452,6 @@ public class Semantics {
         semanticAction(34); // S34: Check that variable and expression in assignment are the same type.
     }
     
-    // TODO: finish argument checking
     @PostProcessor(target = "ProcedureCallStmt")
     void postProcedureCallStmt(ProcedureCallStmt procedureCallStmt) {
         semanticAction(41); // S41: Check that identifier has been declared as a procedure.
@@ -476,7 +475,7 @@ public class Semantics {
     }
     
     /*
-     * ’-’ expression S31 S21
+     * '-' expression S31 S21
      */
     @PostProcessor(target = "UnaryMinusExpn")
     void postUnaryMinusExpn(UnaryMinusExpn unaryMinusExpn) {
@@ -486,10 +485,10 @@ public class Semantics {
     }
     
     /*
-     * expression S31 ’+’ expression S31 S21
-     * expression S31 ’-’ expression S31 S21
-     * expression S31 ’*’ expression S31 S21
-     * expression S31 ’/’ expression S31 S21
+     * expression S31 '+' expression S31 S21
+     * expression S31 '-' expression S31 S21
+     * expression S31 '*' expression S31 S21
+     * expression S31 '/' expression S31 S21
      */
     @PostProcessor(target = "ArithExpn")
     void postArithExpn(BinaryExpn binaryExpn) {
@@ -501,8 +500,8 @@ public class Semantics {
     }
     
     /*
-     * ’true’ S20
-     * ’false’ S20
+     * 'true' S20
+     * 'false' S20
      */
     @PostProcessor(target = "BoolConstExpn")
     void postBoolConstExpn(BoolConstExpn boolConstExpn) {
@@ -510,7 +509,7 @@ public class Semantics {
     }
 
     /*
-     * ’not’ expression S30 S20
+     * 'not' expression S30 S20
      */
     @PostProcessor(target = "NotExpn")
     void postNotExpn(NotExpn notExpn) {
@@ -520,8 +519,8 @@ public class Semantics {
     }
     
     /*
-     * expression S30 ’and’ expression S30 S20 ,
-     * expression S30 ’or’ expression S30 S20 ,
+     * expression S30 'and' expression S30 S20 ,
+     * expression S30 'or' expression S30 S20 ,
      */
     @PostProcessor(target = "BoolExpn")
     void postBoolExpn(BoolExpn boolExpn) {
@@ -533,8 +532,8 @@ public class Semantics {
     }
     
     /*
-     * expression ’=’ expression S32 S20
-     * expression ’not’ ’=’ expression S32 S20
+     * expression '=' expression S32 S20
+     * expression 'not' '=' expression S32 S20
      */
     @PostProcessor(target = "EqualsExpn")
     void postEqualsExpn(BinaryExpn binaryExpn) {
@@ -543,10 +542,10 @@ public class Semantics {
     }
     
     /*
-     * expression S31 ’<’ expression S31 S20
-     * expression S31 ’<’ ’=’ expression S31 S20
-     * expression S31 ’>’ expression S31 S20
-     * expression S31 ’>’ ’=’ expression S31 S20
+     * expression S31 '<' expression S31 S20
+     * expression S31 '<' '=' expression S31 S20
+     * expression S31 '>' expression S31 S20
+     * expression S31 '>' '=' expression S31 S20
      */
     @PostProcessor(target = "CompareExpn")
     void postCompareExpn(BinaryExpn binaryExpn) {
@@ -558,7 +557,7 @@ public class Semantics {
     }
     
     /*
-     * ’(’ expression S30 ’?’ expression ’:’ expression S33 ’)’ S24
+     * '(' expression S30 '?' expression ':' expression S33 ')' S24
      */
     @PostProcessor(target = "ConditionalExpn")
     void postConditionalExpn(ConditionalExpn conditionalExpn) {
@@ -569,11 +568,11 @@ public class Semantics {
     }
     
     /*
-     * functionname ’(’ S44 argumentList ’)’ S43 S28
+     * functionname '(' S44 argumentList ')' S43 S28
      * argumentList: arguments ,
      *               % EMPTY
      * arguments: expression S45 S36 ,
-     *            arguments ’,’ arguments
+     *            arguments ',' arguments
      */
     // TODO: finish argument checking
     @PostProcessor(target = "FunctionCallExpn")
