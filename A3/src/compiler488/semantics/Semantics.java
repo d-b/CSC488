@@ -130,12 +130,16 @@ public class Semantics {
     
     @Action(number = 11) // Declare forward function.
     Boolean actionDeclareForwardFunction(RoutineDecl routineDecl) {
+    	analysisErrorLoc = routineDecl.getIdent();
+    	
         return symbolTable.scopeSet(routineDecl.getName(),
                 new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType(), false));
     }
     
     @Action(number = 12) // Declare function with parameters ( if any ) and specified type. 
     Boolean actionDeclareFunction(RoutineDecl routineDecl) {
+    	analysisErrorLoc = routineDecl.getIdent();
+
         Symbol symbol = symbolTable.find(routineDecl.getName(), false);
         if(symbol == null)
             return workingSet(routineDecl.getName(),
@@ -144,7 +148,9 @@ public class Semantics {
     }
     
     @Action(number = 13) // Associate scope with function/procedure.
-    Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) { 
+    Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) {
+    	analysisErrorLoc = routineDecl.getIdent();
+
         Symbol symbol = symbolTable.find(routineDecl.getName(), false /* allScopes */);
         if(symbol == null)            
             return symbolTable.scopeSet(routineDecl.getName(),
@@ -161,6 +167,8 @@ public class Semantics {
     
     @Action(number = 15) // Declare parameter with specified type.
     Boolean actionDeclareParameter(ScalarDecl scalarDecl) {
+    	analysisErrorLoc = scalarDecl.getIdent();
+
         Symbol symbol = new VariableSymbol(scalarDecl.getName());
         symbol.setType(scalarDecl.getType());
         return workingSet(scalarDecl.getName(), symbol, true /* newScope */);
@@ -183,6 +191,8 @@ public class Semantics {
     
     @Action(number = 19) // Declare one dimensional array with specified bound.
     Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
+    	analysisErrorLoc = arrayDecl.getIdent();
+    	
     	ArrayBound b1 = arrayDecl.getBound1();
     	Symbol symbol = new VariableSymbol(arrayDecl.getName(),
                 b1.getLowerboundValue(), b1.getUpperboundValue()); 
@@ -286,10 +296,17 @@ public class Semantics {
     Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
         ArrayBound b1 = arrayDecl.getBound1(),
                    b2 = arrayDecl.getBound2();
-        if(arrayDecl.getDimensions() >= 1)
-            if (b1.getLowerboundValue() > b1.getUpperboundValue()) return false;
-        if(arrayDecl.getDimensions() >= 2)
-        	if (b2.getLowerboundValue() > b2.getUpperboundValue()) return false;
+
+        if (arrayDecl.getDimensions() >= 1 && b1.getLowerboundValue() > b1.getUpperboundValue()) {
+        	analysisErrorLoc = b1;
+        	return false;
+        }
+
+        if (arrayDecl.getDimensions() >= 2 && b2.getLowerboundValue() > b2.getUpperboundValue()) {
+        	analysisErrorLoc = b2;
+        	return false;
+        }
+
         return true;
     }    
     
@@ -302,6 +319,8 @@ public class Semantics {
     
     @Action(number = 48) // Declare two dimensional array with specified bound.
     Boolean actionDeclareArray2D(ArrayDeclPart arrayDecl) {
+    	analysisErrorLoc = arrayDecl.getIdent();
+    	
     	ArrayBound b1 = arrayDecl.getBound1();
     	ArrayBound b2 = arrayDecl.getBound2();
     	Symbol symbol = new VariableSymbol(arrayDecl.getName(),
@@ -724,17 +743,17 @@ public class Semantics {
             // Invoke the semantic action. 
             try {
                 AST node = (analysisSubTop == null) ? analysisTop : analysisSubTop;
+                analysisErrorLoc = node;
                 Boolean result = (Boolean) m.invoke(this, node);
                 analysisSubTop = null;
 
                 if (result) {
                     System.out.println("Semantic Action: S" + actionNumber);
                 } else {
-                    SourceLoc loc = node.getLoc();
                     String errorMessage = Errors.getError(actionNumber);
                     if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber;
                     else errorMessage = "S" + actionNumber + ": " + errorMessage;
-                    SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, analysisSource, loc);
+                    SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, analysisSource, analysisErrorLoc);
                     System.out.println(pp.getFileRef() + ": " + errorMessage);
                     pp.print();
                     analysisErrors += 1;
@@ -831,6 +850,9 @@ public class Semantics {
     private Deque<Object> analysisWorking;
     private List<String>  analysisSource;
     private Integer       analysisErrors;
+    
+    /** Where a given semantic error originated in the source */
+    private SourceLoc     analysisErrorLoc;
 }
 
 //
