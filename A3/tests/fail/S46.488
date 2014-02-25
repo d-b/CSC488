@@ -1,0 +1,8 @@
+%
+% Tests Error S46
+% array with lower bound above upper bound
+%
+{
+  var x[3..0] : integer
+  x[0] := 0 
+}
