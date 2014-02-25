@@ -104,6 +104,11 @@ public class RoutineDecl extends Declaration {
         p.print("(");
         params.prettyPrintCommas(p);
         p.print(")");
+        
+        if (isFunction()) {
+            p.print(" : ");
+            type.prettyPrint(p);
+        }
 
         if (body != null) {
             p.print(" ");
