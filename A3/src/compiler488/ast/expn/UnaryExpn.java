@@ -28,7 +28,7 @@ public class UnaryExpn extends Expn {
     /** Returns a string that represents the unary expression. */
     @Override
     public String toString() {
-        return ( opSymbol + "(" + operand + ")");
+        return opSymbol + "(" + operand + ")";
     }
 
     public Expn getOperand() {

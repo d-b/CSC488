@@ -11,7 +11,7 @@ import compiler488.ast.type.Type;
  * a convenient place to add common behaviour.
  * @author  Dave Wortman, Marsha Chechik, Danny House
  */
-public class AST implements SourceLoc {
+public class AST implements SourceLoc, ASTPrettyPrintable {
     protected Type type;
     protected AST parent;
     protected SourceLoc loc;
@@ -71,5 +71,8 @@ public class AST implements SourceLoc {
     public int getEndColumn() {
         return loc.getEndColumn();
     }
-}
 
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.print(toString());
+    }
+}

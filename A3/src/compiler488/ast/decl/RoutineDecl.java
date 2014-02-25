@@ -6,8 +6,8 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
+import compiler488.ast.ASTPrettyPrinterContext;
 import compiler488.ast.IdentNode;
-import compiler488.ast.Indentable;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
 import compiler488.ast.type.FunctionType;
@@ -92,43 +92,22 @@ public class RoutineDecl extends Declaration {
      */
     @Override
     public String toString() {
-        String s = "";
-
-        if (body == null) {
-            s = "forward ";
-        }
-
-        if (!isFunction()) {
-            s += "proc ";
-        } else {
-            s += "func ";
-        }
-
+        String s = (body == null) ? "forward " : "";
+        s += isFunction() ? "func " : "proc ";
         s += ident;
 
         return s;
     }
 
-    /**
-     * Prints a description of the function/procedure.
-     *
-     * @param out
-     *            Where to print the description.
-     * @param depth
-     *            How much indentation to use while printing.
-     */
-    @Override
-    public void printOn(PrintStream out, int depth) {
-        Indentable.printIndentOn(out, depth, this + " ");
-
-        if (params != null) {
-            out.println("(" + params + ")");
-        } else {
-            out.println("( ) ");
-        }
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.print(toString());
+        p.print("(");
+        params.prettyPrintCommas(p);
+        p.print(")");
 
         if (body != null) {
-            body.printOn(out, depth + 1);
+            p.print(" ");
+            body.prettyPrint(p);
         }
     }
 }

@@ -6,10 +6,8 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
-import compiler488.ast.Indentable;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
-
 
 /**
  * Holds the declaration of multiple elements.
@@ -36,21 +34,7 @@ public class MultiDeclarations extends Declaration {
      */
     @Override
     public String toString() {
-        return  elements + " : " + type ;
-    }
-
-    /**
-     * Print the multiple declarations of the same type.
-     *
-     * @param out
-     *            Where to print the description.
-     * @param depth
-     *            How much indentation to use while printing.
-     */
-    @Override
-    public void printOn(PrintStream out, int depth) {
-        out.println(elements);
-        Indentable.printIndentOn(out, depth, this + " ");
+        return  "var " + elements + " : " + type ;
     }
 
     public ASTList<DeclarationPart> getElements() {

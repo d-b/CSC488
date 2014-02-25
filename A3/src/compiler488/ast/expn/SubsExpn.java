@@ -33,8 +33,8 @@ public class SubsExpn extends VarRefExpn {
     @Override
     public String toString() {
         return ident + "[" + subscript1 +
-                ( subscript2 != null ? "," + subscript2 : "" )
-                + "]";
+               ( subscript2 != null ? "," + subscript2 : "" )
+               + "]";
     }
 
     public Expn getSubscript1() {

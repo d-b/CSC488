@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Vector;
 
 import compiler488.ast.AST;
-import compiler488.ast.Indentable;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
@@ -23,18 +22,8 @@ public class ResultStmt extends Stmt {
         value.setParent(this);
     }
 
-    /**
-     * Print <b>result</b>  expression on a line, by itself.
-     *
-     * @param out
-     *            Where to print.
-     * @param depth
-     *            How much indentation to use while printing.
-     */
-    @Override
-    public void printOn(PrintStream out, int depth) {
-        Indentable.printIndentOn(out, depth);
-        out.println("result " + value );
+    public String toString() {
+        return "result " + value;
     }
 
     public Expn getValue() {

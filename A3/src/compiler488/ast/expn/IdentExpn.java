@@ -9,5 +9,8 @@ public class IdentExpn extends VarRefExpn {
     public IdentExpn(IdentNode ident) {
         super(ident, ident);
     }
-}
 
+    public String toString() {
+        return ident.toString();
+    }
+}

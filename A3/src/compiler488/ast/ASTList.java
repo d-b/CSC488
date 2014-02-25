@@ -8,7 +8,7 @@ import java.util.ListIterator;
 /**
  * For nodes with an arbitrary number of children.
  */
-public class ASTList<E extends SourceLoc> extends AST {
+public class ASTList<E extends SourceLoc & ASTPrettyPrintable> extends AST {
     /*
      * Keep the list here. We delegate rather than subclass LinkedList
      * because Java won't let us override the return type for addLast.
@@ -61,27 +61,34 @@ public class ASTList<E extends SourceLoc> extends AST {
         return ll;
     }
 
-    /**
-     * Ask each element of the list to print itself using
-     * <b>printOn(out,depth)</b>.  This should only be used when the
-     * elements are typically printed on seperate lines, otherwise they may
-     * not implement <b>printOn</b>. If the list is empty, print
-     * <b>&gt;&gt;empty&lt;&lt;</b> follwed by a new-line.
-     *
-     * @param out
-     *            Where to print the list.
-     * @param depth
-     *            How much indentation to use while printing.
-     */
-    public void printOnSeperateLines(PrintStream out, int depth) {
-        ListIterator<E> iterator = ll.listIterator();
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.print(toString());
+    }
 
-        if (iterator.hasNext()) {
-            while (iterator.hasNext()) {
-                ((Indentable) iterator.next()).printOn(out, depth);
+    public void prettyPrintCommas(ASTPrettyPrinterContext p) {
+        boolean first = true;
+
+        for (ASTPrettyPrintable node : ll) {
+            if (!first) {
+                p.print(", ");
             }
-        } else {
-            Indentable.printIndentOn(out, depth, ">>empty<<\n");
+
+            node.prettyPrint(p);
+
+            first = false;
+        }
+    }
+
+    public void prettyPrintBlock(ASTPrettyPrinterContext p) {
+        p.enterBlock();
+        prettyPrintNewlines(p);
+        p.exitBlock();
+    }
+
+    public void prettyPrintNewlines(ASTPrettyPrinterContext p) {
+        for (ASTPrettyPrintable node : ll) {
+            node.prettyPrint(p);
+            p.newline();
         }
     }
 

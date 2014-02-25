@@ -1,14 +1,14 @@
 package compiler488.ast.decl;
 
+import compiler488.ast.AST;
 import compiler488.ast.IdentNode;
-import compiler488.ast.Indentable;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
 
 /**
  * The common features of declarations.
  */
-public class Declaration extends Indentable {
+public class Declaration extends AST {
     /** The type of thing being declared. */
     protected Type type;
 

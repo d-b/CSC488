@@ -6,6 +6,7 @@ import java.util.List;
 
 import compiler488.parser.*;
 import compiler488.ast.AST ;
+import compiler488.ast.ASTPrettyPrinterContext;
 import compiler488.ast.stmt.Program;
 import compiler488.semantics.Semantics;
 import compiler488.symbol.SymbolTable;
@@ -452,13 +453,17 @@ public class Main {
                 if (compilerDumpFileName.length() > 0) {
                     dumpFile = new File(compilerDumpFileName) ;
                     dumpStream = new PrintStream(new FileOutputStream(dumpFile));
-                    programAST.printOn(dumpStream, 0);
+                    
+                    ASTPrettyPrinterContext p = new ASTPrettyPrinterContext(dumpStream);
+                    p.print(programAST);
+                    
                     if (!dumpAST2) {
                         // finished with dump stream
                         dumpStream.close();
                     }
                 } else {
-                    programAST.printOn(saveSysOut, 0);
+                    ASTPrettyPrinterContext p = new ASTPrettyPrinterContext(saveSysOut);
+                    p.print(programAST);
                 }
             }
             catch (Exception e) {
@@ -503,10 +508,12 @@ public class Main {
                         dumpStream = new PrintStream(new FileOutputStream(dumpFile));
                     }
 
-                    programAST.printOn(dumpStream , 0);
+                    ASTPrettyPrinterContext p = new ASTPrettyPrinterContext(dumpStream);
+                    p.print(programAST);
                     dumpStream.close();
                 } else {
-                    programAST.printOn(saveSysOut, 0);
+                    ASTPrettyPrinterContext p = new ASTPrettyPrinterContext(saveSysOut);
+                    p.print(programAST);
                 }
             } catch (Exception e) {
                 System.err.println("Exception during AST dump after semantic analysis");

@@ -3,7 +3,7 @@ package compiler488.ast.stmt;
 import java.io.PrintStream;
 
 import compiler488.ast.ASTList;
-import compiler488.ast.Indentable;
+import compiler488.ast.ASTPrettyPrinterContext;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
@@ -15,19 +15,9 @@ public class RepeatUntilStmt extends LoopingStmt {
         super(body, condition, loc);
     }
 
-    /**
-     * Print a description of the <b>repeat-until</b> construct.
-     *
-     * @param out
-     *            Where to print the description.
-     * @param depth
-     *            How much indentation to use while printing.
-     */
-    @Override
-    public void printOn(PrintStream out, int depth) {
-        Indentable.printIndentOnLn(out, depth, "repeat");
-        //        body.printOn(out, depth + 1);
-        Indentable.printIndentOnLn(out, depth, " until "  + condition);
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.println("repeat");
+        body.prettyPrintBlock(p);
+        p.println("until " + condition);
     }
 }
-

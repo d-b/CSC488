@@ -6,7 +6,7 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
-import compiler488.ast.Indentable;
+import compiler488.ast.ASTPrettyPrinterContext;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.decl.Declaration;
 
@@ -46,26 +46,13 @@ public class Scope extends Stmt {
         statements.setParent(this);
     }
 
-    /**
-     * Print a description of the <b>scope</b> construct.
-     *
-     * @param out
-     *            Where to print the description.
-     * @param depth
-     *            How much indentation to use while printing.
-     */
-    @Override
-    public void printOn(PrintStream out, int depth) {
-        Indentable.printIndentOnLn(out, depth, "{");
-        Indentable.printIndentOnLn(out, depth, "declarations");
-
-        declarations.printOnSeperateLines(out, depth + 1);
-
-        Indentable.printIndentOnLn(out, depth, "statements");
-
-        statements.printOnSeperateLines(out, depth + 1);
-
-        Indentable.printIndentOnLn(out, depth, "}");
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.println("{");
+        p.enterBlock();
+        declarations.prettyPrintNewlines(p);
+        statements.prettyPrintNewlines(p);
+        p.exitBlock();
+        p.print("}");
     }
 
     public ASTList<Declaration> getDeclarations() {

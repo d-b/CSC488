@@ -6,7 +6,7 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
-import compiler488.ast.Indentable;
+import compiler488.ast.ASTPrettyPrinterContext;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
@@ -40,26 +40,16 @@ public class IfStmt extends Stmt {
         whenFalse.setParent(this);
     }
 
-    /**
-     * Print a description of the <b>if-then-else</b> construct. If the
-     * <b>else</b> part is empty, just print an <b>if-then</b> construct.
-     *
-     * @param out
-     *            Where to print the description.
-     * @param depth
-     *            How much indentation to use while printing.
-     */
-    @Override
-    public void printOn(PrintStream out, int depth) {
-        Indentable.printIndentOnLn(out, depth, "if " + condition + " then ");
-        //whenTrue.printOn(out, 	depth + 1);
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.println("if " + condition + " then ");
+        whenTrue.prettyPrintBlock(p);
 
         if (whenFalse != null) {
-            Indentable.printIndentOnLn(out, depth, "else");
-            //whenFalse.printOn(out, depth + 1);
+            p.println("else");
+            whenFalse.prettyPrintBlock(p);
         }
 
-        Indentable.printIndentOnLn(out, depth, "fi");
+        p.println("fi");
     }
 
     public Expn getCondition() {

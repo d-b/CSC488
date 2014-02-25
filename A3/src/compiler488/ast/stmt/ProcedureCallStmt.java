@@ -31,9 +31,9 @@ public class ProcedureCallStmt extends Stmt {
     @Override
     public String toString() {
         if (arguments != null) {
-            return "Procedure call: " + ident + " (" + arguments + ")";
+            return ident + "(" + arguments + ")";
         } else {
-            return "Procedure call: " + ident + " ( ) ";
+            return ident + "()";
         }
     }
 

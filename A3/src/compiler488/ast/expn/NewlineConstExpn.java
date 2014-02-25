@@ -15,7 +15,7 @@ public class NewlineConstExpn extends ConstExpn implements Printable {
     /** Returns the string <b>"newline"</b>. */
     @Override
     public String toString() {
-        return " newline ";
+        return "newline";
     }
 }
 
