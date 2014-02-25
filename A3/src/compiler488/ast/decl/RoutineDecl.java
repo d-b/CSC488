@@ -32,9 +32,11 @@ public class RoutineDecl extends Declaration {
         ASTList<Type> argTypes = new ASTList<Type>();
 
         this.returnType = returnType;
-        this.params = params;
+        if (returnType != null) {
+        	returnType.setParent(this);
+        }
         
-        returnType.setParent(this);
+        this.params = params;
         params.setParent(this);
         
         for (ScalarDecl argDecl : params.getList()) {

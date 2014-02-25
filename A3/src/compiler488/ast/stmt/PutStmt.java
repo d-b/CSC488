@@ -16,6 +16,7 @@ public class PutStmt extends Stmt {
 
     public PutStmt (ASTList<Printable> outputs, SourceLoc loc) {
     	super(loc);
+
         this.outputs = outputs;
         outputs.setParent(this);
     }

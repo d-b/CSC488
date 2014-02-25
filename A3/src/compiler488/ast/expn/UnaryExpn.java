@@ -18,7 +18,9 @@ public class UnaryExpn extends Expn {
 
     public UnaryExpn(String opSymbol, Expn operand, SourceLoc loc) {
     	super(loc);
+    	
         this.opSymbol = opSymbol;
+
         this.operand = operand;
         operand.setParent(this);
     }

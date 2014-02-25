@@ -18,6 +18,7 @@ public class ResultStmt extends Stmt {
 
     public ResultStmt(Expn value, SourceLoc loc) {
     	super(loc);
+
         this.value = value;
         value.setParent(this);
     }

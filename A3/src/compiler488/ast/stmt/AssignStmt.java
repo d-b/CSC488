@@ -19,9 +19,11 @@ public class AssignStmt extends Stmt {
 
     public AssignStmt(Expn lval, Expn rval, SourceLoc loc) {
     	super(loc);
+
         this.lval = lval;
-        this.rval = rval;
         lval.setParent(this);
+
+        this.rval = rval;
         rval.setParent(this);
     }
 
@@ -35,17 +37,10 @@ public class AssignStmt extends Stmt {
         return lval;
     }
 
-    public void setLval(Expn lval) {
-        this.lval = lval;
-    }
-
     public Expn getRval() {
         return rval;
     }
 
-    public void setRval(Expn rval) {
-        this.rval = rval;
-    }
     
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();

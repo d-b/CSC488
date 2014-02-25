@@ -14,6 +14,7 @@ public class IntConstExpn extends ConstExpn {
     	super(intconst);
     	
     	this.intconst = intconst;
+    	intconst.setParent(this);
     }
 
     /** Returns a string representing the value of the literal. */

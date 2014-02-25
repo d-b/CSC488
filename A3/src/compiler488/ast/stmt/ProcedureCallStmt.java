@@ -21,6 +21,8 @@ public class ProcedureCallStmt extends Stmt {
     	super(loc);
     	
     	this.ident = ident;
+    	ident.setParent(this);
+
     	this.arguments = arguments;
     	arguments.setParent(this);
     }

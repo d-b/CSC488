@@ -12,9 +12,13 @@ public class FunctionType extends Type {
 
     public FunctionType(Type returnType, ASTList<Type> arguments, SourceLoc loc) {
     	super(loc);
+    	
         this.returnType = returnType;
+        if (returnType != null) {
+        	returnType.setParent(this);
+        }
+        
         this.arguments = arguments;
-        returnType.setParent(this);
         arguments.setParent(this);
     }
 

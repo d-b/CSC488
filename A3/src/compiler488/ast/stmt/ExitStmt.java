@@ -21,6 +21,7 @@ public class ExitStmt extends Stmt {
 
     public ExitStmt(Expn condition, SourceLoc loc) {
     	this(loc);
+
         this.condition = condition;
         condition.setParent(this);
     }

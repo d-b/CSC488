@@ -11,6 +11,7 @@ public class TextConstExpn extends ConstExpn implements Printable {
 
     public TextConstExpn(String value, SourceLoc loc) {
     	super(loc);
+
         this.value = value;
     }
 

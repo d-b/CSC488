@@ -9,7 +9,9 @@ public abstract class VarRefExpn extends Expn implements Readable {
 	
 	public VarRefExpn(IdentNode ident, SourceLoc loc) {
 		super(loc);
+		
 		this.ident = ident;
+		ident.setParent(this);
 	}
 	
 	public String getName() {

@@ -19,7 +19,10 @@ public class Declaration extends Indentable {
     	super(loc);
 
     	this.ident = ident;
+    	ident.setParent(this);
+    	
         this.type = type;
+        type.setParent(this);
     }
 
     public String getName() {

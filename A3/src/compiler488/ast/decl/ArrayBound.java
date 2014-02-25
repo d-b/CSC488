@@ -14,6 +14,7 @@ public class ArrayBound extends AST {
 
 		implicit_lb = true;
 		this.ub = ub;
+		ub.setParent(this);
 	}
 	
 	public ArrayBound(IntConstNode lb, IntConstNode ub, SourceLoc loc) {
@@ -21,6 +22,7 @@ public class ArrayBound extends AST {
 
 		implicit_lb = false;
 		this.lb = lb;
+		lb.setParent(this);
 	}
 	
 	public Integer getLowerboundValue() {

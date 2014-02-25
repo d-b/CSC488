@@ -16,10 +16,14 @@ public class ConditionalExpn extends Expn {
 
     public ConditionalExpn(Expn condition, Expn trueValue, Expn falseValue, SourceLoc loc) {
     	super(loc);
+    	
         this.condition = condition;
+        condition.setParent(this);
+        
         this.trueValue = trueValue;
-        this.falseValue = falseValue;
         trueValue.setParent(this);
+        
+        this.falseValue = falseValue;
         falseValue.setParent(this);
     }
 

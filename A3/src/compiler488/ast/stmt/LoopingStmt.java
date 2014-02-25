@@ -19,8 +19,9 @@ public abstract class LoopingStmt extends Stmt {
     	super(loc);
     	
         this.body = body;
-        this.condition = condition;
         body.setParent(this);
+        
+        this.condition = condition;
         condition.setParent(this);
     }
 

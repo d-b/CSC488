@@ -18,7 +18,10 @@ public class FunctionCallExpn extends Expn {
 
     public FunctionCallExpn(IdentNode ident, ASTList<Expn> arguments, SourceLoc loc) {
     	super(loc);
+    	
         this.ident = ident;
+        ident.setParent(this);
+        
         this.arguments = arguments;
         arguments.setParent(this);
     }

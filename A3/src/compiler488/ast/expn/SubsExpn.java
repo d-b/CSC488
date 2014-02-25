@@ -15,17 +15,18 @@ public class SubsExpn extends VarRefExpn {
     private Expn subscript1;	 // first subscript
     private Expn subscript2 = null;	// second subscript (if any)
 
-    public SubsExpn(IdentNode ident, Expn subscript1, Expn subscript2, SourceLoc loc) {
+    public SubsExpn(IdentNode ident, Expn subscript1, SourceLoc loc) {
     	super(ident, loc);
     	
-        this.subscript1 = subscript1;
-        this.subscript2 = subscript2;
-        subscript1.setParent(this);
-        if(subscript2 != null) subscript2.setParent(this);
+    	this.subscript1 = subscript1;
+        subscript1.setParent(this);       
     }
 
-    public SubsExpn(IdentNode ident, Expn subscript1, SourceLoc loc) {
-        this(ident, subscript1, null, loc);
+    public SubsExpn(IdentNode ident, Expn subscript1, Expn subscript2, SourceLoc loc) {
+    	this(ident, subscript1, loc);
+
+    	this.subscript2 = subscript2;
+        subscript2.setParent(this);
     }
 
     /** Returns a string that represents the array subscript. */

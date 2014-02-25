@@ -16,6 +16,7 @@ public class GetStmt extends Stmt {
 
     public GetStmt(ASTList<Readable> inputs, SourceLoc loc) {
     	super(loc);
+
         this.inputs = inputs;
         inputs.setParent(this);
     }
