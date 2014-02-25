@@ -116,14 +116,16 @@ public class ASTList<E extends SourceLoc & ASTPrettyPrintable> extends AST {
         return ll.getFirst();
     }
 
-    public boolean equals(Object other) {
-        if (!(other instanceof ASTList)) {
+    public boolean equals(Object o) {
+        if (!(o instanceof ASTList)) {
             return false;
         }
-
-        ASTList<?> alist = (ASTList<?>) other;
-
-        return ll.equals(alist.ll);
+        
+        return equals((ASTList<?>) o);
+    }
+    
+    public boolean equals(ASTList<?> o) {
+        return ll.equals(o.ll);
     }
 
     @SuppressWarnings("unchecked")
@@ -151,4 +153,3 @@ public class ASTList<E extends SourceLoc & ASTPrettyPrintable> extends AST {
         return ll.getLast().getEndColumn();
     }
 }
-

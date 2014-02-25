@@ -43,5 +43,17 @@ public class Declaration extends AST {
     public String toString() {
         return  ident + " : " + type;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof Declaration)) {
+            return false;
+        }
+        
+        return equals((Declaration) o);
+    }
+    
+    public boolean equals(Declaration o) {
+        return type.equals(o.type) &&
+                ((ident == null) ? (o.ident == null) : ident.equals(o.ident));
+    }
 }
-

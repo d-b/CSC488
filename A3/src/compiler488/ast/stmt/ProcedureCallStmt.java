@@ -56,5 +56,18 @@ public class ProcedureCallStmt extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ProcedureCallStmt)) {
+            return false;
+        }
+        
+        return equals((ProcedureCallStmt) o);
+    }
+    
+    public boolean equals(ProcedureCallStmt o) {
+        return ident.equals(o.ident) &&
+                arguments.equals(o.arguments);
+    }
 }
 

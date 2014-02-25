@@ -20,5 +20,13 @@ public class WhileDoStmt extends LoopingStmt {
         body.prettyPrintBlock(p);
         p.println("end");
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof WhileDoStmt)) {
+            return false;
+        }
+        
+        // The above check ensures the correct type, but after that LoopingStmt can do the rest 
+        return equals((LoopingStmt) o);
+    }
 }
-

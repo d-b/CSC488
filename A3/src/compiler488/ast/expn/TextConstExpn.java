@@ -24,5 +24,16 @@ public class TextConstExpn extends ConstExpn implements Printable {
     public String getValue() {
         return value;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof TextConstExpn)) {
+            return false;
+        }
+        
+        return equals((TextConstExpn) o);
+    }
+    
+    public boolean equals(TextConstExpn o) {
+        return value.equals(o.value);
+    }
 }
-

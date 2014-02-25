@@ -19,5 +19,17 @@ public class ScalarDecl extends Declaration {
     public String toString() {
         return ident + " : " + type;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ScalarDecl)) {
+            return false;
+        }
+        
+        return equals((ScalarDecl) o);
+    }
+    
+    public boolean equals(ScalarDecl o) {
+        return ident.equals(o.ident) &&
+                type.equals(o.type); 
+    }
 }
-

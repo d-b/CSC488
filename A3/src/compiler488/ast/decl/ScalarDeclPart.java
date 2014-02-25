@@ -13,5 +13,17 @@ public class ScalarDeclPart extends DeclarationPart {
     public String toString() {
         return ident.toString();
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ScalarDeclPart)) {
+            return false;
+        }
+        
+        return equals((ScalarDeclPart) o);
+    }
+    
+    public boolean equals(ScalarDeclPart o) {
+        return ident.equals(o.ident);
+    }
 }
 

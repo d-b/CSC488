@@ -16,5 +16,16 @@ public class IdentNode extends AST {
     public String toString() {
         return id;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof IdentNode)) {
+            return false;
+        }
+        
+        return equals((IdentNode) o);
+    }
+    
+    public boolean equals(IdentNode o) {        
+        return id.equals(o.id);
+    }
 }
-

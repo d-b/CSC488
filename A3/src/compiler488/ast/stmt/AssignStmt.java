@@ -51,5 +51,17 @@ public class AssignStmt extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof AssignStmt)) {
+            return false;
+        }
+        
+        return equals((AssignStmt) o);
+    }
+    
+    public boolean equals(AssignStmt o) {
+        return lval.equals(o.lval) &&
+                rval.equals(o.rval);
+    }
 }
-

@@ -66,5 +66,18 @@ public class Scope extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof Scope)) {
+            return false;
+        }
+        
+        return equals((Scope) o);
+    }
+    
+    public boolean equals(Scope o) {
+        return ((declarations == null) ? (o.declarations == null) : declarations.equals(o.declarations)) &&
+                ((statements == null) ? (o.statements == null) : statements.equals(o.statements));
+    }
 }
 

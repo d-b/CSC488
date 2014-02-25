@@ -62,5 +62,17 @@ public class ArrayBound extends AST {
         children.add(ub);
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ArrayBound)) {
+            return false;
+        }
+        
+        return equals((ArrayBound) o);
+    }
+    
+    public boolean equals(ArrayBound o) {
+        return getLowerboundValue() == o.getLowerboundValue() &&
+                getUpperboundValue() == o.getUpperboundValue();
+    }
 }
-

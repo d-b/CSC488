@@ -56,5 +56,19 @@ public class SubsExpn extends VarRefExpn {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof SubsExpn)) {
+            return false;
+        }
+        
+        return equals((SubsExpn) o);
+    }
+    
+    public boolean equals(SubsExpn o) {
+        return ident.equals(o.ident) &&
+                subscript1.equals(o.subscript1) &&
+                ((subscript2 == null) ? (o.subscript2 == null) : subscript2.equals(o.subscript2));
+    }
 }
 

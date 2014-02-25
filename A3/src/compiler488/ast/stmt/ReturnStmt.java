@@ -15,5 +15,9 @@ public class ReturnStmt extends Stmt {
     public String toString() {
         return "return";
     }
+    
+    public boolean equals(Object o) {
+        return o instanceof ReturnStmt;
+    }
 }
 

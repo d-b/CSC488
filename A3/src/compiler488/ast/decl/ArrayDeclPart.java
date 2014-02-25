@@ -54,5 +54,24 @@ public class ArrayDeclPart extends DeclarationPart {
     public Integer getSize() {
         return size;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ArrayDeclPart)) {
+            return false;
+        }
+        
+        return equals((ArrayDeclPart) o);
+    }
+    
+    public boolean equals(ArrayDeclPart o) {
+        boolean b1_equals = b1.equals(o.b1);
+        
+        if (is2D) {
+            return o.is2D &&
+                    b1_equals &&
+                    b2.equals(o.b2);
+        } else {
+            return !o.is2D && b1_equals;
+        }
+    }
 }
-

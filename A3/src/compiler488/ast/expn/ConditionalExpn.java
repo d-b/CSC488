@@ -54,5 +54,19 @@ public class ConditionalExpn extends Expn {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ConditionalExpn)) {
+            return false;
+        }
+        
+        return equals((ConditionalExpn) o);
+    }
+    
+    public boolean equals(ConditionalExpn o) {
+        return condition.equals(o.condition) &&
+                trueValue.equals(o.trueValue) &&
+                falseValue.equals(o.falseValue);
+    }
 }
 

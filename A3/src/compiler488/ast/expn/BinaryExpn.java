@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
+import compiler488.ast.decl.ScalarDecl;
 
 /**
  * The common features of binary expressions.
@@ -50,6 +51,22 @@ public class BinaryExpn extends Expn {
         children.add(right);
 
         return children;
+    }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof BinaryExpn)) {
+            return false;
+        }
+
+        return equals((BinaryExpn) o);
+    }
+    
+    public boolean equals(BinaryExpn o) {
+        // NB: opSymbol equality is indeed object pointer equality!
+        
+        return (opSymbol == o.opSymbol) &&
+                left.equals(o.left) &&
+                right.equals(o.right);
     }
 }
 

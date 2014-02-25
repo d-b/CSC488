@@ -24,5 +24,16 @@ public class IntConstExpn extends ConstExpn {
     public Integer getValue() {
         return intconst.getInteger();
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof IntConstExpn)) {
+            return false;
+        }
+        
+        return equals((IntConstExpn) o);
+    }
+    
+    public boolean equals(IntConstExpn o) {
+        return intconst.equals(o.intconst);
+    }
 }
-

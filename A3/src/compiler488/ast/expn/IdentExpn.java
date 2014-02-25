@@ -13,4 +13,16 @@ public class IdentExpn extends VarRefExpn {
     public String toString() {
         return ident.toString();
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof IdentExpn)) {
+            return false;
+        }
+        
+        return equals((IdentExpn) o);
+    }
+    
+    public boolean equals(IdentExpn o) {
+        return ident.equals(o.ident);
+    }
 }

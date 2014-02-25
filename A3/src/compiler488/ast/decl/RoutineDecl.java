@@ -115,5 +115,18 @@ public class RoutineDecl extends Declaration {
             body.prettyPrint(p);
         }
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof RoutineDecl)) {
+            return false;
+        }
+        
+        return equals((RoutineDecl) o);
+    }
+    
+    public boolean equals(RoutineDecl o) {
+        return ident.equals(o.ident) &&
+                type.equals(o.type) && 
+                params.equals(o.params);
+    }
 }
-

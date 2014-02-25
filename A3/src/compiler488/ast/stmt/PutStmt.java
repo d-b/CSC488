@@ -38,5 +38,17 @@ public class PutStmt extends Stmt {
 
         return children;
     }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof PutStmt)) {
+            return false;
+        }
+        
+        return equals((PutStmt) o);
+    }
+    
+    public boolean equals(PutStmt o) {
+        return outputs.equals(o.outputs);
+    }
 }
 

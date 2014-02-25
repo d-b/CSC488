@@ -49,5 +49,16 @@ public class ExitStmt extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ExitStmt)) {
+            return false;
+        }
+        
+        return equals((ExitStmt) o);
+    }
+    
+    public boolean equals(ExitStmt o) {
+        return (condition == null) ? (o.condition == null) : condition.equals(o.condition);
+    }
 }
-

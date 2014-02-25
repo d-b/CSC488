@@ -40,5 +40,17 @@ public class MultiDeclarations extends Declaration {
     public ASTList<DeclarationPart> getElements() {
         return elements;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof MultiDeclarations)) {
+            return false;
+        }
+        
+        return equals((MultiDeclarations) o);
+    }
+    
+    public boolean equals(MultiDeclarations o) {
+        return type.equals(o.type) &&
+                elements.equals(o.elements);
+    }
 }
-

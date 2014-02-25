@@ -23,5 +23,16 @@ public class BoolConstExpn extends ConstExpn {
     public boolean getValue() {
         return value;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof BoolConstExpn)) {
+            return false;
+        }
+        
+        return equals((BoolConstExpn) o);
+    }
+    
+    public boolean equals(BoolConstExpn o) {
+        return value == o.value;
+    }
 }
-

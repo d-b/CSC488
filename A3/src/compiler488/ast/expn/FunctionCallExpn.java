@@ -55,5 +55,17 @@ public class FunctionCallExpn extends Expn {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof FunctionCallExpn)) {
+            return false;
+        }
+        
+        return equals((FunctionCallExpn) o);
+    }
+    
+    public boolean equals(FunctionCallExpn o) {
+        return ident.equals(o.ident) &&
+                arguments.equals(o.arguments);
+    }
 }
-

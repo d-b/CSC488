@@ -76,5 +76,19 @@ public class IfStmt extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof IfStmt)) {
+            return false;
+        }
+        
+        return equals((IfStmt) o);
+    }
+    
+    public boolean equals(IfStmt o) {
+        return condition.equals(o.condition) &&
+                whenTrue.equals(o.whenTrue) &&
+                ((whenFalse == null) ? (o.whenFalse == null) : whenFalse.equals(o.whenFalse));
+    }
 }
 

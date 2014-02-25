@@ -37,5 +37,17 @@ public class ResultStmt extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof ResultStmt)) {
+            return false;
+        }
+        
+        return equals((ResultStmt) o);
+    }
+    
+    public boolean equals(ResultStmt o) {
+        return value.equals(o.value);
+    }
 }
 

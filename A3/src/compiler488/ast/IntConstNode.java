@@ -24,5 +24,17 @@ public class IntConstNode extends AST {
     public String toString() {
         return i.toString();
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof IntConstNode)) {
+            return false;
+        }
+        
+        return equals((IntConstNode) o);
+    }
+    
+    public boolean equals(IntConstNode o) {
+        return i.equals(o.i);
+    }
 }
 

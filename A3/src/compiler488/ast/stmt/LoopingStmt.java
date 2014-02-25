@@ -41,5 +41,18 @@ public abstract class LoopingStmt extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof LoopingStmt)) {
+            return false;
+        }
+        
+        return equals((LoopingStmt) o);
+    }
+    
+    public boolean equals(LoopingStmt o) {
+        return body.equals(o.body) &&
+                condition.equals(o.condition);
+    }
 }
 

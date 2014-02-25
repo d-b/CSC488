@@ -21,4 +21,16 @@ public abstract class VarRefExpn extends Expn implements Readable {
     public IdentNode getIdent() {
         return ident;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof VarRefExpn)) {
+            return false;
+        }
+        
+        return equals((VarRefExpn) o);
+    }
+    
+    public boolean equals(VarRefExpn o) {
+        return ident.equals(o.ident);
+    }
 }

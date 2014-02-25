@@ -46,5 +46,17 @@ public class UnaryExpn extends Expn {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof UnaryExpn)) {
+            return false;
+        }
+        
+        return equals((UnaryExpn) o);
+    }
+    
+    public boolean equals(UnaryExpn o) {
+        return (opSymbol == o.opSymbol) &&
+                operand.equals(o.operand);
+    }
 }
-

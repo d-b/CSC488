@@ -20,4 +20,13 @@ public class RepeatUntilStmt extends LoopingStmt {
         body.prettyPrintBlock(p);
         p.println("until " + condition);
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof RepeatUntilStmt)) {
+            return false;
+        }
+        
+        // The above check ensures the correct type, but after that LoopingStmt can do the rest 
+        return equals((LoopingStmt) o);
+    }   
 }

@@ -38,5 +38,16 @@ public class GetStmt extends Stmt {
 
         return children;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof GetStmt)) {
+            return false;
+        }
+        
+        return equals((GetStmt) o);
+    }
+    
+    public boolean equals(GetStmt o) {
+        return inputs.equals(o.inputs);
+    }
 }
-

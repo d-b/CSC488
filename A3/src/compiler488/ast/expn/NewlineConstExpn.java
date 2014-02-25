@@ -17,5 +17,8 @@ public class NewlineConstExpn extends ConstExpn implements Printable {
     public String toString() {
         return "newline";
     }
+    
+    public boolean equals(Object o) {
+        return o instanceof NewlineConstExpn;
+    }
 }
-

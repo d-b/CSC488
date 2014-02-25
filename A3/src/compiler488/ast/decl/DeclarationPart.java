@@ -29,5 +29,16 @@ public class DeclarationPart extends AST {
     public String toString() {
         return ident.toString();
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof DeclarationPart)) {
+            return false;
+        }
+        
+        return equals((DeclarationPart) o);
+    }
+    
+    public boolean equals(DeclarationPart o) {
+        return ident.equals(o.ident);
+    }
 }
-
