@@ -22,8 +22,4 @@ public class BoolConstExpn extends ConstExpn {
     public boolean getValue() {
         return value;
     }
-
-    public void setValue(boolean value) {
-        this.value = value;
-    }
 }

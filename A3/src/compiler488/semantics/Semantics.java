@@ -10,6 +10,7 @@ import compiler488.semantics.Errors;
 import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.SourceLocPrettyPrinter;
+import compiler488.ast.decl.ArrayBound;
 import compiler488.ast.decl.ArrayDeclPart;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.MultiDeclarations;
@@ -166,9 +167,11 @@ public class Semantics {
     
     @Action(number = 19) // Declare one dimensional array with specified bound.
     Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
-        return workingSet(arrayDecl.getName(),
-                new VariableSymbol(arrayDecl.getName(),
-                                   arrayDecl.getLowerBoundary1(), arrayDecl.getUpperBoundary1()));
+    	ArrayBound b1 = arrayDecl.getBound1();
+    	Symbol sym = new VariableSymbol(arrayDecl.getName(),
+                b1.getLowerboundValue(), b1.getUpperboundValue()); 
+    	
+        return workingSet(arrayDecl.getName(), sym);
     }
     
     // TODO: Finish assignment checking after expression checking is finished
@@ -177,12 +180,16 @@ public class Semantics {
         return true;
     }
     
+    private boolean isBoundValid(ArrayBound b) {
+    	return b.getLowerboundValue() <= b.getUpperboundValue();
+    }
+
     @Action(number = 46) // Check that lower bound is <= upper bound.
     Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
         if(arrayDecl.getDimensions() >= 1)
-            if(arrayDecl.getLowerBoundary1() > arrayDecl.getUpperBoundary1()) return false;
+            if (!isBoundValid(arrayDecl.getBound1())) return false;
         if(arrayDecl.getDimensions() >= 2)
-            if(arrayDecl.getLowerBoundary2() > arrayDecl.getUpperBoundary2()) return false;
+        	if (!isBoundValid(arrayDecl.getBound2())) return false;
         return true;
     }    
     
@@ -195,10 +202,13 @@ public class Semantics {
     
     @Action(number = 48) // Declare two dimensional array with specified bound.
     Boolean actionDeclareArray2D(ArrayDeclPart arrayDecl) {
-        return workingSet(arrayDecl.getName(),
-                new VariableSymbol(arrayDecl.getName(),
-                                   arrayDecl.getLowerBoundary1(), arrayDecl.getUpperBoundary1(),
-                                   arrayDecl.getLowerBoundary2(), arrayDecl.getUpperBoundary2()));
+    	ArrayBound b1 = arrayDecl.getBound1();
+    	ArrayBound b2 = arrayDecl.getBound2();
+    	Symbol sym = new VariableSymbol(arrayDecl.getName(),
+                b1.getLowerboundValue(), b1.getUpperboundValue(),
+                b2.getLowerboundValue(), b2.getUpperboundValue());
+    	
+        return workingSet(arrayDecl.getName(), sym);
     }
     
     @Action(number = 49) // If function/procedure was declared forward, verify forward declaration matches.

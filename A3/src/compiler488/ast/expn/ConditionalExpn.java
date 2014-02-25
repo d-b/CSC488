@@ -33,26 +33,14 @@ public class ConditionalExpn extends Expn {
         return condition;
     }
 
-    public void setCondition(Expn condition) {
-        this.condition = condition;
-    }
-
     public Expn getFalseValue() {
         return falseValue;
     }
-
-    public void setFalseValue(Expn falseValue) {
-        this.falseValue = falseValue;
-    }
-
+    
     public Expn getTrueValue() {
         return trueValue;
     }
 
-    public void setTrueValue(Expn trueValue) {
-        this.trueValue = trueValue;
-    }
-    
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(condition);

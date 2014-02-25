@@ -1,5 +1,6 @@
 package compiler488.ast.decl;
 
+import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
 
@@ -8,17 +9,16 @@ import compiler488.ast.type.Type;
  */
 
 public class ScalarDecl extends Declaration {
-    public ScalarDecl(String name, Type type, SourceLoc loc) {
-        super(name, type, loc);
+    public ScalarDecl(IdentNode ident, Type type, SourceLoc loc) {
+        super(ident, type, loc);
     }
 
     /**
      * Returns a string describing the name and type of the object being
      * declared.
      */
-    @Override
     public String toString() {
-        return name + " : " + type;
+        return ident + " : " + type;
     }
 }
 

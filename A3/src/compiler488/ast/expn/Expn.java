@@ -9,6 +9,6 @@ import compiler488.ast.SourceLoc;
  */
 public class Expn extends AST implements Printable {
 	public Expn(SourceLoc loc) {
-		this.loc = loc;
+		super(loc);
 	}
 }

@@ -23,18 +23,21 @@ public class IfStmt extends Stmt {
     // Represents the statement to execute when the condition is false.
     private ASTList<Stmt> whenFalse = null;
 
-    public IfStmt(Expn condition, ASTList<Stmt> whenTrue, ASTList<Stmt> whenFalse, SourceLoc loc) {
-    	super(loc);
-        this.condition = condition;
-        this.whenTrue = whenTrue;
-        this.whenFalse = whenFalse;
-        condition.setParent(this);
-        whenTrue.setParent(this);
-        if(whenFalse != null) whenFalse.setParent(this);
-    }
-
     public IfStmt(Expn condition, ASTList<Stmt> whenTrue, SourceLoc loc) {
-        this(condition, whenTrue, null, loc);
+        super(loc);
+        
+        this.condition = condition;
+        condition.setParent(this);
+
+        this.whenTrue = whenTrue;
+        whenTrue.setParent(this);
+    }
+    
+    public IfStmt(Expn condition, ASTList<Stmt> whenTrue, ASTList<Stmt> whenFalse, SourceLoc loc) {
+    	this(condition, whenTrue, loc);
+
+    	this.whenFalse = whenFalse;
+        whenFalse.setParent(this);
     }
 
     /**

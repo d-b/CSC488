@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Vector;
 
 import compiler488.ast.AST;
+import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 
 /**
@@ -11,20 +12,19 @@ import compiler488.ast.SourceLoc;
  *
  */
 public class SubsExpn extends VarRefExpn {
-    private String ident;
     private Expn subscript1;	 // first subscript
     private Expn subscript2 = null;	// second subscript (if any)
 
-    public SubsExpn(String ident, Expn subscript1, Expn subscript2, SourceLoc loc) {
-    	super(loc);
-        this.ident = ident;
+    public SubsExpn(IdentNode ident, Expn subscript1, Expn subscript2, SourceLoc loc) {
+    	super(ident, loc);
+    	
         this.subscript1 = subscript1;
         this.subscript2 = subscript2;
         subscript1.setParent(this);
         if(subscript2 != null) subscript2.setParent(this);
     }
 
-    public SubsExpn(String ident, Expn subscript1, SourceLoc loc) {
+    public SubsExpn(IdentNode ident, Expn subscript1, SourceLoc loc) {
         this(ident, subscript1, null, loc);
     }
 
@@ -36,28 +36,12 @@ public class SubsExpn extends VarRefExpn {
                 + "]");
     }
 
-    public String getIdent() {
-        return ident;
-    }
-
-    public void setIdent(String ident) {
-        this.ident = ident;
-    }
-
     public Expn getSubscript1() {
         return subscript1;
     }
 
-    public void setSubscript1(Expn subscript1) {
-        this.subscript1 = subscript1;
-    }
-
     public Expn getSubscript2() {
         return subscript2;
-    }
-
-    public void setSubscript2(Expn subscript2) {
-        this.subscript2 = subscript2;
     }
     
     public List<AST> getChildren() {

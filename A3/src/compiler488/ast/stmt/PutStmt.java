@@ -29,10 +29,6 @@ public class PutStmt extends Stmt {
     public ASTList<Printable> getOutputs() {
         return outputs;
     }
-
-    public void setOutputs(ASTList<Printable> outputs) {
-        this.outputs = outputs;
-    }
     
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();

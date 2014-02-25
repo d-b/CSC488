@@ -29,10 +29,10 @@ public class ExitStmt extends Stmt {
     */
     @Override
     public String toString() {
-        String stmt = "exit " ;
+        String stmt = "exit" ;
 
         if (condition != null) {
-            stmt = stmt + "when " + condition + " " ;
+            stmt += " when " + condition;
         }
 
         return stmt;
@@ -40,10 +40,6 @@ public class ExitStmt extends Stmt {
 
     public Expn getCondition() {
         return condition;
-    }
-
-    public void setCondition(Expn condition) {
-        this.condition = condition;
     }
     
     public List<AST> getChildren() {

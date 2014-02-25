@@ -1,6 +1,7 @@
 package compiler488.ast.decl;
 
 import compiler488.ast.AST;
+import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 
 /**
@@ -8,19 +9,22 @@ import compiler488.ast.SourceLoc;
  */
 public class DeclarationPart extends AST {
     /** The name of the thing being declared. */
-    protected String name;
+    protected IdentNode ident;
 
-    public DeclarationPart(String name, SourceLoc loc) {
+    public DeclarationPart(IdentNode ident, SourceLoc loc) {
     	super(loc);
-        this.name = name;
+        this.ident = ident;
     }
 
     public String getName() {
-        return name;
+    	return ident.getId();
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public IdentNode getIdent() {
+        return ident;
+    }
+    
+    public String toString() {
+    	return ident.toString();
     }
 }
-

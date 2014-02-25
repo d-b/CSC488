@@ -75,14 +75,6 @@ public class Scope extends Stmt {
     public ASTList<Stmt> getStatements() {
         return statements;
     }
-
-    public void setDeclarations(ASTList<Declaration> declarations) {
-        this.declarations = declarations;
-    }
-
-    public void setStatements(ASTList<Stmt> statements) {
-        this.statements = statements;
-    }
     
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();

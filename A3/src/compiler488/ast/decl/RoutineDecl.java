@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
+import compiler488.ast.IdentNode;
 import compiler488.ast.Indentable;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.type.Type;
@@ -20,41 +21,43 @@ public class RoutineDecl extends Declaration {
      * The formal parameters of the function/procedure and the
      * statements to execute when the procedure is called.
      */
-    private Type returnType;
+    private Type returnType = null;
     private ASTList<ScalarDecl> params; // The formal parameters of the routine.
-    private Scope body;
+    private Scope body = null;
     private FunctionType funcType;
 
-    public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params, Scope body, SourceLoc loc) {
-        super(name, returnType, loc);
+    public RoutineDecl(IdentNode ident, Type returnType, ASTList<ScalarDecl> params, SourceLoc loc) {
+    	super(ident, returnType, loc);
         
         ASTList<Type> argTypes = new ASTList<Type>();
 
         this.returnType = returnType;
         this.params = params;
-        this.body = body;
         
         returnType.setParent(this);
         params.setParent(this);
-        if(body != null) body.setParent(this);
         
-        for (ScalarDecl argDecl : params.getList())
+        for (ScalarDecl argDecl : params.getList()) {
             argTypes.addLast(argDecl.getType());
+        }
 
         funcType = new FunctionType(returnType, argTypes, loc);
         funcType.setParent(this);
     }
-
-    public RoutineDecl(String name, Type returnType, ASTList<ScalarDecl> params, SourceLoc loc) {
-        this(name, returnType, params, null, loc);
+    
+    public RoutineDecl(IdentNode ident, Type returnType, ASTList<ScalarDecl> params, Scope body, SourceLoc loc) {
+        this(ident, returnType, params, loc);
+        
+        this.body = body;
+        body.setParent(this);
     }
 
     public RoutineDecl withBody(Scope body, SourceLoc wider_loc) {
-        return new RoutineDecl(name, type, params, body, wider_loc);
+        return new RoutineDecl(ident, type, params, body, wider_loc);
     }
     
     public boolean isFunction() {
-        return type != Type.TYPE_NIL;
+        return type != null;
     }
 
     public boolean isForward() {
@@ -105,7 +108,7 @@ public class RoutineDecl extends Declaration {
             s += "func ";
         }
 
-        s += name;
+        s += ident;
 
         return s;
     }

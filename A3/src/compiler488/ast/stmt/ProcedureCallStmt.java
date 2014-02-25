@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
+import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
@@ -12,24 +13,25 @@ import compiler488.ast.expn.Expn;
  * Represents calling a procedure.
  */
 public class ProcedureCallStmt extends Stmt {
-    private String name; // The name of the procedure being called.
+    private IdentNode ident; // The name of the procedure being called.
 
     private ASTList<Expn> arguments; // The arguments passed to the procedure.
 
-    public ProcedureCallStmt(String name, ASTList<Expn> arguments, SourceLoc loc) {
+    public ProcedureCallStmt(IdentNode ident, ASTList<Expn> arguments, SourceLoc loc) {
     	super(loc);
-        this.name = name;
-        this.arguments = arguments;
-        arguments.setParent(this);
+    	
+    	this.ident = ident;
+    	this.arguments = arguments;
+    	arguments.setParent(this);
     }
 
     /** Returns a string describing the procedure call. */
     @Override
     public String toString() {
         if (arguments != null) {
-            return "Procedure call: " + name + " (" + arguments + ")";
+            return "Procedure call: " + ident + " (" + arguments + ")";
         } else {
-            return "Procedure call: " + name + " ( ) ";
+            return "Procedure call: " + ident + " ( ) ";
         }
     }
 
@@ -37,16 +39,12 @@ public class ProcedureCallStmt extends Stmt {
         return arguments;
     }
 
-    public void setArguments(ASTList<Expn> args) {
-        this.arguments = args;
+    public IdentNode getIdent() {
+    	return ident;
     }
 
     public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        return ident.getId();
     }
     
     public List<AST> getChildren() {

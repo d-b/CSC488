@@ -13,11 +13,14 @@ import java.util.List;
 import compiler488.ast.ASTList;
 import compiler488.ast.Readable;
 import compiler488.ast.SourceLoc;
+import compiler488.ast.IdentNode;
+import compiler488.ast.IntConstNode;
 import compiler488.ast.SourceLocImpl;
 import compiler488.ast.Printable;
 import compiler488.ast.SourceLocPrettyPrinter;
 
 import compiler488.ast.decl.ScalarDecl;
+import compiler488.ast.decl.ArrayBound;
 import compiler488.ast.decl.Declaration;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ArrayDeclPart;
@@ -190,9 +193,12 @@ terminal	EQUAL,	GREATER,LESS,	COMMA,  DOT, COLON	;
 terminal	PLUS,	MINUS,	TIMES,  DIVIDE, QUESTION	;
 
 // Terminals returned by the scanner with a value.
-terminal String  IDENT	;
-terminal Integer INTCONST	;
-terminal String  TEXTCONST	;
+terminal String IDENT;
+terminal Integer INTCONST;
+terminal String TEXTCONST;
+
+nonterminal IdentNode ident;
+nonterminal IntConstNode intconst;
 
 nonterminal Program program;
 nonterminal Scope scope;
@@ -210,8 +216,8 @@ nonterminal ASTList<Readable> inputs;
 
 nonterminal ASTList<DeclarationPart> variablenames;
 nonterminal DeclarationPart variablename;
-nonterminal Integer generalBound;
-nonterminal Integer[] bound;
+nonterminal IntConstNode generalBound;
+nonterminal ArrayBound bound;
 
 nonterminal RoutineDecl functionHead;
 nonterminal RoutineDecl procedureHead;
@@ -321,8 +327,8 @@ statement
         |   GET:_start inputs:inputs                                                                        // input statement
                 {: RESULT = new GetStmt(inputs, new SourceLocImpl(filename, _startleft, _startright, inputs)); :}
 
-        |   IDENT:name L_PAREN argumentList:arguments R_PAREN:_end                                          // call procedure
-                {: RESULT = new ProcedureCallStmt(name, arguments, new SourceLocImpl(filename, nameleft, nameright, _endleft, _endright + 1)); :}
+        |   ident:id L_PAREN argumentList:arguments R_PAREN:_end                                            // call procedure
+                {: RESULT = new ProcedureCallStmt(id, arguments, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
 
         |   scope:scope                                                                                     // embedded scope
                 {: RESULT = scope; :}
@@ -354,30 +360,30 @@ variablenames
         ;
 
 variablename
-        ::= IDENT:id                                                    // scalar variable
-                {: RESULT = new ScalarDeclPart(id, new SourceLocImpl(filename, idleft, idright, id)); :}
+        ::= ident:id                                                    // scalar variable
+                {: RESULT = new ScalarDeclPart(id); :}
 
-        |   IDENT:id L_SQUARE bound:b R_SQUARE:_end                     // 1 dimensional array
-                {: RESULT = new ArrayDeclPart(id, b[0], b[1], new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+        |   ident:id L_SQUARE bound:b R_SQUARE:_end                     // 1 dimensional array
+                {: RESULT = new ArrayDeclPart(id, b, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
 
-        |   IDENT:id L_SQUARE bound:b1 COMMA bound:b2 R_SQUARE:_end     // 1 dimensional array
-                {: RESULT = new ArrayDeclPart(id, b1[0], b1[1], b2[0], b2[1], new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+        |   ident:id L_SQUARE bound:b1 COMMA bound:b2 R_SQUARE:_end     // 1 dimensional array
+                {: RESULT = new ArrayDeclPart(id, b1, b2, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
         ;
 
 bound
-        ::= INTCONST:ub                                     // integer array bound
-                {: RESULT = new Integer[]{ 1, ub }; :}
+        ::= intconst:ub                                     // integer array bound
+                {: RESULT = new ArrayBound(ub, new SourceLocImpl(filename, ubleft, ubright, ub.toString())); :}
 
         |   generalBound:lb DOT DOT generalBound:ub
-                {: RESULT = new Integer[]{ lb, ub }; :}
+                {: RESULT = new ArrayBound(lb, ub, new SourceLocImpl(filename, lb, ub)); :}
         ;
 
 generalBound
-        ::= INTCONST:i                                      // positive array bound
+        ::= intconst:i                                      // positive array bound
                 {: RESULT = i; :}
 
-        |   MINUS INTCONST:i                                // negative array bound
-                {: RESULT = -i; :}
+        |   MINUS:_start intconst:i                         // negative array bound
+                {: RESULT = i.negate(new SourceLocImpl(filename, _startleft, _startright, i)); :}
         ;
 
 type
@@ -389,13 +395,13 @@ type
         ;
 
 functionHead
-        ::= FUNC:_start IDENT:id L_PAREN parameterList:params R_PAREN COLON type:returnType     // function head
+        ::= FUNC:_start ident:id L_PAREN parameterList:params R_PAREN COLON type:returnType     // function head
                 {: RESULT = new RoutineDecl(id, returnType, params, new SourceLocImpl(filename, _startleft, _startright, returnType)); :}
         ;
 
 procedureHead
-        ::= PROCEDURE:_start IDENT:id L_PAREN parameterList:params R_PAREN:_end                 // function head
-                {: RESULT = new RoutineDecl(id, Type.TYPE_NIL, params, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+        ::= PROCEDURE:_start ident:id L_PAREN parameterList:params R_PAREN:_end                 // function head
+                {: RESULT = new RoutineDecl(id, null, params, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
         ;
 
 outputs
@@ -457,8 +463,8 @@ parameters
         ;
 
 parameter
-        ::= IDENT:name COLON type:type                                  // declare one parameter
-                {: RESULT = new ScalarDecl(name, type, new SourceLocImpl(filename, nameleft, nameright, type)); :}
+        ::= ident:id COLON type:type                                    // declare one parameter
+                {: RESULT = new ScalarDecl(id, type, new SourceLocImpl(filename, idleft, idright, type)); :}
         ;
 
 expression
@@ -551,13 +557,13 @@ primary
         |   L_PAREN:_start expression:condition QUESTION:s expression:trueValue COLON expression:falseValue R_PAREN:_end    // conditional expression
                 {: RESULT = new ConditionalExpn(condition, trueValue, falseValue, new SourceLocImpl(filename, _startleft, _startright + 1)); :}
 
-        |   IDENT:name L_PAREN argumentList:arguments R_PAREN:_end      // function call
-                {: RESULT = new FunctionCallExpn(name, arguments, new SourceLocImpl(filename, nameleft, nameright, _endleft, _endright + 1)); :}
+        |   ident:id L_PAREN argumentList:arguments R_PAREN:_end        // function call
+                {: RESULT = new FunctionCallExpn(id, arguments, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
         ;
 
 constant
-        ::= INTCONST:i                                                  // integer constant
-                {: RESULT = new IntConstExpn(i, new SourceLocImpl(filename, ileft, iright, i.toString())); :}
+        ::= intconst:i                                                  // integer constant
+                {: RESULT = new IntConstExpn(i); :}
 
         |   TRUE:_start                                                 // constant true
                 {: RESULT = new BoolConstExpn(true, new SourceLocImpl(filename, _startleft, _startright, "true")); :}
@@ -567,14 +573,24 @@ constant
         ;
 
 variable
-        ::= IDENT:id                                                                // scalar variable or parameter
-                {: RESULT = new IdentExpn(id, new SourceLocImpl(filename, idleft, idright, id)); :}
+        ::= ident:id                                                                // scalar variable or parameter
+                {: RESULT = new IdentExpn(id); :}
 
-        |   IDENT:id L_SQUARE expression:sub1 R_SQUARE:_end                         // element of 1 dimensional array
+        |   ident:id L_SQUARE expression:sub1 R_SQUARE:_end                         // element of 1 dimensional array
                 {: RESULT = new SubsExpn(id, sub1, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
 
-        |   IDENT:id L_SQUARE expression:sub1 COMMA expression:sub2 R_SQUARE:_end   // element of 2 dimensional array
+        |   ident:id L_SQUARE expression:sub1 COMMA expression:sub2 R_SQUARE:_end   // element of 2 dimensional array
                 {: RESULT = new SubsExpn(id, sub1, sub2, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+        ;
+
+ident
+        ::= IDENT:id
+                {: RESULT = new IdentNode(id, new SourceLocImpl(filename, idleft, idright, id)); :}
+        ;
+
+intconst
+        ::= INTCONST:i
+                {: RESULT = new IntConstNode(i, new SourceLocImpl(filename, ileft, iright, i.toString())); :}
         ;
 
 /* The End */
