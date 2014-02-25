@@ -20,6 +20,12 @@ h4,p {font-family:monospace;}
 <h4>compiler488.ast.AST</h4>
 <p>Root superclass for all syntax tree nodes. We added a parent-children interface allowing node traversal, that is, a member called parent and a method called getChildren. Added source location tracking.</p>
 <div class="tab">
+	<h4>compiler488.ast.IdentNode</h4>
+	<p>extends AST. Represents an identifier instead of just using a String. Added this class.</p>
+	<h4>compiler488.ast.IntConstNode</h4>
+	<p>extends AST. Represents an integer constant value instead of using a Int. Added this class.</p>
+	<h4>compiler488.ast.ArrayBound</h4>
+	<p>extends AST. Represents the bounds of an array instead of using two ints. Added this class.</p>
 	<h4>compiler488.ast.ASTList&lt;E&gt;</h4>
 	<p>extends AST. A list of nodes. Delegated rather than subclassed because of a language restriction.</p>
 	<h4>compiler488.ast.expn.Expn</h4>
