@@ -7,6 +7,6 @@ import compiler488.ast.IdentNode;
  */
 public class IdentExpn extends VarRefExpn {
     public IdentExpn(IdentNode ident) {
-    	super(ident, ident);
+        super(ident, ident);
     }
 }

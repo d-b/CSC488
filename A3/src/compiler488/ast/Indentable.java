@@ -7,10 +7,10 @@ import java.io.PrintStream;
  * line.
  */
 public class Indentable extends AST {
-	public Indentable(SourceLoc loc) {
-		super(loc);
-	}
-	
+    public Indentable(SourceLoc loc) {
+        super(loc);
+    }
+
     /**
      * Print the whitespace that should appear at the start of the line when
      * indenting to this depth.

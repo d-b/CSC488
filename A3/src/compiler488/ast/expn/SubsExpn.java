@@ -16,16 +16,16 @@ public class SubsExpn extends VarRefExpn {
     private Expn subscript2 = null;	// second subscript (if any)
 
     public SubsExpn(IdentNode ident, Expn subscript1, SourceLoc loc) {
-    	super(ident, loc);
-    	
-    	this.subscript1 = subscript1;
-        subscript1.setParent(this);       
+        super(ident, loc);
+
+        this.subscript1 = subscript1;
+        subscript1.setParent(this);
     }
 
     public SubsExpn(IdentNode ident, Expn subscript1, Expn subscript2, SourceLoc loc) {
-    	this(ident, subscript1, loc);
+        this(ident, subscript1, loc);
 
-    	this.subscript2 = subscript2;
+        this.subscript2 = subscript2;
         subscript2.setParent(this);
     }
 
@@ -44,7 +44,7 @@ public class SubsExpn extends VarRefExpn {
     public Expn getSubscript2() {
         return subscript2;
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(subscript1);

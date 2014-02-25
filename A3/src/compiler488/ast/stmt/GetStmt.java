@@ -15,7 +15,7 @@ public class GetStmt extends Stmt {
     private ASTList<Readable> inputs; // A list of locations to put the values read.
 
     public GetStmt(ASTList<Readable> inputs, SourceLoc loc) {
-    	super(loc);
+        super(loc);
 
         this.inputs = inputs;
         inputs.setParent(this);

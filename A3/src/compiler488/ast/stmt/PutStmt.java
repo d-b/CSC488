@@ -15,7 +15,7 @@ public class PutStmt extends Stmt {
     private ASTList<Printable> outputs; // The objects to be printed.
 
     public PutStmt (ASTList<Printable> outputs, SourceLoc loc) {
-    	super(loc);
+        super(loc);
 
         this.outputs = outputs;
         outputs.setParent(this);
@@ -30,7 +30,7 @@ public class PutStmt extends Stmt {
     public ASTList<Printable> getOutputs() {
         return outputs;
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(outputs);

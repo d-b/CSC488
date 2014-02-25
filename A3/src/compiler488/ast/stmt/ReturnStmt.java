@@ -10,7 +10,7 @@ import compiler488.ast.SourceLoc;
  */
 public class ReturnStmt extends Stmt {
     public ReturnStmt(SourceLoc loc) {
-    	super(loc);
+        super(loc);
     }
 
     /**

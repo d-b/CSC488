@@ -18,13 +18,13 @@ public class ProcedureCallStmt extends Stmt {
     private ASTList<Expn> arguments; // The arguments passed to the procedure.
 
     public ProcedureCallStmt(IdentNode ident, ASTList<Expn> arguments, SourceLoc loc) {
-    	super(loc);
-    	
-    	this.ident = ident;
-    	ident.setParent(this);
+        super(loc);
 
-    	this.arguments = arguments;
-    	arguments.setParent(this);
+        this.ident = ident;
+        ident.setParent(this);
+
+        this.arguments = arguments;
+        arguments.setParent(this);
     }
 
     /** Returns a string describing the procedure call. */
@@ -42,13 +42,13 @@ public class ProcedureCallStmt extends Stmt {
     }
 
     public IdentNode getIdent() {
-    	return ident;
+        return ident;
     }
 
     public String getName() {
         return ident.getId();
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(arguments);

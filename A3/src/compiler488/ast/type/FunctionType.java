@@ -10,14 +10,14 @@ public class FunctionType extends Type {
     public FunctionType(Type returnType, ASTList<Type> arguments) {
         this.returnType = returnType;
         returnType.setParent(this);
-        
+
         this.arguments = arguments;
         arguments.setParent(this);
     }
-    
+
     public FunctionType(Type returnType, ASTList<Type> arguments, SourceLoc loc) {
         this(returnType, arguments);
-        this.loc = loc; 
+        this.loc = loc;
     }
 
     public String toString() {

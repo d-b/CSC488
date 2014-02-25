@@ -48,7 +48,7 @@ public class ASTList<E extends SourceLoc> extends AST {
     public ASTList<E> addLast(E ast) {
         ll.addLast(ast);
         if(ast instanceof AST)
-            ((AST) ast).setParent(this);        
+            ((AST) ast).setParent(this);
         return this;
     }
 
@@ -112,31 +112,31 @@ public class ASTList<E extends SourceLoc> extends AST {
 
         return ll.equals(alist.ll);
     }
-    
+
     @SuppressWarnings("unchecked")
     public List<AST> getChildren() {
         return (List<AST>) getList();
     }
-    
-	public String getFilename() {
-		return ll.getFirst().getFilename();
-	}
 
-	public int getStartLine() {
-		return ll.getFirst().getStartLine();
-	}
+    public String getFilename() {
+        return ll.getFirst().getFilename();
+    }
 
-	public int getStartColumn() {
-		return ll.getFirst().getStartColumn();
-	}
+    public int getStartLine() {
+        return ll.getFirst().getStartLine();
+    }
 
-	public int getEndLine() {
-		return ll.getLast().getEndLine();
-	}
+    public int getStartColumn() {
+        return ll.getFirst().getStartColumn();
+    }
 
-	public int getEndColumn() {
-		return ll.getLast().getEndColumn();
-	}
-    
+    public int getEndLine() {
+        return ll.getLast().getEndLine();
+    }
+
+    public int getEndColumn() {
+        return ll.getLast().getEndColumn();
+    }
+
 }
 

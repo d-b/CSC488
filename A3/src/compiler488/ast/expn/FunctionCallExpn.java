@@ -17,11 +17,11 @@ public class FunctionCallExpn extends Expn {
     private ASTList<Expn> arguments; // The arguments passed to the function.
 
     public FunctionCallExpn(IdentNode ident, ASTList<Expn> arguments, SourceLoc loc) {
-    	super(loc);
-    	
+        super(loc);
+
         this.ident = ident;
         ident.setParent(this);
-        
+
         this.arguments = arguments;
         arguments.setParent(this);
     }
@@ -41,13 +41,13 @@ public class FunctionCallExpn extends Expn {
     }
 
     public String getName() {
-    	return ident.getId();
+        return ident.getId();
     }
 
     public IdentNode getIdent() {
         return ident;
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(arguments);

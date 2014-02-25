@@ -19,8 +19,8 @@ public class Scope extends Stmt {
     private ASTList<Stmt> statements; // The statements to execute.
 
     public Scope(SourceLoc loc) {
-    	super(loc);
-    	
+        super(loc);
+
         declarations = new ASTList<Declaration>();
         statements = new ASTList<Stmt>();
         declarations.setParent(this);
@@ -28,8 +28,8 @@ public class Scope extends Stmt {
     }
 
     public Scope(ASTList<Declaration> decls, ASTList<Stmt> stmts, SourceLoc loc) {
-    	super(loc);
-    	
+        super(loc);
+
         if (decls == null) {
             declarations = new ASTList<Declaration>();
         } else {
@@ -41,9 +41,9 @@ public class Scope extends Stmt {
         } else {
             statements = stmts;
         }
-        
+
         declarations.setParent(this);
-        statements.setParent(this);        
+        statements.setParent(this);
     }
 
     /**
@@ -75,7 +75,7 @@ public class Scope extends Stmt {
     public ASTList<Stmt> getStatements() {
         return statements;
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(declarations);

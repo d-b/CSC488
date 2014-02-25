@@ -17,8 +17,8 @@ public class UnaryExpn extends Expn {
     private String opSymbol;	/* Name of the operator. */
 
     public UnaryExpn(String opSymbol, Expn operand, SourceLoc loc) {
-    	super(loc);
-    	
+        super(loc);
+
         this.opSymbol = opSymbol;
 
         this.operand = operand;

@@ -25,18 +25,18 @@ public class IfStmt extends Stmt {
 
     public IfStmt(Expn condition, ASTList<Stmt> whenTrue, SourceLoc loc) {
         super(loc);
-        
+
         this.condition = condition;
         condition.setParent(this);
 
         this.whenTrue = whenTrue;
         whenTrue.setParent(this);
     }
-    
-    public IfStmt(Expn condition, ASTList<Stmt> whenTrue, ASTList<Stmt> whenFalse, SourceLoc loc) {
-    	this(condition, whenTrue, loc);
 
-    	this.whenFalse = whenFalse;
+    public IfStmt(Expn condition, ASTList<Stmt> whenTrue, ASTList<Stmt> whenFalse, SourceLoc loc) {
+        this(condition, whenTrue, loc);
+
+        this.whenFalse = whenFalse;
         whenFalse.setParent(this);
     }
 
@@ -80,6 +80,6 @@ public class IfStmt extends Stmt {
         children.add(whenTrue);
         if(whenFalse != null) children.add(whenFalse);
         return children;
-    }    
+    }
 }
 

@@ -10,7 +10,7 @@ public class TextConstExpn extends ConstExpn implements Printable {
     private String value; // The value of this literal.
 
     public TextConstExpn(String value, SourceLoc loc) {
-    	super(loc);
+        super(loc);
 
         this.value = value;
     }

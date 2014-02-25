@@ -20,7 +20,7 @@ public class AssignStmt extends Stmt {
     private Expn rval;
 
     public AssignStmt(VarRefExpn lval, Expn rval, SourceLoc loc) {
-    	super(loc);
+        super(loc);
 
         this.lval = lval;
         lval.setParent(this);
@@ -43,7 +43,7 @@ public class AssignStmt extends Stmt {
         return rval;
     }
 
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(lval);

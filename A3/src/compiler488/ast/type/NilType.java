@@ -4,5 +4,5 @@ public class NilType extends Type {
     @Override
     public String toString() {
         return "><";
-    }    
+    }
 }

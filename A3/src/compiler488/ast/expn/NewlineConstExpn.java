@@ -9,10 +9,10 @@ import compiler488.ast.SourceLoc;
  */
 public class NewlineConstExpn extends ConstExpn implements Printable {
     public NewlineConstExpn(SourceLoc loc) {
-		super(loc);
-	}
+        super(loc);
+    }
 
-	/** Returns the string <b>"newline"</b>. */
+    /** Returns the string <b>"newline"</b>. */
     @Override
     public String toString() {
         return " newline ";

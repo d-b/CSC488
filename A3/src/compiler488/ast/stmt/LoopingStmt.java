@@ -16,11 +16,11 @@ public abstract class LoopingStmt extends Stmt {
     protected Expn condition;          // Loop condition
 
     public LoopingStmt(ASTList<Stmt> body, Expn condition, SourceLoc loc) {
-    	super(loc);
-    	
+        super(loc);
+
         this.body = body;
         body.setParent(this);
-        
+
         this.condition = condition;
         condition.setParent(this);
     }
@@ -32,7 +32,7 @@ public abstract class LoopingStmt extends Stmt {
     public ASTList<Stmt> getBody() {
         return body;
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(body);

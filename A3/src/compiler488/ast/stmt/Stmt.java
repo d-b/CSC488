@@ -7,8 +7,8 @@ import compiler488.ast.SourceLoc;
  * A placeholder for statements.
  */
 public class Stmt extends Indentable {
-	public Stmt(SourceLoc loc) {
-		super(loc);
-	}
+    public Stmt(SourceLoc loc) {
+        super(loc);
+    }
 }
 

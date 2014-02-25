@@ -16,14 +16,14 @@ public class Declaration extends Indentable {
     protected IdentNode ident;
 
     public Declaration(IdentNode ident, Type type, SourceLoc loc) {
-    	super(loc);
+        super(loc);
 
-    	this.ident = ident;
-    	// FIXME MultiDeclaration passes in a NULL for this, and that feels wrong...
-    	if (ident != null) {
-    		ident.setParent(this);
-    	}
-    	
+        this.ident = ident;
+        // FIXME MultiDeclaration passes in a NULL for this, and that feels wrong...
+        if (ident != null) {
+            ident.setParent(this);
+        }
+
         this.type = type;
         type.setParent(this);
     }
@@ -31,9 +31,9 @@ public class Declaration extends Indentable {
     public String getName() {
         return ident.getId();
     }
-    
+
     public IdentNode getIdent() {
-    	return ident;
+        return ident;
     }
 
     public Type getType() {

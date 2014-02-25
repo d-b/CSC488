@@ -26,13 +26,13 @@ public class RoutineDecl extends Declaration {
     private FunctionType funcType;
 
     public RoutineDecl(IdentNode ident, Type returnType, ASTList<ScalarDecl> params, SourceLoc loc) {
-    	super(ident, returnType, loc);
-        
+        super(ident, returnType, loc);
+
         ASTList<Type> argTypes = new ASTList<Type>();
-        
+
         this.params = params;
         params.setParent(this);
-        
+
         for (ScalarDecl argDecl : params.getList()) {
             argTypes.addLast(argDecl.getType());
         }
@@ -40,10 +40,10 @@ public class RoutineDecl extends Declaration {
         funcType = new FunctionType(returnType, argTypes, loc);
         funcType.setParent(this);
     }
-    
+
     public RoutineDecl(IdentNode ident, Type returnType, ASTList<ScalarDecl> params, Scope body, SourceLoc loc) {
         this(ident, returnType, params, loc);
-        
+
         this.body = body;
         body.setParent(this);
     }
@@ -59,25 +59,25 @@ public class RoutineDecl extends Declaration {
     public boolean isForward() {
         return body == null;
     }
-    
+
     public Scope getBody() {
         return body;
     }
-    
+
     public FunctionType getFunctionType() {
         return funcType;
     }
-    
+
     public ASTList<ScalarDecl> getParameters() {
         return params;
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(type);
         children.add(params);
         if(body != null) children.add(body);
-        return children;        
+        return children;
     }
 
     /**

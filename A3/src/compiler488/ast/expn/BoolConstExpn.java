@@ -9,7 +9,7 @@ public class BoolConstExpn extends ConstExpn {
     private boolean  value;	/* value of the constant */
 
     public BoolConstExpn(boolean value, SourceLoc loc) {
-    	super(loc);
+        super(loc);
         this.value = value;
     }
 

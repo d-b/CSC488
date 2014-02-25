@@ -25,7 +25,7 @@ public class ArrayDeclPart extends DeclarationPart {
 
     public ArrayDeclPart(IdentNode ident, ArrayBound b1, ArrayBound b2, SourceLoc loc) {
         this(ident, b1, loc);
-        
+
         this.b2 = b2;
         is2D = true;
         size *= (b2.getUpperboundValue() - b2.getLowerboundValue() + 1);
@@ -44,15 +44,15 @@ public class ArrayDeclPart extends DeclarationPart {
     }
 
     public ArrayBound getBound1() {
-    	return b1;
+        return b1;
     }
-    
+
     public ArrayBound getBound2() {
-    	assert is2D;
-    	return b2;
+        assert is2D;
+        return b2;
     }
-    
+
     public Integer getSize() {
-    	return size;
+        return size;
     }
 }

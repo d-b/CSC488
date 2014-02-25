@@ -24,12 +24,12 @@ public class MultiDeclarations extends Declaration {
         this.elements = elements;
         elements.setParent(this);
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(elements);
         return children;
-    }    
+    }
 
     /**
      * Returns a string that describes the array.

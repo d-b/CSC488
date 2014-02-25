@@ -16,11 +16,11 @@ public class ExitStmt extends Stmt {
     private Expn condition = null;
 
     public ExitStmt(SourceLoc loc) {
-    	super(loc);
+        super(loc);
     }
 
     public ExitStmt(Expn condition, SourceLoc loc) {
-    	this(loc);
+        this(loc);
 
         this.condition = condition;
         condition.setParent(this);
@@ -42,11 +42,11 @@ public class ExitStmt extends Stmt {
     public Expn getCondition() {
         return condition;
     }
-    
+
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
         children.add(condition);
         return children;
-    }    
+    }
 }
 

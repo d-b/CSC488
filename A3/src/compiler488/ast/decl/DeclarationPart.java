@@ -12,20 +12,20 @@ public class DeclarationPart extends AST {
     protected IdentNode ident;
 
     public DeclarationPart(IdentNode ident, SourceLoc loc) {
-    	super(loc);
+        super(loc);
         this.ident = ident;
         ident.setParent(this);
     }
 
     public String getName() {
-    	return ident.getId();
+        return ident.getId();
     }
 
     public IdentNode getIdent() {
         return ident;
     }
-    
+
     public String toString() {
-    	return ident.toString();
+        return ident.toString();
     }
 }

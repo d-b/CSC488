@@ -14,13 +14,13 @@ public class BinaryExpn extends Expn {
     String opSymbol;	/* Name of the operator. */
 
     public BinaryExpn(String opSymbol, Expn left, Expn right, SourceLoc loc) {
-    	super(loc);
+        super(loc);
 
         this.opSymbol = opSymbol;
 
         this.left = left;
         left.setParent(this);
-        
+
         this.right = right;
         right.setParent(this);
     }
