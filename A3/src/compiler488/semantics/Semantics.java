@@ -204,6 +204,24 @@ public class Semantics {
         conditionalExpn.setType(conditionalExpn.getTrueValue().getType()); return true;
     }
     
+    @Action(number = 26) // Set result type to type of variablename.
+    Boolean actionSetToVariable(IdentExpn identExpn) {
+        Symbol symbol = symbolTable.find(identExpn.getIdent().getId());
+        if(symbol == null) return false;
+        identExpn.setType(symbol.getType());
+        return true;
+    }
+    
+    @Action(number = 28) // Set result type to result type of function.
+    Boolean actionSetToFunction(FunctionCallExpn functionCallExpn) {
+        Symbol symbol = symbolTable.find(functionCallExpn.getIdent().getId());
+        Type   type   = symbol.getType(); 
+        if(symbol == null
+        || !(type instanceof FunctionType)) return false;
+        functionCallExpn.setType(((FunctionType) type).getReturnType());
+        return true;
+    }    
+    
     @Action(number = 29) // Check that identifier is visible according to the language scope rule.
     Boolean actionCheckIdentifer(IdentNode ident) {
         Symbol symbol = symbolTable.find(ident.getId());
@@ -241,38 +259,27 @@ public class Semantics {
     Boolean actionCheckIdentExpn(IdentExpn identExpn) {
         // Find the symbol
         Symbol symbol = symbolTable.find(identExpn.getIdent().getId());
-        if(symbol == null) return false;
-        
-        // Make sure it's a scalar
-        if(!(symbol instanceof VariableSymbol)) return false;
-        identExpn.setType(symbol.getType());
-        VariableSymbol varSym = (VariableSymbol) symbol;
-        return varSym.getDimensions() == 0;
+        // Verify result
+        return (symbol != null
+             && symbol instanceof VariableSymbol
+             && ((VariableSymbol) symbol).getDimensions() == 0);
     }
     
     @Action(number = 40) // Check that identifier has been declared as a function.
     Boolean actionCheckFunctionCallExpn(FunctionCallExpn functionCallExpn) {
-        // Find the symbol
+        // Find and check the symbol
         Symbol symbol = symbolTable.find(functionCallExpn.getIdent().getId());
-        if(symbol == null) return false;
-        
-        // Make sure it's a function
-        if(!(symbol instanceof FunctionSymbol)) return false;
-        FunctionSymbol funcSym = (FunctionSymbol) symbol;
-        functionCallExpn.setType(((FunctionType) funcSym.getType()).getReturnType());
-        return FunctionSymbol.isFunction(funcSym);
+        return FunctionSymbol.isFunction(symbol);        
     }
     
     @Action(number = 41) // Check that identifier has been declared as a procedure.
     Boolean actionCheckProcedureCallStmt(ProcedureCallStmt procedureCallStmt) {
         // Find the symbol
         Symbol symbol = symbolTable.find(procedureCallStmt.getIdent().getId());
-        if(symbol == null) return false;
-        
-        // Make sure it's a procedure
-        if(!(symbol instanceof FunctionSymbol)) return false;
-        FunctionSymbol funcSym = (FunctionSymbol) symbol;
-        return !FunctionSymbol.isFunction(funcSym);
+        // Verify result
+        return (symbol != null
+             && symbol instanceof FunctionSymbol
+             && !FunctionSymbol.isFunction(symbol));
     }     
     
     @Action(number = 46) // Check that lower bound is <= upper bound.
@@ -464,6 +471,7 @@ public class Semantics {
         semanticAction(37); // S37: Check that identifier has been declared as a scalar variable.
         setTop(identExpn.getIdent());
         semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
+        semanticAction(26); // S26: Set result type to type of variablename.
     }
     
     /*
@@ -580,6 +588,7 @@ public class Semantics {
         semanticAction(40); // S40: Check that identifier has been declared as a function.
         setTop(functionCallExpn.getIdent());
         semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
+        semanticAction(28); // S28: Set result type to result type of function.
     }
    
     //
