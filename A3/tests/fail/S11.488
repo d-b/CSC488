@@ -1,10 +1,14 @@
 %
-% Test action S11
+% Duplicate forward function declaration
 %
+% @line=9
+%
+
 {
 	forward func foo() : integer
 	forward func foo() : integer
 	func foo() : integer {result 1}
+
 	var x : integer
 	x := foo()
 }

@@ -1,10 +1,14 @@
 %
-% Test S18 Error : multiple definition.
+% Duplicate procedure declaration
 %
+% @line=10
+%
+
 {
-	forward proc foo(x : integer, y:integer)
-	proc foo(x : integer, y:integer) {put "bar",newline}
-	proc foo(x : integer, y:integer) {put "bar",newline}
+	forward proc foo(x : integer, y : integer)
+	proc foo(x : integer, y : integer) {put "bar",newline}
+	proc foo(x : integer, y : integer) {put "bar",newline}
+
 	put "foo"
 	foo(1,2)
 }

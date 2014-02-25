@@ -1,8 +1,12 @@
 %
-% Test action S15
+% Duplicate parameter declaration
 %
+% @line=8
+%
+
 {
-	func foo(x : integer, x:integer) : integer {result 1}
+	func foo(x : integer, x : integer) : integer {result 1}
+
 	var x : integer
 	x := foo(1,2)
 }
