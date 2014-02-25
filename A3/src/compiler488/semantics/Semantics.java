@@ -6,6 +6,7 @@ import compiler488.symbol.FunctionSymbol;
 import compiler488.symbol.Symbol;
 import compiler488.symbol.SymbolTable;
 import compiler488.symbol.VariableSymbol;
+import compiler488.semantics.Errors;
 import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.SourceLocPrettyPrinter;
@@ -38,13 +39,12 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Vector;
 
 /** Implement semantic analysis for compiler 488 
  *  @author Daniel Bloemendal
  */
 public class Semantics {
-	private List<String> source_lines;
-	
     //
     // Actions
     //
@@ -478,8 +478,10 @@ public class Semantics {
                 	System.out.println("Semantic Action: S" + actionNumber);
                 } else {
                     SourceLoc loc = analysisTop.getLoc();
-                    System.out.println(loc + ": Semantic Error S" + actionNumber);
-                    (new SourceLocPrettyPrinter(System.out, source_lines, loc)).print();
+                    String errorMessage = Errors.getError(actionNumber);
+                    if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber; 
+                    System.out.println(loc + ": " + errorMessage);
+                    (new SourceLocPrettyPrinter(System.out, analysisSource, loc)).print();
                 }
             }
             catch (IllegalAccessException e)    { e.printStackTrace(); }
@@ -507,8 +509,9 @@ public class Semantics {
         populateMappings();
     }
 
-    public void Analyze(Program ast, List<String> lines) {
-    	source_lines = lines;
+    public void Analyze(Program ast, List<String> source) {
+        // Store source code
+        analysisSource = new Vector<String>(source);
     	
         // Add the initial element to the stack
         analysisStack.add(ast);
@@ -562,6 +565,7 @@ public class Semantics {
     private Set<AST>      analysisGrey;
     private Deque<AST>    analysisStack;
     private Deque<Object> analysisWorking;
+    private List<String>  analysisSource;
 }
 
 //
