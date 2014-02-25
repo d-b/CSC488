@@ -446,6 +446,8 @@ public class Main {
             System.out.println("Processing Terminated due to errors during parsing");
             return;
         }
+        
+        //verifyPrettyPrint(programAST);
 
         // Dump AST after parsing if requested
         if (dumpAST1) {
@@ -594,5 +596,35 @@ public class Main {
 
         System.out.println("End of Execution");
     }
-}
+    
+    static void verifyPrettyPrint(Program prog) {
+        ByteArrayOutputStream output_stream = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(output_stream);
+        ASTPrettyPrinterContext pp = new ASTPrettyPrinterContext(ps);
+        pp.print(prog);
+        ps.flush();
+        
+        String output = output_stream.toString();
+        
+        //System.out.println(output);
+        
+        try {
+            Parser p = new Parser(new Lexer(new StringReader(output)));
+            
+            p.filename = "<roundtrip>";
+            p.source_lines = null;
 
+            Program prog2 = (Program) p.parse().value;
+            
+            if (!prog.equals(prog2)) {
+                throw new RuntimeException("Roundtrip didn't match, oops");
+            }
+        } catch (SyntaxErrorException e) {
+            System.err.println("Error parsing pretty print output");
+        } catch (Exception e) {
+            System.err.println("Exception during Parsing and AST building");
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
