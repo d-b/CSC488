@@ -10,7 +10,7 @@ import compiler488.ast.type.Type;
  */
 public class Declaration extends Indentable {
     /** The type of thing being declared. */
-    protected Type type = null;
+    protected Type type;
 
     /** The name of the thing being declared. */
     protected IdentNode ident;
@@ -19,7 +19,10 @@ public class Declaration extends Indentable {
     	super(loc);
 
     	this.ident = ident;
-    	ident.setParent(this);
+    	// FIXME MultiDeclaration passes in a NULL for this, and that feels wrong...
+    	if (ident != null) {
+    		ident.setParent(this);
+    	}
     	
         this.type = type;
         type.setParent(this);

@@ -41,7 +41,7 @@ public class FunctionSymbol extends Symbol {
     
     static public Boolean isFunction(Symbol instance) {
         return (instance instanceof FunctionSymbol) &&
-        		(((FunctionSymbol) instance).type.getReturnType() != null);
+        		!(((FunctionSymbol) instance).type.getReturnType().isNil());
     }    
     
     static public Boolean isForward(Symbol instance) {

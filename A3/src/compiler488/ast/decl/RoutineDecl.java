@@ -21,7 +21,6 @@ public class RoutineDecl extends Declaration {
      * The formal parameters of the function/procedure and the
      * statements to execute when the procedure is called.
      */
-    private Type returnType = null;
     private ASTList<ScalarDecl> params; // The formal parameters of the routine.
     private Scope body = null;
     private FunctionType funcType;
@@ -30,11 +29,6 @@ public class RoutineDecl extends Declaration {
     	super(ident, returnType, loc);
         
         ASTList<Type> argTypes = new ASTList<Type>();
-
-        this.returnType = returnType;
-        if (returnType != null) {
-        	returnType.setParent(this);
-        }
         
         this.params = params;
         params.setParent(this);
@@ -57,9 +51,9 @@ public class RoutineDecl extends Declaration {
     public RoutineDecl withBody(Scope body, SourceLoc wider_loc) {
         return new RoutineDecl(ident, type, params, body, wider_loc);
     }
-    
+
     public boolean isFunction() {
-        return type != null;
+        return !type.isNil();
     }
 
     public boolean isForward() {
@@ -74,17 +68,13 @@ public class RoutineDecl extends Declaration {
         return funcType;
     }
     
-    public Type getReturnType() {
-        return returnType;
-    }
-    
     public ASTList<ScalarDecl> getParameters() {
         return params;
     }
     
     public List<AST> getChildren() {
         Vector<AST> children = new Vector<AST>();
-        children.add(returnType);
+        children.add(type);
         children.add(params);
         if(body != null) children.add(body);
         return children;        

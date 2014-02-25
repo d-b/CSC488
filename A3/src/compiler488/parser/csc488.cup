@@ -29,6 +29,7 @@ import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
 
 import compiler488.ast.type.Type;
+import compiler488.ast.type.NilType;
 import compiler488.ast.type.BooleanType;
 import compiler488.ast.type.IntegerType;
 
@@ -401,7 +402,7 @@ functionHead
 
 procedureHead
         ::= PROCEDURE:_start ident:id L_PAREN parameterList:params R_PAREN:_end                 // function head
-                {: RESULT = new RoutineDecl(id, null, params, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+                {: RESULT = new RoutineDecl(id, new NilType(), params, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
         ;
 
 outputs

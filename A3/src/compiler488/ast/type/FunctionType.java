@@ -14,9 +14,7 @@ public class FunctionType extends Type {
     	super(loc);
     	
         this.returnType = returnType;
-        if (returnType != null) {
-        	returnType.setParent(this);
-        }
+        returnType.setParent(this);
         
         this.arguments = arguments;
         arguments.setParent(this);

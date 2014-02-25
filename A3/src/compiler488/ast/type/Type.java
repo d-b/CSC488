@@ -18,5 +18,21 @@ abstract public class Type extends AST {
     public boolean equals(Object o) {
         return this.getClass().equals(o.getClass());
     }
+    
+    public boolean equals(Class cls) {
+    	return this.getClass().equals(cls);
+    }
+    
+    public boolean isNil() {
+    	return equals(NilType.class);
+    }
+    
+    public boolean isBoolean() {
+    	return equals(BooleanType.class);
+    }
+    
+    public boolean isInteger() {
+    	return equals(IntegerType.class);
+    }
 }
 
