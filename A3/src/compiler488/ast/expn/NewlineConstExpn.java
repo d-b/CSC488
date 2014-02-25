@@ -18,4 +18,3 @@ public class NewlineConstExpn extends ConstExpn implements Printable {
         return " newline ";
     }
 }
-

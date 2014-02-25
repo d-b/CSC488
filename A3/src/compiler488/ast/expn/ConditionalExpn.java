@@ -1,5 +1,9 @@
 package compiler488.ast.expn;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 
 /** Represents a conditional expression (i.e., x>0?3:4). */
@@ -48,5 +52,12 @@ public class ConditionalExpn extends Expn {
     public void setTrueValue(Expn trueValue) {
         this.trueValue = trueValue;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(condition);
+        children.add(trueValue);
+        children.add(falseValue);
+        return children;
+    }    
 }
-

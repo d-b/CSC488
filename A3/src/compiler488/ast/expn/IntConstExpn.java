@@ -31,4 +31,3 @@ public class IntConstExpn extends ConstExpn {
         this.value = value;
     }
 }
-

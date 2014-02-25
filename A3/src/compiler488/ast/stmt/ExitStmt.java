@@ -1,5 +1,9 @@
 package compiler488.ast.stmt;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
@@ -41,5 +45,11 @@ public class ExitStmt extends Stmt {
     public void setCondition(Expn condition) {
         this.condition = condition;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(condition);
+        return children;
+    }    
 }
 

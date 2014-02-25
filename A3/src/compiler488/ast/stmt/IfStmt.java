@@ -1,11 +1,13 @@
 package compiler488.ast.stmt;
 
 import java.io.PrintStream;
+import java.util.List;
+import java.util.Vector;
 
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Indentable;
 import compiler488.ast.SourceLoc;
-
 import compiler488.ast.expn.Expn;
 
 /**
@@ -80,5 +82,13 @@ public class IfStmt extends Stmt {
     public void setWhenTrue(ASTList<Stmt> whenTrue) {
         this.whenTrue = whenTrue;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(condition);
+        children.add(whenTrue);
+        if(whenFalse != null) children.add(whenFalse);
+        return children;
+    }    
 }
 

@@ -1,5 +1,9 @@
 package compiler488.ast.expn;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 
 /**
@@ -47,5 +51,11 @@ public class BinaryExpn extends Expn {
     public void setRight(Expn right) {
         this.right = right;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(left);
+        children.add(right);
+        return children;
+    }
 }
-

@@ -27,4 +27,3 @@ public class BoolConstExpn extends ConstExpn {
         this.value = value;
     }
 }
-

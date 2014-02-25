@@ -1,5 +1,9 @@
 package compiler488.ast.expn;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.SourceLoc;
 
@@ -43,5 +47,10 @@ public class FunctionCallExpn extends Expn {
     public void setIdent(String ident) {
         this.ident = ident;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(arguments);
+        return children;
+    }
 }
-

@@ -10,4 +10,3 @@ public class UnaryMinusExpn extends UnaryExpn {
         super(UnaryExpn.OP_MINUS, operand, loc);
     }
 }
-

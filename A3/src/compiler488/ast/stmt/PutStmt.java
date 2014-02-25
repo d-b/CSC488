@@ -1,5 +1,9 @@
 package compiler488.ast.stmt;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Printable;
 import compiler488.ast.SourceLoc;
@@ -28,6 +32,12 @@ public class PutStmt extends Stmt {
 
     public void setOutputs(ASTList<Printable> outputs) {
         this.outputs = outputs;
+    }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(outputs);
+        return children;
     }
 }
 

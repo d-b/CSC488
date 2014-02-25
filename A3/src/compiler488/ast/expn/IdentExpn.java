@@ -29,4 +29,3 @@ public class IdentExpn extends VarRefExpn {
         this.ident = ident;
     }
 }
-

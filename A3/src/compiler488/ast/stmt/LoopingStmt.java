@@ -1,5 +1,9 @@
 package compiler488.ast.stmt;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
@@ -33,6 +37,13 @@ public abstract class LoopingStmt extends Stmt {
 
     public void setBody(ASTList<Stmt> body) {
         this.body = body;
+    }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(body);
+        children.add(condition);
+        return children;
     }
 }
 

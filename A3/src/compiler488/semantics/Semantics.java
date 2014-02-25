@@ -16,6 +16,7 @@ import compiler488.ast.decl.MultiDeclarations;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.ScalarDeclPart;
+import compiler488.ast.expn.IdentExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.ResultStmt;
@@ -534,7 +535,10 @@ public class Semantics {
                 // Add children to the stack
                 List<AST> children = top.getChildren();
                 ListIterator<AST> li = children.listIterator(children.size());
-                while(li.hasPrevious()) analysisStack.push(li.previous());
+                while(li.hasPrevious()) {
+                    AST node = li.previous();
+                    if(node != null) analysisStack.push(node);
+                }
             }
             // Finish processing node and pop it off of the stack
             else {

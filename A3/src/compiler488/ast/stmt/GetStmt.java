@@ -1,5 +1,9 @@
 package compiler488.ast.stmt;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.Readable;
 import compiler488.ast.SourceLoc;
@@ -29,5 +33,10 @@ public class GetStmt extends Stmt {
     public void setInputs(ASTList<Readable> inputs) {
         this.inputs = inputs;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(inputs);
+        return children;
+    }
 }
-

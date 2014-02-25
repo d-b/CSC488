@@ -28,4 +28,3 @@ public class TextConstExpn extends ConstExpn implements Printable {
         this.value = value;
     }
 }
-

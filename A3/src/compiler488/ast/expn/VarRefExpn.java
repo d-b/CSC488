@@ -8,4 +8,3 @@ public abstract class VarRefExpn extends Expn implements Readable {
 		super(loc);
 	}
 }
-

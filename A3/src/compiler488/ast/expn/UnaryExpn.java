@@ -1,5 +1,9 @@
 package compiler488.ast.expn;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 
 /**
@@ -40,5 +44,10 @@ public class UnaryExpn extends Expn {
     public void setOpSymbol(String opSymbol) {
         this.opSymbol = opSymbol;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(operand);
+        return children;
+    }
 }
-

@@ -1,5 +1,9 @@
 package compiler488.ast.stmt;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
@@ -43,6 +47,12 @@ public class ProcedureCallStmt extends Stmt {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(arguments);
+        return children;
     }
 }
 

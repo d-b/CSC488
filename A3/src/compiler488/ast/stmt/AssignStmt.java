@@ -1,5 +1,9 @@
 package compiler488.ast.stmt;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
 
@@ -42,5 +46,11 @@ public class AssignStmt extends Stmt {
     public void setRval(Expn rval) {
         this.rval = rval;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(lval);
+        children.add(rval);
+        return children;
+    }
 }
-

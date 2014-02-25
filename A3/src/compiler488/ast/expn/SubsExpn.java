@@ -1,5 +1,9 @@
 package compiler488.ast.expn;
 
+import java.util.List;
+import java.util.Vector;
+
+import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 
 /**
@@ -55,5 +59,11 @@ public class SubsExpn extends VarRefExpn {
     public void setSubscript2(Expn subscript2) {
         this.subscript2 = subscript2;
     }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(subscript1);
+        if(subscript2 != null) children.add(subscript2);
+        return children;
+    }
 }
-

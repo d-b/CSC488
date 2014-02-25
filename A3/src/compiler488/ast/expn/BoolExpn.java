@@ -15,4 +15,3 @@ public class BoolExpn extends BinaryExpn {
         super(opSymbol, left, right, loc);
     }
 }
-

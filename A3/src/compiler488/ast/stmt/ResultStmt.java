@@ -1,7 +1,10 @@
 package compiler488.ast.stmt;
 
 import java.io.PrintStream;
+import java.util.List;
+import java.util.Vector;
 
+import compiler488.ast.AST;
 import compiler488.ast.Indentable;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
@@ -39,6 +42,12 @@ public class ResultStmt extends Stmt {
 
     public void setValue(Expn value) {
         this.value = value;
+    }
+    
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(value);
+        return children;
     }
 }
 
