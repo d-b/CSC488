@@ -8,7 +8,7 @@ import java.util.List;
  * a convenient place to add common behaviour.
  * @author  Dave Wortman, Marsha Chechik, Danny House
  */
-public class AST {
+public class AST implements SourceLoc {
     AST parent;
     protected SourceLoc loc;
 
@@ -26,4 +26,24 @@ public class AST {
     public List<AST> getChildren() {
         return Collections.emptyList();
     }
+
+	public String getFilename() {
+		return loc.getFilename();
+	}
+
+	public int getStartLine() {
+		return loc.getStartLine();
+	}
+
+	public int getStartColumn() {
+		return loc.getStartColumn();
+	}
+
+	public int getEndLine() {
+		return loc.getEndLine();
+	}
+
+	public int getEndColumn() {
+		return loc.getEndColumn();
+	}
 }

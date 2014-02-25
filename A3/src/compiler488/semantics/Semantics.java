@@ -439,7 +439,7 @@ public class Semantics {
         catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
         catch (InvocationTargetException e) { e.printStackTrace(); return false; }
     }
-    
+
     void semanticAction(int actionNumber) {
         if( traceSemantics ){
             if(traceFile.length() > 0 ){
@@ -448,40 +448,41 @@ public class Semantics {
                     //open the file for writing and append to it
                     new File(traceFile);
                     Tracer = new FileWriter(traceFile, true);
-                                  
+
                     Tracer.write("Sematics: S" + actionNumber + "\n");
                     //always be sure to close the file
                     Tracer.close();
                 }
                 catch (IOException e) {
-                  System.out.println(traceFile + 
-                    " could be opened/created.  It may be in use.");
+                    System.out.println(traceFile + 
+                            " could be opened/created.  It may be in use.");
                 }
             }
             else{
                 //output the trace to standard out.
                 System.out.println("Sematics: S" + actionNumber );
             }
-         
+
         }
-        
+
         Method m = actionsMap.get(actionNumber);
         if(m == null) System.out.println("Unhandled Semantic Action: S" + actionNumber );
         else {
-        	Boolean result = false;
-        	
+            Boolean result = false;
+
             // Invoke the semantic action. 
             try {
                 result = (Boolean) m.invoke(this, analysisTop);
-                
+
                 if (result) {
-                	System.out.println("Semantic Action: S" + actionNumber);
+                    System.out.println("Semantic Action: S" + actionNumber);
                 } else {
                     SourceLoc loc = analysisTop.getLoc();
                     String errorMessage = Errors.getError(actionNumber);
                     if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber; 
-                    System.out.println(loc + ": " + errorMessage);
-                    (new SourceLocPrettyPrinter(System.out, analysisSource, loc)).print();
+                    SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, analysisSource, loc);
+                    System.out.println(pp.getFileRef() + ": " + errorMessage);
+                    pp.print();
                     analysisErrors += 1;
                 }
             }

@@ -8,9 +8,14 @@ package compiler488.parser;
 
 import java_cup.runtime.*;		// Must always import this.
 
+import java.util.List;
+
 import compiler488.ast.ASTList;
 import compiler488.ast.Readable;
 import compiler488.ast.SourceLoc;
+import compiler488.ast.SourceLocImpl;
+import compiler488.ast.Printable;
+import compiler488.ast.SourceLocPrettyPrinter;
 
 import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.Declaration;
@@ -67,12 +72,12 @@ import compiler488.ast.expn.FunctionCallExpn;
      * @pdmccormick: A bit hackish, should be with the scanner, but we don't readily have
      * access to a private member of type `Lexer`, only one of the underlying
      * interface `java_cup.runtime.Scanner`, so given how much mess we are already
-     * dealing with in the mass of `new SourceLoc(_startleft, _startright, ...)`,
+     * dealing with in the mass of `new SourceLocImpl(_startleft, _startright, ...)`,
      * we relent to the ugliness and make our lives easier.
      *
      * Speaking of the `_startleft` and `_startright` convention seen below, it would
      * be much nicer if CUP would give us both the typed terminal itself as well as a
-     * `java_cup.runtime.Symbol` for it, then we could enhance the `SourceLoc` 
+     * `java_cup.runtime.Symbol` for it, then we could enhance the `SourceLocImpl` 
      * constructors to directly accept that type and extract the `left` and `right`
      * fields itself. Oh well...
      */
@@ -87,8 +92,11 @@ parser code {:
      * action class case.) */
     public String filename = "<unknown file>";
 
-	String lastError;
-	
+    /** List of lines from the file (for error reporting) */
+    public List<String> source_lines;
+
+    String lastError;
+
     /** Override the report_error method so it will display the line and
      * column of where the error occurred in the input as well as the
      * reason for the error which is passed into the method in the
@@ -97,42 +105,42 @@ parser code {:
      * @param info     symbol containing line/column numbers
      */
     public void report_error(String message, Object info)
-	{
-	String st =  "Error";
-   
-        if (info instanceof java_cup.runtime.Symbol)
-	    {
+    {
+        String st = "Error";
+        SourceLocPrettyPrinter pp = null;
+
+        if (info instanceof java_cup.runtime.Symbol) {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
 
-	    /* s.left is supposed to hold the line number of the error.
-	     * s.right is supposed to hold the column number.
-             * If either is < 0 the parser may have run off the end of the program
-             * and a Syntax Error message without line number may be printed.
-	     */
-   
-            if (s.left >= 0)				// Check line number.
-		{
-                st += " in line " + (s.left + 1);
-                if (s.right >= 0)			// Check column number.
-                    st += ", column " + (s.right + 1);
-		}
-            else
-               st += " at end of input " ;
-           }
-	    st += ": " + message;
-        System.err.println (st);
+            // Synthesize a SourceLocImpl here so we can use the pretty-printer
+            SourceLoc loc = new SourceLocImpl(filename, s.left, s.right);
+
+            if (s.left >= 0) {
+                pp = new SourceLocPrettyPrinter(System.err, source_lines, loc);
+                st = pp.getFileRef();
+            } else {
+                st += " at end of input";
+            }
+        }
+        st += ": " + message;
+        System.err.println(st);
+
+        if (pp != null) {
+            pp.print();
+        }
+
         lastError = st;
-	}
-   
+    }
+
     /** Override the report_fatal_error method to use the report_error method. */
     /** @throws SyntaxErrorException						*/
     public void report_fatal_error (String message, Object info) throws SyntaxErrorException
-	{
+    {
         report_error (message, info);
         throw new SyntaxErrorException (lastError); 
-	}
-   
-:};
+    }
+
+    :};
 
 /* User code components 3: initialization code.
  * If you want some code to be executed before the parser asks for the first
@@ -195,8 +203,8 @@ nonterminal ASTList<Declaration> declarations;
 nonterminal Stmt statement;
 nonterminal Declaration declaration;
 
-nonterminal ASTList<Expn> outputs;
-nonterminal	Expn output;
+nonterminal ASTList<Printable> outputs;
+nonterminal	Printable output;
 
 nonterminal ASTList<Readable> inputs;
 
@@ -249,18 +257,18 @@ start with program;
 
 program
         ::= scope:scope                                                         // the main program
-                {: RESULT = new Program(scope, new SourceLoc(filename, scope)); :}
+                {: RESULT = new Program(scope, new SourceLocImpl(filename, scope)); :}
         ;
 
 scope
         ::= L_CURLEY:_start declarations:decls statements:stmts R_CURLEY:_end   // scope with declarations and statement
-                {: RESULT = new Scope(decls, stmts, new SourceLoc(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+                {: RESULT = new Scope(decls, stmts, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
 
         |   L_CURLEY:_start statements:stmts R_CURLEY:_end                      // scope with statments only
-                {: RESULT = new Scope(null, stmts, new SourceLoc(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+                {: RESULT = new Scope(null, stmts, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
 
         |   L_CURLEY:_start R_CURLEY:_end                                       // empty scope
-                {: RESULT = new Scope(null, null, new SourceLoc(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+                {: RESULT = new Scope(null, null, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
         ;
 
 statements
@@ -281,40 +289,40 @@ declarations
 
 statement
         ::= variable:lval COLON EQUAL expression:rval                                                       // assignment statement
-                {: RESULT = new AssignStmt(lval, rval, new SourceLoc(filename, lval, rval)); :}
+                {: RESULT = new AssignStmt(lval, rval, new SourceLocImpl(filename, lval, rval)); :}
 
 		|   IF:_start expression:condition THEN statements:whenTrue FI:_end                                 // if-then statements
-                {: RESULT = new IfStmt(condition, whenTrue, new SourceLoc(filename, _startleft, _startright, _endleft, _endright + 2)); :}
+                {: RESULT = new IfStmt(condition, whenTrue, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 2)); :}
 		
         |   IF:_start expression:condition THEN statements:whenTrue ELSE statements:whenFalse FI:_end       // if-then-else statements
-                {: RESULT = new IfStmt(condition, whenTrue, whenFalse, new SourceLoc(filename, _startleft, _startright, _endleft, _endright + 2)); :}
+                {: RESULT = new IfStmt(condition, whenTrue, whenFalse, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 2)); :}
 
         |   WHILE:_start expression:condition DO statements:body END:_end                                   // while statement
-                {: RESULT = new WhileDoStmt(body, condition, new SourceLoc(filename, _startleft, _startright, _endleft, _endright + 3)); :}
+                {: RESULT = new WhileDoStmt(body, condition, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 3)); :}
 
         |   REPEAT:_start statements:body UNTIL expression:condition                                        // repeat statement
-                {: RESULT = new RepeatUntilStmt(body, condition, new SourceLoc(filename, _startleft, _startright, condition)); :}
+                {: RESULT = new RepeatUntilStmt(body, condition, new SourceLocImpl(filename, _startleft, _startright, condition)); :}
 
         |   EXIT:_start                                                                                     // exit statement (no conditional)
-                {: RESULT = new ExitStmt(new SourceLoc(filename, _startleft, _startright, "exit")); :}
+                {: RESULT = new ExitStmt(new SourceLocImpl(filename, _startleft, _startright, "exit")); :}
 
         |   EXIT:_start WHEN expression:condition                                                           // exit statement (with conditional)
-                {: RESULT = new ExitStmt(condition, new SourceLoc(filename, _startleft, _startright, condition)); :}
+                {: RESULT = new ExitStmt(condition, new SourceLocImpl(filename, _startleft, _startright, condition)); :}
 
         |   RESULT:_start expression:value                                                                  // return from function
-                {: RESULT = new ResultStmt(value, new SourceLoc(filename, _startleft, _startright, value)); :}
+                {: RESULT = new ResultStmt(value, new SourceLocImpl(filename, _startleft, _startright, value)); :}
 
         |   RETURN:_start                                                                                   // return from procedure
-                {: RESULT = new ReturnStmt(new SourceLoc(filename, _startleft, _startright, "return")); :}
+                {: RESULT = new ReturnStmt(new SourceLocImpl(filename, _startleft, _startright, "return")); :}
 
         |   PUT:_start outputs:outputs                                                                      // output statement
-                {: RESULT = new PutStmt(outputs, SourceLoc.fromList(filename, _startleft, _startright, outputs)); :}
+                {: RESULT = new PutStmt(outputs, new SourceLocImpl(filename, _startleft, _startright, outputs)); :}
 
         |   GET:_start inputs:inputs                                                                        // input statement
-                {: RESULT = new GetStmt(inputs, new SourceLoc(filename, _startleft, _startright, inputs)); :}
+                {: RESULT = new GetStmt(inputs, new SourceLocImpl(filename, _startleft, _startright, inputs)); :}
 
         |   IDENT:name L_PAREN argumentList:arguments R_PAREN:_end                                          // call procedure
-                {: RESULT = new ProcedureCallStmt(name, arguments, new SourceLoc(filename, nameleft, nameright, _endleft, _endright + 1)); :}
+                {: RESULT = new ProcedureCallStmt(name, arguments, new SourceLocImpl(filename, nameleft, nameright, _endleft, _endright + 1)); :}
 
         |   scope:scope                                                                                     // embedded scope
                 {: RESULT = scope; :}
@@ -322,13 +330,13 @@ statement
 
 declaration
         ::= VAR:_start variablenames:vars COLON type:type       // declare scalar/array variables
-                {: RESULT = new MultiDeclarations(vars, type, new SourceLoc(filename, _startleft, _startright, type)); :}
+                {: RESULT = new MultiDeclarations(vars, type, new SourceLocImpl(filename, _startleft, _startright, type)); :}
 
         |   functionHead:func scope:body                        // function declaration
-                {:  RESULT = func.withBody(body, new SourceLoc(filename, func, body)); :}
+                {:  RESULT = func.withBody(body, new SourceLocImpl(filename, func, body)); :}
         
         |   procedureHead:proc scope:body                       // procedure declaration
-                {:  RESULT = proc.withBody(body, new SourceLoc(filename, proc, body)); :}
+                {:  RESULT = proc.withBody(body, new SourceLocImpl(filename, proc, body)); :}
 
         |   FORWARD functionHead:func                           // forward function declaration
                 {:  RESULT = func; :}
@@ -347,13 +355,13 @@ variablenames
 
 variablename
         ::= IDENT:id                                                    // scalar variable
-                {: RESULT = new ScalarDeclPart(id, new SourceLoc(filename, idleft, idright, id)); :}
+                {: RESULT = new ScalarDeclPart(id, new SourceLocImpl(filename, idleft, idright, id)); :}
 
         |   IDENT:id L_SQUARE bound:b R_SQUARE:_end                     // 1 dimensional array
-                {: RESULT = new ArrayDeclPart(id, b[0], b[1], new SourceLoc(filename, idleft, idright, _endleft, _endright + 1)); :}
+                {: RESULT = new ArrayDeclPart(id, b[0], b[1], new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
 
         |   IDENT:id L_SQUARE bound:b1 COMMA bound:b2 R_SQUARE:_end     // 1 dimensional array
-                {: RESULT = new ArrayDeclPart(id, b1[0], b1[1], b2[0], b2[1], new SourceLoc(filename, idleft, idright, _endleft, _endright + 1)); :}
+                {: RESULT = new ArrayDeclPart(id, b1[0], b1[1], b2[0], b2[1], new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
         ;
 
 bound
@@ -374,25 +382,25 @@ generalBound
 
 type
         ::= INTEGER:_start                                                                      // integer type
-                {: RESULT = new IntegerType(new SourceLoc(filename, _startleft, _startright, "integer")); :}
+                {: RESULT = new IntegerType(new SourceLocImpl(filename, _startleft, _startright, "integer")); :}
 
         |   BOOLEAN:_start                                                                      // boolean type
-                {: RESULT = new BooleanType(new SourceLoc(filename, _startleft, _startright, "boolean")); :}
+                {: RESULT = new BooleanType(new SourceLocImpl(filename, _startleft, _startright, "boolean")); :}
         ;
 
 functionHead
         ::= FUNC:_start IDENT:id L_PAREN parameterList:params R_PAREN COLON type:returnType     // function head
-                {: RESULT = new RoutineDecl(id, returnType, params, new SourceLoc(filename, _startleft, _startright, returnType)); :}
+                {: RESULT = new RoutineDecl(id, returnType, params, new SourceLocImpl(filename, _startleft, _startright, returnType)); :}
         ;
 
 procedureHead
         ::= PROCEDURE:_start IDENT:id L_PAREN parameterList:params R_PAREN:_end                 // function head
-                {: RESULT = new RoutineDecl(id, Type.TYPE_NIL, params, new SourceLoc(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+                {: RESULT = new RoutineDecl(id, Type.TYPE_NIL, params, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
         ;
 
 outputs
         ::= output:output                                               // list of output expressions
-                {: RESULT = new ASTList<Expn>().addLast(output); :}
+                {: RESULT = new ASTList<Printable>().addLast(output); :}
 
         |   outputs:head COMMA output:tail
                 {: RESULT = head.addLast(tail); :}
@@ -403,15 +411,15 @@ output
                 {: RESULT = expr; :}
 
         |   TEXTCONST:text                                              // text constant
-                {: RESULT = new TextConstExpn(text, new SourceLoc(filename, textleft, textright, text)); :}
+                {: RESULT = new TextConstExpn(text, new SourceLocImpl(filename, textleft, textright, text)); :}
 
         |   NEWLINE:_start                                              // newline constant
-                {: RESULT = new NewlineConstExpn(new SourceLoc(filename, _startleft, _startright)); :}
+                {: RESULT = new NewlineConstExpn(new SourceLocImpl(filename, _startleft, _startright)); :}
         ;
 
 inputs
         ::= variable:var                                                // list of variables being read into
-                {: RESULT = new ASTList<Readable>().addLast(var); :}
+                {: RESULT = new ASTList<Readable>(var); :}
         |   inputs:head COMMA variable:tail
                 {: RESULT = head.addLast(tail); :}
         ;
@@ -426,7 +434,7 @@ argumentList
 
 arguments
         ::= expression:expr
-                {: RESULT = new ASTList<Expn>().addLast(expr); :}
+                {: RESULT = new ASTList<Expn>(expr); :}
 
         |   arguments:head COMMA expression:tail                        // list of function/procedure arguments
                 {: RESULT = head.addLast(tail); :}
@@ -450,7 +458,7 @@ parameters
 
 parameter
         ::= IDENT:name COLON type:type                                  // declare one parameter
-                {: RESULT = new ScalarDecl(name, type, new SourceLoc(filename, nameleft, nameright, type)); :}
+                {: RESULT = new ScalarDecl(name, type, new SourceLocImpl(filename, nameleft, nameright, type)); :}
         ;
 
 expression
@@ -458,7 +466,7 @@ expression
                 {: RESULT = expr; :}
 
         |   expression:left OR conjunction:right
-                {: RESULT = new BoolExpn(BoolExpn.OP_OR, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new BoolExpn(BoolExpn.OP_OR, left, right, new SourceLocImpl(filename, left, right)); :}
 		;
 
 conjunction
@@ -466,7 +474,7 @@ conjunction
                 {: RESULT = expr; :}
 
         |   conjunction:left AND negation:right
-                {: RESULT = new BoolExpn(BoolExpn.OP_AND, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new BoolExpn(BoolExpn.OP_AND, left, right, new SourceLocImpl(filename, left, right)); :}
         ;
 
 negation
@@ -474,7 +482,7 @@ negation
                 {: RESULT = expr; :}
 
         |   NOT:_start negation:expr
-                {: RESULT = new NotExpn(expr, new SourceLoc(filename, _startleft, _startright, expr)); :}
+                {: RESULT = new NotExpn(expr, new SourceLocImpl(filename, _startleft, _startright, expr)); :}
         ;
 
 compareExpn
@@ -482,22 +490,22 @@ compareExpn
                 {: RESULT = expr; :}
 
         |   arithExpn:left EQUAL arithExpn:right
-                {: RESULT = new EqualsExpn(EqualsExpn.OP_EQUAL, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new EqualsExpn(EqualsExpn.OP_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
 
         |   arithExpn:left NOT EQUAL arithExpn:right
-                {: RESULT = new EqualsExpn(EqualsExpn.OP_NOT_EQUAL, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new EqualsExpn(EqualsExpn.OP_NOT_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
 
         |   arithExpn:left LESS arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_LESS, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_LESS, left, right, new SourceLocImpl(filename, left, right)); :}
 
         |   arithExpn:left LESS EQUAL arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_LESS_EQUAL, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_LESS_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
 
         |   arithExpn:left GREATER EQUAL arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER_EQUAL, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
 
         |   arithExpn:left GREATER arithExpn:right
-                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER, left, right, new SourceLocImpl(filename, left, right)); :}
         ;
 
 arithExpn
@@ -505,10 +513,10 @@ arithExpn
                 {: RESULT = expr; :}
 
         |   arithExpn:left PLUS term:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_PLUS, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_PLUS, left, right, new SourceLocImpl(filename, left, right)); :}
  
         |   arithExpn:left MINUS term:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_MINUS, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_MINUS, left, right, new SourceLocImpl(filename, left, right)); :}
         ;
 
 term
@@ -516,10 +524,10 @@ term
                 {: RESULT = expr; :}
 
         |   term:left TIMES factor:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_TIMES, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_TIMES, left, right, new SourceLocImpl(filename, left, right)); :}
 
         |   term:left DIVIDE factor:right
-                {: RESULT = new ArithExpn(ArithExpn.OP_DIVIDE, left, right, new SourceLoc(filename, left, right)); :}
+                {: RESULT = new ArithExpn(ArithExpn.OP_DIVIDE, left, right, new SourceLocImpl(filename, left, right)); :}
         ;
 
 factor
@@ -527,7 +535,7 @@ factor
                 {: RESULT = expr; :}
 
         |   MINUS:_start factor:expr                                    // unary minus
-                {: RESULT = new UnaryMinusExpn(expr, new SourceLoc(filename, _startleft, _startright, expr)); :}
+                {: RESULT = new UnaryMinusExpn(expr, new SourceLocImpl(filename, _startleft, _startright, expr)); :}
         ;
 
 primary
@@ -541,32 +549,32 @@ primary
                 {: RESULT = expr; :}
 
         |   L_PAREN:_start expression:condition QUESTION:s expression:trueValue COLON expression:falseValue R_PAREN:_end    // conditional expression
-                {: RESULT = new ConditionalExpn(condition, trueValue, falseValue, new SourceLoc(filename, _startleft, _startright + 1)); :}
+                {: RESULT = new ConditionalExpn(condition, trueValue, falseValue, new SourceLocImpl(filename, _startleft, _startright + 1)); :}
 
         |   IDENT:name L_PAREN argumentList:arguments R_PAREN:_end      // function call
-                {: RESULT = new FunctionCallExpn(name, arguments, new SourceLoc(filename, nameleft, nameright, _endleft, _endright + 1)); :}
+                {: RESULT = new FunctionCallExpn(name, arguments, new SourceLocImpl(filename, nameleft, nameright, _endleft, _endright + 1)); :}
         ;
 
 constant
         ::= INTCONST:i                                                  // integer constant
-                {: RESULT = new IntConstExpn(i, new SourceLoc(filename, ileft, iright)); :}
+                {: RESULT = new IntConstExpn(i, new SourceLocImpl(filename, ileft, iright)); :}
 
         |   TRUE:_start                                                 // constant true
-                {: RESULT = new BoolConstExpn(true, new SourceLoc(filename, _startleft, _startright, "true")); :}
+                {: RESULT = new BoolConstExpn(true, new SourceLocImpl(filename, _startleft, _startright, "true")); :}
 
         |   FALSE:_start                                                // constant false
-                {: RESULT = new BoolConstExpn(false, new SourceLoc(filename, _startleft, _startright, "false")); :}
+                {: RESULT = new BoolConstExpn(false, new SourceLocImpl(filename, _startleft, _startright, "false")); :}
         ;
 
 variable
         ::= IDENT:id                                                                // scalar variable or parameter
-                {: RESULT = new IdentExpn(id, new SourceLoc(filename, idleft, idright, id)); :}
+                {: RESULT = new IdentExpn(id, new SourceLocImpl(filename, idleft, idright, id)); :}
 
         |   IDENT:id L_SQUARE expression:sub1 R_SQUARE:_end                         // element of 1 dimensional array
-                {: RESULT = new SubsExpn(id, sub1, new SourceLoc(filename, idleft, idright, _endleft, _endright + 1)); :}
+                {: RESULT = new SubsExpn(id, sub1, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
 
         |   IDENT:id L_SQUARE expression:sub1 COMMA expression:sub2 R_SQUARE:_end   // element of 2 dimensional array
-                {: RESULT = new SubsExpn(id, sub1, sub2, new SourceLoc(filename, idleft, idright, _endleft, _endright + 1)); :}
+                {: RESULT = new SubsExpn(id, sub1, sub2, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
         ;
 
 /* The End */

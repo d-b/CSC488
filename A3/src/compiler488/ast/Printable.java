@@ -1,6 +1,6 @@
 package compiler488.ast;
 
-public interface Printable {
+public interface Printable extends SourceLoc {
     /*
      * Classes that extend this interface can be used
      * as arguments to PrintStmt. Don't confuse this

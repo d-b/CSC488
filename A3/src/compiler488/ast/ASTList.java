@@ -8,7 +8,7 @@ import java.util.ListIterator;
 /**
  * For nodes with an arbitrary number of children.
  */
-public class ASTList<E> extends AST {
+public class ASTList<E extends SourceLoc> extends AST {
     /*
      * Keep the list here. We delegate rather than subclass LinkedList
      * because Java won't let us override the return type for addLast.
@@ -117,5 +117,26 @@ public class ASTList<E> extends AST {
     public List<AST> getChildren() {
         return (List<AST>) getList();
     }
+    
+	public String getFilename() {
+		return ll.getFirst().getFilename();
+	}
+
+	public int getStartLine() {
+		return ll.getFirst().getStartLine();
+	}
+
+	public int getStartColumn() {
+		return ll.getFirst().getStartColumn();
+	}
+
+	public int getEndLine() {
+		return ll.getLast().getEndLine();
+	}
+
+	public int getEndColumn() {
+		return ll.getLast().getEndColumn();
+	}
+    
 }
 

@@ -40,4 +40,8 @@ public class SourceLocPrettyPrinter {
 		
 		output.println();
 	}
+
+	public String getFileRef() {
+	    return loc.getFilename() + ":" + (loc.getStartLine() + 1) + ":" + (loc.getStartColumn() + 1);
+	}
 }

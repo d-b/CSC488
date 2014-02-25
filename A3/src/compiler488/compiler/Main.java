@@ -414,6 +414,7 @@ public class Main {
 	try {
 	    Parser p = new Parser(new Lexer(new FileReader(sourceFileName )));
 	    p.filename = sourceFileName;
+	    p.source_lines = lines;
 	    
             if(  traceSyntax )
 	         parserResult = p.debug_parse().value;  //DEBUG Output
