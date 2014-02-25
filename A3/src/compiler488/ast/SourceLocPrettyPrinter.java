@@ -15,18 +15,22 @@ public class SourceLocPrettyPrinter {
 	}
 
 	public void print() {
-		if (loc.getStartLine() != loc.getEndLine()) {
-			output.println("Multi-line pretty print not available: " + loc);
-			return;
-		}
-		
 		String line = lines.get(loc.getStartLine());
 		
 		// If a tab appears in the source line, convert to a single space to correspond to the single tab character!
 		line = line.replace("\t", " ");
 		
 		int start = loc.getStartColumn();
-		int num = loc.getEndColumn() - start;
+		int num;
+       
+        if (loc.getStartLine() == loc.getEndLine()) {
+            // Range fits on one line
+            num = loc.getEndColumn() - start;
+        }
+        else {
+            // Show only the first line
+            num = line.length() - start;
+        }
 		
 		output.println(line);	
 		
