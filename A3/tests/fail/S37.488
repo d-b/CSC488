@@ -6,4 +6,5 @@
 {
   var x[3] : boolean
   x := true
+  a := 1
 }

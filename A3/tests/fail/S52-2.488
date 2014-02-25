@@ -1,0 +1,11 @@
+%
+% Return statement outside of a procedure.
+%
+% @line=8
+%
+{
+func bar(): integer {
+    return
+}
+bar()
+}
