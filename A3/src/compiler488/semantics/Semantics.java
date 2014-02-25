@@ -437,22 +437,7 @@ public class Semantics {
         try { m.invoke(this, obj); return true; }
         catch (IllegalAccessException e)    { e.printStackTrace(); return false; }
         catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
-        catch (InvocationTargetException e) {
-        	Throwable target = e.getTargetException();
-        	
-        	if (target instanceof SemanticActionException) {
-        		SemanticActionException err = (SemanticActionException) target;
-        		SourceLoc loc = obj.getLoc();
-        		System.out.println(loc + ": Semantic Error S" + err.getActionNumber());
-        		
-        		SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, source_lines, loc);
-        		pp.print();
-        	} else {
-        		e.printStackTrace();
-        	}
-        	
-        	return false;
-        }
+        catch (InvocationTargetException e) { e.printStackTrace(); return false; }
     }
     
     void semanticAction(int actionNumber) {
@@ -492,7 +477,9 @@ public class Semantics {
                 if (result) {
                 	System.out.println("Semantic Action: S" + actionNumber);
                 } else {
-                	throw new SemanticActionException(actionNumber);
+                    SourceLoc loc = analysisTop.getLoc();
+                    System.out.println(loc + ": Semantic Error S" + actionNumber);
+                    (new SourceLocPrettyPrinter(System.out, source_lines, loc)).print();
                 }
             }
             catch (IllegalAccessException e)    { e.printStackTrace(); }
