@@ -1,9 +1,0 @@
-%
-% Return statement outside of a procedure.
-%
-% @line=8
-%
-
-{
-    return
-}

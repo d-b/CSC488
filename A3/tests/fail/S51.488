@@ -1,9 +1,0 @@
-%
-% Result statement outside of a function.
-%
-% @line=8
-%
-
-{
-    result 0
-}

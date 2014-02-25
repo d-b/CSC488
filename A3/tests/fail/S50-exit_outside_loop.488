@@ -1,11 +1,14 @@
 %
 % Exit statement outside of a loop
 %
-% @line=10
+% @line=12
 %
 
 {
     var x : integer
+
     x := 2
+
     exit when x = 2
 }
+

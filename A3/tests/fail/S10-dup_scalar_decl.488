@@ -6,9 +6,10 @@
 
 {
     var x, x : integer
-    var y : integer
-    var y : integer
+    var yy : integer
+    var yy : integer
 
     x : = 0
-    y : = 0
+    yy : = 0
 }
+

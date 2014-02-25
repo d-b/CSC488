@@ -1,0 +1,15 @@
+%
+% Duplicate function declaration
+%
+% @line=10
+%
+
+{
+    forward func foo() : integer
+    func foo() : integer { result 1 }
+    func foo() : integer { result 1 }
+
+    var x : integer
+    x := foo()
+}
+

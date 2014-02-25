@@ -1,0 +1,17 @@
+%
+% Return statement outside of a procedure (function scope)
+%
+% @line=11
+%
+
+{
+    var x : integer
+    func foo() : integer
+    {
+        return
+        result 1
+    }
+
+    x := foo()
+}
+
