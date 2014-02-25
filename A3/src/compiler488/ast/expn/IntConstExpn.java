@@ -1,7 +1,6 @@
 package compiler488.ast.expn;
 
 import compiler488.ast.IntConstNode;
-import compiler488.ast.SourceLoc;
 
 /**
  * Represents a literal integer constant.

@@ -6,6 +6,7 @@ import java.util.Vector;
 import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
+import compiler488.ast.expn.VarRefExpn;
 
 /**
  * Holds the assignment of an expression to a variable.
@@ -15,9 +16,10 @@ public class AssignStmt extends Stmt {
      * lval is the location being assigned to, and rval is the value being
      * assigned.
      */
-    private Expn lval, rval;
+    private VarRefExpn lval;
+    private Expn rval;
 
-    public AssignStmt(Expn lval, Expn rval, SourceLoc loc) {
+    public AssignStmt(VarRefExpn lval, Expn rval, SourceLoc loc) {
     	super(loc);
 
         this.lval = lval;
@@ -33,7 +35,7 @@ public class AssignStmt extends Stmt {
         return "Assignment: " + lval + " := " + rval;
     }
 
-    public Expn getLval() {
+    public VarRefExpn getLval() {
         return lval;
     }
 

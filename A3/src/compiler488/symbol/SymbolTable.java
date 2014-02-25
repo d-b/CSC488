@@ -31,7 +31,6 @@ class Scope {
 
 public class SymbolTable {
     public enum ScopeType { Program, Function, Statement, Procedure }
-    public enum ScalarType { Integer, Boolean }
     
     Deque<Scope> scopeStack;
     

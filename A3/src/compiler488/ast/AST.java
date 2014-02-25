@@ -3,29 +3,42 @@ package compiler488.ast;
 import java.util.Collections;
 import java.util.List;
 
+import compiler488.ast.SourceLocNull;
+import compiler488.ast.type.Type;
+
 /**
  * This is a placeholder at the top of the Abstract Syntax Tree hierarchy. It is
  * a convenient place to add common behaviour.
  * @author  Dave Wortman, Marsha Chechik, Danny House
  */
 public class AST implements SourceLoc {
-    AST parent;
-    protected SourceLoc loc;
-
-    public AST(){parent = null;}
+    Type type;
+    AST  parent;
     
-    public AST(SourceLoc loc) {
-    	this.loc = loc;
+    public AST(){
+        parent = null;
+        type   = Type.TYPE_NIL;
+        loc    = new SourceLocNull();
     }
     
-    public AST  getParent() {return parent;}
+    protected SourceLoc loc;
+    public AST(SourceLoc loc) {
+        this();
+        this.loc = loc;
+    }
+    
+    public Type getType()             {return type;         }
+    public void setType(Type type)    {this.type = type;    }
+    public AST  getParent()           {return parent;       }
     public void setParent(AST parent) {this.parent = parent;}
-
-    public SourceLoc getLoc() { return loc; }
     
     public List<AST> getChildren() {
         return Collections.emptyList();
     }
+    
+    public SourceLoc getLoc() {
+        return loc;
+    }    
 
 	public String getFilename() {
 		return loc.getFilename();

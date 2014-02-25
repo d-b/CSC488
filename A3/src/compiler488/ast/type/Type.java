@@ -7,9 +7,12 @@ import compiler488.ast.SourceLoc;
  * A placeholder for types.
  */
 abstract public class Type extends AST {
-    public Type(SourceLoc loc) {
-    	super(loc);
-    }
+    public static final Type TYPE_INTEGER = new IntegerType();
+    public static final Type TYPE_BOOLEAN = new BooleanType();
+    public static final Type TYPE_NIL     = new NilType();
+    
+    public Type() {super();}
+    public Type(SourceLoc loc) {super(loc);}
 
     public Type evaluatesTo() {
         return this;
@@ -19,7 +22,7 @@ abstract public class Type extends AST {
         return this.getClass().equals(o.getClass());
     }
     
-    public boolean equals(Class cls) {
+    public boolean equals(Class<?> cls) {
     	return this.getClass().equals(cls);
     }
     

@@ -1,5 +1,8 @@
 package compiler488.ast.decl;
 
+import java.util.List;
+import java.util.Vector;
+
 import compiler488.ast.AST;
 import compiler488.ast.IntConstNode;
 import compiler488.ast.SourceLoc;
@@ -61,4 +64,11 @@ public class ArrayBound extends AST {
 			return lb.getInteger() <= ub.getInteger();
 		}
 	}
+	
+    public List<AST> getChildren() {
+        Vector<AST> children = new Vector<AST>();
+        children.add(lb);
+        children.add(ub);
+        return children;
+    }
 }

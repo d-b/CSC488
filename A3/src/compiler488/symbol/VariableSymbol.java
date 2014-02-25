@@ -43,6 +43,10 @@ public class VariableSymbol extends Symbol {
         this.type = type;
     }
     
+    public int getDimensions() {
+        return dimensions;
+    }
+       
     //
     // Members
     //
