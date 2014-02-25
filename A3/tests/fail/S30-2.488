@@ -1,0 +1,10 @@
+%
+% type error, not operator on integer.
+%
+% @line=9
+%
+{
+  var q : integer
+  q := 3
+  if not q then put "hi",newline fi
+}

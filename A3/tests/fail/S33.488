@@ -1,0 +1,10 @@
+%
+% type error, conditional with different types in each case.
+%
+% @line=9
+%
+{
+  var x : boolean
+  x := true
+  x := (x?false:2)
+}

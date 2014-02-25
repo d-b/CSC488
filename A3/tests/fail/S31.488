@@ -1,0 +1,9 @@
+%
+% type error, arithmetic operator on boolean
+%
+% @line=8
+%
+{
+  var x : integer
+  x := 2 + true
+}
