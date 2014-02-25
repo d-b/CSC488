@@ -557,7 +557,7 @@ primary
 
 constant
         ::= INTCONST:i                                                  // integer constant
-                {: RESULT = new IntConstExpn(i, new SourceLocImpl(filename, ileft, iright)); :}
+                {: RESULT = new IntConstExpn(i, new SourceLocImpl(filename, ileft, iright, i.toString())); :}
 
         |   TRUE:_start                                                 // constant true
                 {: RESULT = new BoolConstExpn(true, new SourceLocImpl(filename, _startleft, _startright, "true")); :}
