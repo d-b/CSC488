@@ -42,7 +42,7 @@
 	func find_triangle () : integer {
 		var x : integer
 		x := which_triangle
-		if which_trangle <= 0 then 
+		if which_triangle <= 0 then 
 			result 0
 		else
 			which_triangle := which_triangle - 1
