@@ -18,15 +18,6 @@ public class Scope extends Stmt {
 
     private ASTList<Stmt> statements; // The statements to execute.
 
-    public Scope(SourceLoc loc) {
-        super(loc);
-
-        declarations = new ASTList<Declaration>();
-        statements = new ASTList<Stmt>();
-        declarations.setParent(this);
-        statements.setParent(this);
-    }
-
     public Scope(ASTList<Declaration> decls, ASTList<Stmt> stmts, SourceLoc loc) {
         super(loc);
 
@@ -44,6 +35,10 @@ public class Scope extends Stmt {
 
         declarations.setParent(this);
         statements.setParent(this);
+    }
+    
+    public Scope(SourceLoc loc) {
+        this(null, null, loc);
     }
 
     public void prettyPrint(ASTPrettyPrinterContext p) {
