@@ -482,6 +482,7 @@ public class Semantics {
                     if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber; 
                     System.out.println(loc + ": " + errorMessage);
                     (new SourceLocPrettyPrinter(System.out, analysisSource, loc)).print();
+                    analysisErrors += 1;
                 }
             }
             catch (IllegalAccessException e)    { e.printStackTrace(); }
@@ -503,13 +504,14 @@ public class Semantics {
         analysisGrey      = new HashSet<AST>();
         analysisStack     = new LinkedList<AST>();
         analysisWorking   = new LinkedList<Object>();
+        analysisErrors    = 0;
     }    
 
     public void Initialize() {
         populateMappings();
     }
 
-    public void Analyze(Program ast, List<String> source) {
+    public Boolean Analyze(Program ast, List<String> source) {
         // Store source code
         analysisSource = new Vector<String>(source);
     	
@@ -538,6 +540,9 @@ public class Semantics {
                 analysisStack.pop();
             }
         }
+        
+        // Return true if no errors occurred
+        return analysisErrors == 0;
     }
     
     public void Finalize() {  
@@ -566,6 +571,7 @@ public class Semantics {
     private Deque<AST>    analysisStack;
     private Deque<Object> analysisWorking;
     private List<String>  analysisSource;
+    private Integer       analysisErrors;
 }
 
 //

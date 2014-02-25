@@ -29,7 +29,7 @@ function decider() {
     INPUT=$1
 
     # Execute compiler and collect results
-    ERRORS=`java -jar $WHERE/dist/compiler488.jar $INPUT 2>&1 | grep 'Semantic Error:' | wc -l`
+    ERRORS=`java -jar $WHERE/dist/compiler488.jar $INPUT 2>&1 | grep 'Ended Semantic Analysis with failures' | wc -l`
     if [ $ERRORS -eq 0 ]; then return 1; else return 0; fi
 }
 

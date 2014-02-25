@@ -46,7 +46,6 @@ public class SymbolTable {
     public void Initialize() {}
     public void Finalize()   {}
     
-    
     public Symbol find(String name) {
         return find(name, true /* allScopes*/);
     }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 class Errors {
+    @SuppressWarnings("serial")
     static final Map<Integer, String> messageMap = new HashMap<Integer, String>() {{
         put(10, "Name of scalar variable collides with a previous declaration.");
         put(11, "Name of function collides with a previous declaration.");

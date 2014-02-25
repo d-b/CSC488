@@ -460,10 +460,13 @@ public class Main {
 	       }
 
 	try{
+	    System.out.println("Begin Semantic Analysis");
         Semantics semantics = new Semantics();
         semantics.Initialize();
-        semantics.Analyze(programAST, lines);
+        Boolean result = semantics.Analyze(programAST, lines);
         semantics.Finalize();
+        if(result) System.out.println("End of Semantic Analysis");
+        else       System.out.println("Ended Semantic Analysis with failures");
 	}
         catch( Exception e) 
 	    {
