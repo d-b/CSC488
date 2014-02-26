@@ -130,7 +130,7 @@ public class ASTList<E extends SourceLoc & ASTPrettyPrintable> extends AST {
 
     @SuppressWarnings("unchecked")
     public List<AST> getChildren() {
-        return (List<AST>) getList();
+        return (List<AST>) ((List<? extends Object>) getList());
     }
 
     public String getFilename() {
