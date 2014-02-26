@@ -872,7 +872,7 @@ public class Semantics {
     @Action(number = 54) // Associate parameters if any with scope.
     Boolean actionAssociateParameters(Scope scope) {
         for(Entry<String, Symbol> entry: workingEntries()) {
-            if(!(entry.getValue() instanceof VariableSymbol)
+            if(!entry.getValue().isVariable()
             || !symbolTable.scopeSet(entry.getKey(), entry.getValue())) return false;
         } return true;
     }
