@@ -81,7 +81,7 @@ def test(path, failing = False):
 
 def run(directory, failing = False):
     failures = 0
-    for path in filter(lambda x: x.endswith('.488'), os.listdir(directory)):
+    for path in sorted(filter(lambda x: x.endswith('.488'), os.listdir(directory))):
         target = os.path.join(directory, path)
         print('Testing {}... '.format(target), end='')
         sys.stdout.flush()
