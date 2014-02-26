@@ -490,7 +490,7 @@ public class Semantics {
 
     @Action(number = 6) // Start statement scope.
     Boolean actionMinorScopeStart(Scope scope) {
-        symbolTable.scopeEnter(SymbolTable.ScopeType.Statement);
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Statement, symbolTable.scopeRoutine());
         return true;
     }
 
