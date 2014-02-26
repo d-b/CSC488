@@ -4,6 +4,6 @@
 % @line=8
 %
 {
-  var a[4] : boolean
-  a[2,4] := true
+    var a[4] : boolean
+    a[2,4] := true
 }

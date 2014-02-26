@@ -1,9 +1,8 @@
 %
 % 1D array with a lower bound above the upper bound
 % 
-% @line=8
+% @line=7
 % 
-
 {
     var x[3..0] : integer
 

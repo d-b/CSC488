@@ -1,11 +1,10 @@
 %
 % Result statement outside of a function.
 %
-% @line=8
+% @line=7
 %
-
 {
-proc foo() { result 1 }
-foo()
+    proc foo() { result 1 }
+    foo()
 }
 

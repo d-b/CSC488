@@ -1,9 +1,8 @@
 %
 % Duplicate forward procedure declaration
 %
-% @line=9
+% @line=8
 %
-
 {
     forward proc foo(x : integer, y : integer)
     forward proc foo(x : integer, y : integer)
@@ -13,4 +12,3 @@
     put "foo"
     foo(1, 2)
 }
-

@@ -1,9 +1,8 @@
 %
 % Call to undeclared procedure
 %
-% @line=8
+% @line=7
 %
-
 {
     proc bar() { put "bar(" foo() put ")" }
     proc foo() { put "foo()" }

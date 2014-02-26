@@ -1,10 +1,11 @@
 %
 % Tests hiding variable with function
-% @line=8
+% @line=9
+%
 {
-  var x : integer
-  {
-    func x() : integer {result 5}
-    x := 2
-  }
+    var x : integer
+    {
+        func x() : integer {result 5}
+        x := 2
+    }
 }

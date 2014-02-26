@@ -1,9 +1,8 @@
 %
 % Return statement outside of a procedure (top level scope)
 %
-% @line=8
+% @line=7
 %
-
 {
     return
 }

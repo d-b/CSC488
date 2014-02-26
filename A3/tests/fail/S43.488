@@ -4,6 +4,6 @@
 % @line=8
 %
 {
-  proc foo (x : boolean) {put  "foo" return}
-  foo(true, false)
+    proc foo (x : boolean) {put  "foo" return}
+    foo(true, false)
 }

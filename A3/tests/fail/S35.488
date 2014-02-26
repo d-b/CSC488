@@ -4,7 +4,7 @@
 % @line=7
 %
 {
-  func foo () : boolean {result 5}
-  var x : boolean
-  x := foo()
+    func foo () : boolean {result 5}
+    var x : boolean
+    x := foo()
 }

@@ -1,9 +1,8 @@
 % 
 % Duplicate scalar variable definition
 %
-% @line=[8, 10]
+% @line=[7, 9]
 %
-
 {
     var x, x : integer
     var yy : integer
@@ -12,4 +11,3 @@
     x : = 0
     yy : = 0
 }
-

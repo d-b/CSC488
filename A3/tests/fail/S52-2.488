@@ -1,11 +1,12 @@
 %
 % Return statement outside of a procedure.
 %
-% @line=8
+% @line=9
 %
 {
-func bar(): integer {
-    return
-}
-bar()
+    var x : integer
+    func bar(): integer {
+        return
+    }
+    x := bar()
 }

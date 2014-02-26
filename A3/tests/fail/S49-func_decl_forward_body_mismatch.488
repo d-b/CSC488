@@ -1,9 +1,8 @@
 % 
 % Forward routine/routine declaration mismatch
 %
-% @line=[9, 12, 15]
+% @line=[8, 11, 14]
 %
-
 {
     forward func routine1() : integer
     func routine1() : boolean {result 0}

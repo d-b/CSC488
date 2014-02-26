@@ -1,9 +1,8 @@
 %
 % Result statement outside of a function (top level scope)
 %
-% @line=8
+% @line=7
 %
-
 {
     result 0
 }

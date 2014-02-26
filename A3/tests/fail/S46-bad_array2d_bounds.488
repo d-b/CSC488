@@ -1,9 +1,8 @@
 %
 % 2D arrays with a lower above upper bounds in both dimensions
 % 
-% @line=[8, 9, 10]
+% @line=[7, 8, 9]
 % 
-
 {
     var x[3..2, 1] : integer
     var y[3, 2..1] : integer

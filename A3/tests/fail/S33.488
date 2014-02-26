@@ -4,7 +4,7 @@
 % @line=9
 %
 {
-  var x : boolean
-  x := true
-  x := (x?false:2)
+    var x : boolean
+    x := true
+    x := (x ? false : 2)
 }

@@ -1,13 +1,11 @@
 %
 % Duplicate one dimensional array declaration
 %
-% @line=9
+% @line=8
 %
-
 {
     var a[0..3] : boolean
     var a[0..3] : boolean
 
     a[2] := true
 }
-

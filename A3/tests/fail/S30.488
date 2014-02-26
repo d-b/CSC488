@@ -4,7 +4,7 @@
 % @line=9 
 %
 {
-  var q : integer
-  q := 3
-  if q then put "hi",newline fi
+    var q : integer
+    q := 3
+    if q then put "hi",newline fi
 }

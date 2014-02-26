@@ -4,6 +4,6 @@
 % @line=8
 %
 {
-  var x : boolean
-  x := 2
+    var x : boolean
+    x := 2
 }

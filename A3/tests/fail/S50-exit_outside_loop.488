@@ -1,9 +1,8 @@
 %
 % Exit statement outside of a loop
 %
-% @line=12
+% @line=11
 %
-
 {
     var x : integer
 

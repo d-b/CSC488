@@ -1,9 +1,8 @@
 %
 % Return statement outside of a procedure (function scope)
 %
-% @line=11
+% @line=10
 %
-
 {
     var x : integer
     func foo() : integer
@@ -14,4 +13,3 @@
 
     x := foo()
 }
-

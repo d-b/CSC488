@@ -4,6 +4,6 @@
 % @line=8
 %
 {
-  var x : integer
-  x := 2 + true
+    var x : integer
+    x := 2 + true
 }
