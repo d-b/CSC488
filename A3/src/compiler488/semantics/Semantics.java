@@ -680,7 +680,7 @@ public class Semantics {
     Boolean actionCheckAssignmentTypes(AssignStmt assignStmt) {
         VarRefExpn left = assignStmt.getLval();
         Symbol leftSymbol = symbolTable.find(left.getIdent().getId());
-        if (leftSymbol == null) return false;
+        if (leftSymbol == null) return true; // Ignore: already fails S29
         return leftSymbol.getType().equals(assignStmt.getRval().getEvalType());
     }
     

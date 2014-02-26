@@ -49,7 +49,7 @@ public class Main {
      */
 
     /** User option -- supress execution */
-    public static boolean supressExecution   = true ;
+    public static boolean supressExecution   = false ;
 
     // DUMP Options
     /** User option -- dump AST after parsing */
@@ -487,6 +487,7 @@ public class Main {
                 System.out.println("End of Semantic Analysis");
             } else {
                 System.out.println("Ended Semantic Analysis with failures");
+                errorOccurred = true ;
             }
         } catch (Exception e) {
             System.err.println("Exception during Semantic Analysis");
