@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import os
 import re
+import sys
 import subprocess
 
 # Test directories
@@ -83,6 +84,7 @@ def run(directory, failing = False):
     for path in filter(lambda x: x.endswith('.488'), os.listdir(directory)):
         target = os.path.join(directory, path)
         print('Testing {}... '.format(target), end='')
+        sys.stdout.flush()
         result = test(target, failing)
         print('SUCCESS!' if result else 'FAILURE!')
         if not result: failures += 1
