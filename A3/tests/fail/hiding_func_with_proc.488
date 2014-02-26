@@ -1,6 +1,6 @@
 %
 % Tests hiding function with procedure
-% @line=9
+% @line=10
 %
 {
     var y : integer

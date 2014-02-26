@@ -18,10 +18,6 @@ abstract public class LangType {
         return this.getClass().equals(cls);
     }
 
-    public boolean equals(LangType o) {
-        return equals(o.getClass());
-    }
-
     public boolean isNil() {
         return false;
     }

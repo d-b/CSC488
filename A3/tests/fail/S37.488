@@ -1,7 +1,7 @@
 %
 % type error, scalar access to array variable
 %
-% @line=7
+% @line=8
 %
 {
     var x[3] : boolean

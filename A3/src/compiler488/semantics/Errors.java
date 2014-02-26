@@ -28,12 +28,14 @@ class Errors {
         put(38, "Identifier was not declared as a one dimensional array.");
         put(40, "Identifier was not declared as a function.");
         put(41, "Identifier was not declared as a procedure.");
+        put(43, "Number of arguments is not equal to the number of formal parameters.");
         put(46, "Lower bound must be less than or equal to upper bound.");
         put(48, "Name of two dimensional array collides with a previous declaration.");
         put(49, "The routine does not match the forward declaration.");
         put(50, "Exit statement cannot lie outside of a loop.");
         put(51, "Result statement must lie directly within a function.");
         put(52, "Return statement must lie directly within a procedure.");
+        put(55, "Identifier was not declared as a two dimensional array.");
     }};
     
     static final public String getError(int actionNumber) {

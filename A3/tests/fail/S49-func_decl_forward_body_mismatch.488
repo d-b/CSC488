@@ -5,7 +5,7 @@
 %
 {
     forward func routine1() : integer
-    func routine1() : boolean {result 0}
+    func routine1() : boolean {result false}
 
     forward func routine2(a : integer) : integer
     func routine2(a : integer, b : integer) : integer {result 0}

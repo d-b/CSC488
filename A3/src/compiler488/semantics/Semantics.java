@@ -759,7 +759,7 @@ public class Semantics {
        
         // Verify number of arguments        
         FunctionType funcType = (FunctionType) ((FunctionSymbol) symbol).getType();
-        return analysisArgs <= funcType.getArguments().size();
+        return analysisArgs == funcType.getArguments().size();
     }
 
     @Action(number = 44) // Set the argument count to zero. 
@@ -808,7 +808,7 @@ public class Semantics {
     Boolean actionCheckRoutineDeclaration(RoutineDecl routineDecl) {
         // Attempt to find a function symbol with the given routine's name
         Symbol symbol = symbolTable.find(routineDecl.getName(), false);
-        if(!(symbol instanceof FunctionSymbol)) return true;
+        if(symbol == null || !symbol.isRoutine()) return true; // Ignore: handled by other actions
 
         // Verify that it is a function symbol and the type matches
         return ((FunctionSymbol) symbol).getType().equals(routineDecl.getFunctionType());
@@ -986,7 +986,7 @@ public class Semantics {
                     if(verboseOutput) System.out.println("Semantic Action: S" + actionNumber);
                 } else {
                     String errorMessage = Errors.getError(actionNumber);
-                    if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber;
+                    if(errorMessage == null) errorMessage = "S" + actionNumber + ": Semantic error occurred.";
                     else errorMessage = "S" + actionNumber + ": " + errorMessage;
                     SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.err, analysisSource, analysisErrorLoc);
                     System.err.println(pp.getFileRef() + ": " + errorMessage);
