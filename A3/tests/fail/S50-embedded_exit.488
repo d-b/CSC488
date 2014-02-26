@@ -1,0 +1,17 @@
+%
+% Exit not directly inside a loop
+%
+% @line=10
+%
+{
+    while true do
+        {
+            proc P() {
+                exit
+            }
+
+            var x : integer
+            x := 0
+        }
+    end
+}

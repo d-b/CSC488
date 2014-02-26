@@ -853,7 +853,7 @@ public class Semantics {
     @Action(number = 50) // Check that exit statement is inside a loop.
     Boolean actionCheckExit(ExitStmt exitStmt) {
         LoopingStmt loop = firstOf(exitStmt, LoopingStmt.class);
-        return loop != null;
+        return loop != null && loop.getRoutine() == exitStmt.getRoutine();
     }
 
     @Action(number = 51) // Check that result statement is directly inside a function.
