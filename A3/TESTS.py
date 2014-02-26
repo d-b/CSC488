@@ -79,8 +79,9 @@ def test(path, failing = False):
 def run(directory, failing = False):
     failures = 0
     for path in os.listdir(directory):
+        if path[-4:] != ".488": continue
         target = os.path.join(directory, path)
-        print('Testing {}... '.format(target), end='')
+        print 'Testing {}... '.format(target),
         result = test(target, failing)
         print('SUCCESS!' if result else 'FAILURE!')
         if not result: failures += 1
