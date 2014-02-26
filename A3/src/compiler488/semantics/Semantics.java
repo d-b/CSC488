@@ -66,20 +66,27 @@ import java.util.Vector;
  *  @author Daniel Bloemendal
  */
 public class Semantics {
-    //
+    ////////////////////////////////////////////////////////////////////
     // Processors
-    //
+    ////////////////////////////////////////////////////////////////////
 
+    /*
+     * program:
+     *      S00 scope S01
+     */
     @PreProcessor(target = "Program")
     void preProgram(Program program) {
         semanticAction(0); // S00: Start program scope.
     }
-
     @PostProcessor(target = "Program")
     void postProgram(Program program) {
         semanticAction(1); // S01: End program scope.
     }
 
+    /*
+     * statement:
+     *      S06 scope S07
+     */
     @PreProcessor(target = "Scope")
     void preScope(Scope scope) {
         if(scope.getParent() instanceof RoutineDecl)
@@ -87,7 +94,6 @@ public class Semantics {
         else
             semanticAction(6); // S06: Start statement scope.
     }
-
     @PostProcessor(target = "Scope")
     void postScope(Scope scope) {
         if(!(scope.getParent() instanceof RoutineDecl))
@@ -98,11 +104,14 @@ public class Semantics {
     // Declaration processing
     //
 
+    /*
+     * declaration:
+     *      'var' variablenames ':' type S47
+     */
     @PreProcessor(target = "MultiDeclarations")
     void preMultiDeclarations(MultiDeclarations multiDecls) {
         workingPush(); // Prepare for variable declarations.
     }
-
     @PostProcessor(target = "MultiDeclarations")
     void postMultiDeclarations(MultiDeclarations multiDecls) {
         semanticAction(47); // S47: Associate type with variables.
@@ -110,19 +119,32 @@ public class Semantics {
         workingPop(); // Exit variable declaration scope.
     }
 
+    /*
+     * variablenames:
+     *      variablename S10
+     */
     @PostProcessor(target = "ScalarDeclPart")
     void postScalarDeclPart(ScalarDeclPart scalarDeclPart) {
         semanticAction(10); // S10: Declare scalar variable.
     }
 
+    /*
+     * parameters:
+     *      parametername ':' type S16 S15
+     */
     @PostProcessor(target = "ScalarDecl")
     void postScalarDecl(ScalarDecl scalarDecl) {
         if(firstOf(scalarDecl, RoutineDecl.class) != null) {
-            semanticAction(15); // S15: Declare parameter with specified type.
             semanticAction(16); // S16: Increment parameter count by one.
+            semanticAction(15); // S15: Declare parameter with specified type.
         }
     }
 
+    /*
+     * variablenames:
+     *      variablename ’[’ bound ’]’ S19
+     *      variablename ’[’ bound ’,’ bound S46 ’]’ S48
+     */
     @PostProcessor(target = "ArrayDeclPart")
     void postArrayDeclPart(ArrayDeclPart arrayDeclPart) {
         semanticAction(46); // S46: Check that lower bound is <= upper bound.
@@ -132,6 +154,12 @@ public class Semantics {
             semanticAction(48); // S48: Declare two dimensional array with specified bound.
     }
 
+    /*
+     * declaration:
+     *      functionHead S49 S04 S54 scope S05 S13
+     * functionHead:
+     *      'func' functionname '(' S14 parameterList ')' ':' type S12
+     */    
     @PreProcessor(target = "RoutineDecl")
     void preRoutineDecl(RoutineDecl routineDecl) {
         workingPush(); // Prepare for routine declarations.
@@ -145,7 +173,6 @@ public class Semantics {
         }
         workingPush(); // Prepare for parameter declarations.
     }
-
     @PostProcessor(target = "RoutineDecl")
     void postRoutineDecl(RoutineDecl routineDecl) {
         workingPop(); // Exit parameter scope.
@@ -168,6 +195,9 @@ public class Semantics {
         stmt.setRoutine(symbolTable.scopeRoutine());
     }    
 
+    /*
+     * variable ':' '=' expression S34
+     */
     @PostProcessor(target = "AssignStmt")
     void postAssignStmt(AssignStmt assignStmt) {
         semanticAction(34); // S34: Check that variable and expression in assignment are the same type.
@@ -225,10 +255,13 @@ public class Semantics {
     
     /*
      * procedurename '(' S44 argumentList ')' S43
-     * argumentList: arguments ,
-     *               % EMPTY
-     * arguments: expression S45 S36 ,
-     *            arguments ',' arguments
+     * 
+     * argumentList:
+     *      arguments
+     *      % EMPTY
+     * arguments:
+     *      expression S45 S36 ,
+     *      arguments ',' arguments
      */
     @PostProcessor(target = "ProcedureCallStmt")
     void postProcedureCallStmt(Callable procedureCallStmt) {
@@ -247,6 +280,11 @@ public class Semantics {
     // Expression processing
     //
 
+    /*
+     * variablename S26
+     * variablename:
+     *      identifier S37 S29
+     */
     @PostProcessor(target = "IdentExpn")
     void postIdentExpn(IdentExpn identExpn) {
         semanticAction(37); // S37: Check that identifier has been declared as a scalar variable.
@@ -358,10 +396,13 @@ public class Semantics {
 
     /*
      * functionname '(' S44 argumentList ')' S43 S28
-     * argumentList: arguments ,
-     *               % EMPTY
-     * arguments: expression S45 S36 ,
-     *            arguments ',' arguments
+     * 
+     * argumentList:
+     *      arguments
+     *      % EMPTY
+     * arguments:
+     *      expression S45 S36 ,
+     *      arguments ',' arguments
      */
     @PostProcessor(target = "FunctionCallExpn")
     void postFunctionCallExpn(Callable functionCallExpn) {
@@ -397,9 +438,9 @@ public class Semantics {
         }
     }    
     
-    //
+    ////////////////////////////////////////////////////////////////////
     // Actions
-    //
+    ////////////////////////////////////////////////////////////////////
 
     @Action(number = 0) // Start program scope.
     Boolean actionProgramStart(Program program) {
@@ -804,6 +845,10 @@ public class Semantics {
              && symbol.isVariable()
              && ((VariableSymbol) symbol).getDimensions() == 2);
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    // Machinery
+    ////////////////////////////////////////////////////////////////////
 
     //
     // Working scope
