@@ -142,8 +142,8 @@ public class Semantics {
 
     /*
      * variablenames:
-     *      variablename ’[’ bound ’]’ S19
-     *      variablename ’[’ bound ’,’ bound S46 ’]’ S48
+     *      variablename '[' bound ']' S19
+     *      variablename '[' bound ',' bound S46 ']' S48
      */
     @PostProcessor(target = "ArrayDeclPart")
     void postArrayDeclPart(ArrayDeclPart arrayDeclPart) {
