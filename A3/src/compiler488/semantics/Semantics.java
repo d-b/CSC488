@@ -10,6 +10,8 @@ import compiler488.symbol.SymbolTable;
 import compiler488.symbol.VariableSymbol;
 import compiler488.semantics.Errors;
 import compiler488.ast.AST;
+import compiler488.ast.ASTList;
+import compiler488.ast.Callable;
 import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.SourceLocPrettyPrinter;
@@ -29,16 +31,20 @@ import compiler488.ast.expn.FunctionCallExpn;
 import compiler488.ast.expn.IdentExpn;
 import compiler488.ast.expn.IntConstExpn;
 import compiler488.ast.expn.NotExpn;
+import compiler488.ast.expn.SubsExpn;
 import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.expn.VarRefExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.ExitStmt;
+import compiler488.ast.stmt.IfStmt;
 import compiler488.ast.stmt.LoopingStmt;
 import compiler488.ast.stmt.ProcedureCallStmt;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.ResultStmt;
 import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
+import compiler488.ast.stmt.Stmt;
+import compiler488.ast.stmt.WhileDoStmt;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -87,13 +93,17 @@ public class Semantics {
 
     @Action(number = 4) // Start function scope.
     Boolean actionFunctionStart(RoutineDecl routineDecl) {
-        symbolTable.scopeEnter(SymbolTable.ScopeType.Function);
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Wrapper);
+        symbolTable.scopeSet(routineDecl.getName(),
+                new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType()));
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Function, routineDecl);
         return true;
     }
 
     @Action(number = 5) // End function scope.
     Boolean actionFunctionEnd(RoutineDecl routineDecl) {
-        symbolTable.scopeExit();
+        symbolTable.scopeExit(); // Exit function scope
+        symbolTable.scopeExit(); // Exit wrapper
         return true;
     }
 
@@ -112,13 +122,17 @@ public class Semantics {
 
     @Action(number = 8) // Start procedure scope.
     Boolean actionProcedureStart(RoutineDecl routineDecl) {
-        symbolTable.scopeEnter(SymbolTable.ScopeType.Procedure);
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Wrapper);
+        symbolTable.scopeSet(routineDecl.getName(),
+                new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType()));        
+        symbolTable.scopeEnter(SymbolTable.ScopeType.Procedure, routineDecl);
         return true;
     }
 
     @Action(number = 9) // End procedure scope.
     Boolean actionProcedureEnd(RoutineDecl routineDecl) {
-        symbolTable.scopeExit();
+        symbolTable.scopeExit(); // Exit procedure scope
+        symbolTable.scopeExit(); // Exit wrapper
         return true;
     }
 
@@ -130,7 +144,7 @@ public class Semantics {
 
     @Action(number = 11) // Declare forward function.
     Boolean actionDeclareForwardFunction(RoutineDecl routineDecl) {
-    	analysisErrorLoc = routineDecl.getIdent();
+    	setErrorLocation(routineDecl.getIdent());
 
         return symbolTable.scopeSet(routineDecl.getName(),
                 new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType(), false));
@@ -138,7 +152,7 @@ public class Semantics {
 
     @Action(number = 12) // Declare function with parameters ( if any ) and specified type.
     Boolean actionDeclareFunction(RoutineDecl routineDecl) {
-    	analysisErrorLoc = routineDecl.getIdent();
+        setErrorLocation(routineDecl.getIdent());
 
         Symbol symbol = symbolTable.find(routineDecl.getName(), false);
         if(symbol == null)
@@ -149,8 +163,8 @@ public class Semantics {
 
     @Action(number = 13) // Associate scope with function/procedure.
     Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) {
-    	analysisErrorLoc = routineDecl.getIdent();
-
+    	setErrorLocation(routineDecl.getIdent());
+    	
         Symbol symbol = symbolTable.find(routineDecl.getName(), false /* allScopes */);
         if(symbol == null)
             return symbolTable.scopeSet(routineDecl.getName(),
@@ -161,22 +175,22 @@ public class Semantics {
     }
 
     @Action(number = 14) // Set parameter count to zero.
-    Boolean actionResetParameterCount(RoutineDecl routineDecl) {
-        return true;
+    Boolean actionResetParameterCount(AST node) {
+        analysisParams = 0; return true;
     }
 
     @Action(number = 15) // Declare parameter with specified type.
     Boolean actionDeclareParameter(ScalarDecl scalarDecl) {
-    	analysisErrorLoc = scalarDecl.getIdent();
-
+        setErrorLocation(scalarDecl.getIdent());
+        
         Symbol symbol = new VariableSymbol(scalarDecl.getName());
         symbol.setType(scalarDecl.getLangType());
         return workingSet(scalarDecl.getName(), symbol, true /* newScope */);
     }
 
     @Action(number = 16) // Increment parameter count by one.
-    Boolean actionIncrementParameterCount(ScalarDecl scalarDecl) {
-        return true;
+    Boolean actionIncrementParameterCount(AST node) {
+        analysisParams += 1; return true;
     }
 
     @Action(number = 17) // Declare forward procedure.
@@ -191,8 +205,8 @@ public class Semantics {
 
     @Action(number = 19) // Declare one dimensional array with specified bound.
     Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
-    	analysisErrorLoc = arrayDecl.getIdent();
-
+    	setErrorLocation(arrayDecl.getIdent());
+    	
     	ArrayBound b1 = arrayDecl.getBound1();
     	Symbol symbol = new VariableSymbol(arrayDecl.getName(),
                 b1.getLowerboundValue(), b1.getUpperboundValue());
@@ -215,21 +229,41 @@ public class Semantics {
     }
 
     @Action(number = 26) // Set result type to type of variablename.
-    Boolean actionSetToVariable(IdentExpn identExpn) {
-        Symbol symbol = symbolTable.find(identExpn.getIdent().getId());
-        if(symbol == null) return false;
-        identExpn.setEvalType(symbol.getType());
-        return true;
+    Boolean actionSetToVariable(VarRefExpn varRefExpn) {
+        Symbol symbol = symbolTable.find(varRefExpn.getIdent().getId());
+        
+        // If variable not declared
+        if(symbol == null) {
+            varRefExpn.setEvalType(LangType.TYPE_ERROR);
+            return false;
+        }
+        // Otherwise evaluation type is identifier's declared type 
+        else { 
+            varRefExpn.setEvalType(symbol.getType());
+            return true;
+        }
+    }
+    
+    @Action(number = 27) // Set result type to type of array element.
+    Boolean actionSetToArray(SubsExpn subsExpn) {
+        return actionSetToVariable(subsExpn);
     }
 
     @Action(number = 28) // Set result type to result type of function.
     Boolean actionSetToFunction(FunctionCallExpn functionCallExpn) {
         Symbol symbol = symbolTable.find(functionCallExpn.getIdent().getId());
-        LangType type   = symbol.getType();
-        if(symbol == null
-        || !(type instanceof FunctionType)) return false;
-        functionCallExpn.setEvalType(((FunctionType) type).getReturnType());
-        return true;
+        LangType type = symbol.getType();
+        
+        // If identifier is not declared or is not a function
+        if(symbol == null || !symbol.isRoutine()) {
+            functionCallExpn.setEvalType(LangType.TYPE_ERROR);
+            return false;
+        }
+        // Otherwise set evaluation type to function return type
+        else {
+            functionCallExpn.setEvalType(((FunctionType) type).getReturnType());
+            return true;
+        }
     }
 
     @Action(number = 29) // Check that identifier is visible according to the language scope rule.
@@ -240,33 +274,67 @@ public class Semantics {
 
     @Action(number = 30) // Check that type of expression or variable is boolean.
     Boolean actionTypeCheckBoolean(Expn expn) {
-        return expn.getEvalType().isBoolean();
+        LangType type = expn.getEvalType();
+        return type.isBoolean() || type.isError();
     }
 
     @Action(number = 31) // Check that type of expression or variable is integer.
     Boolean actionTypeCheckInteger(Expn expn) {
-        return expn.getEvalType().isInteger();
+        LangType type = expn.getEvalType();
+        return type.isInteger() || type.isError();
     }
 
     @Action(number = 32) // Check that left and right operand expressions are the same type.
     Boolean actionCheckEqualitySides(BinaryExpn binaryExpn) {
-        return binaryExpn.getLeft().getEvalType().equals(binaryExpn.getRight().getEvalType());
+        LangType left    = binaryExpn.getLeft().getEvalType(),
+                 right   = binaryExpn.getRight().getEvalType();
+        LangType unified = LangType.unifyTypes(left, right);
+        return left.equals(right) || unified.equals(LangType.TYPE_ERROR);
     }
 
     @Action(number = 33) // Check that both expressions in conditional are the same type.
     Boolean actionCheckConditionalSides(ConditionalExpn conditionalExpn) {
-        return conditionalExpn.getTrueValue().getEvalType().equals(conditionalExpn.getFalseValue().getEvalType());
+        LangType left    = conditionalExpn.getTrueValue().getEvalType(),
+                 right   = conditionalExpn.getFalseValue().getEvalType();
+        LangType unified = LangType.unifyTypes(left, right);
+        return left.equals(right) || unified.equals(LangType.TYPE_ERROR);
     }
 
     @Action(number = 34) // Check that variable and expression in assignment are the same type.
     Boolean actionCheckAssignmentTypes(AssignStmt assignStmt) {
         VarRefExpn left = assignStmt.getLval();
         Symbol leftSymbol = symbolTable.find(left.getIdent().getId());
-        if (leftSymbol == null) {
-          // undeclared variable!
-          return false;
-        }
+        if (leftSymbol == null) return false;
         return leftSymbol.getType().equals(assignStmt.getRval().getEvalType());
+    }
+    
+    @Action(number = 35) // Check that expression type matches the return type of enclosing function.
+    Boolean actionCheckReturnType(Expn expn) { 
+        RoutineDecl routine = firstOf(expn, Stmt.class).getRoutine();
+        if(routine == null || !routine.isFunction()) return true; // Ignore: already fails S52
+        LangType type = expn.getEvalType();
+        return type.equals(routine.getReturnType()) || type.equals(LangType.TYPE_ERROR);
+    }
+    
+    @Action(number = 36) // Check that type of argument expression matches type of corresponding formal parameter.
+    Boolean actionCheckArgument(Callable callable) {
+        // Get zero based index
+        int argumentIndex = analysisArgs - 1;
+        
+        // Get the identifier and argument
+        IdentNode ident = callable.getIdent();
+        Expn argument = callable.getArguments().getList().get(argumentIndex);
+        setErrorLocation(argument);
+        
+        // Attempt to find the function symbol
+        Symbol symbol = symbolTable.find(ident.getId());
+        if(!symbol.isRoutine()) return true; // Ignore: already fails S40/S41
+       
+        // Verify number of arguments        
+        FunctionType funcType = (FunctionType) ((FunctionSymbol) symbol).getType();
+        if(analysisArgs < funcType.getArguments().size()) return true; // Ignore: already fails S43
+        return argument.getEvalType().equals(funcType.getArguments().get(argumentIndex))
+            || argument.getEvalType().equals(LangType.TYPE_ERROR);
     }
 
     @Action(number = 37) // Check that identifier has been declared as a scalar variable.
@@ -275,8 +343,18 @@ public class Semantics {
         Symbol symbol = symbolTable.find(identExpn.getIdent().getId());
         // Verify result
         return (symbol != null
-             && symbol instanceof VariableSymbol
+             && symbol.isVariable()
              && ((VariableSymbol) symbol).getDimensions() == 0);
+    }
+    
+    @Action(number = 38) // Check that arrayname has been declared as a one dimensional array.
+    Boolean actionCheckArray1D(SubsExpn subsExpn) {
+        // Find the symbol
+        Symbol symbol = symbolTable.find(subsExpn.getIdent().getId());
+        // Verify result
+        return (symbol != null
+             && symbol.isVariable()
+             && ((VariableSymbol) symbol).getDimensions() == 1);
     }
 
     @Action(number = 40) // Check that identifier has been declared as a function.
@@ -292,25 +370,43 @@ public class Semantics {
         Symbol symbol = symbolTable.find(procedureCallStmt.getIdent().getId());
         // Verify result
         return (symbol != null
-             && symbol instanceof FunctionSymbol
+             && symbol.isRoutine()
              && !FunctionSymbol.isFunction(symbol));
     }
+    
 
+    @Action(number = 43) // Check that the number of arguments is equal to the number of formal parameters. 
+    Boolean actionCheckArgumentCount(Callable callable) {
+        // Attempt to find the function symbol
+        IdentNode ident = callable.getIdent();
+        Symbol symbol = symbolTable.find(ident.getId());
+        if(!symbol.isRoutine()) return true; // Ignore: already fails S40/S41
+       
+        // Verify number of arguments        
+        FunctionType funcType = (FunctionType) ((FunctionSymbol) symbol).getType();
+        return analysisArgs <= funcType.getArguments().size();
+    }
+
+    @Action(number = 44) // Set the argument count to zero. 
+    Boolean actionResetArgumentsCount(AST node) {
+        analysisArgs = 0; return true;
+    }
+    
+    @Action(number = 45) // Increment the argument count by one.
+    Boolean actionIncrementArgumentsCount(AST node) {
+        analysisArgs += 1; return true;
+    }    
+    
     @Action(number = 46) // Check that lower bound is <= upper bound.
     Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
         ArrayBound b1 = arrayDecl.getBound1(),
                    b2 = arrayDecl.getBound2();
-
         if (arrayDecl.getDimensions() >= 1 && b1.getLowerboundValue() > b1.getUpperboundValue()) {
-        	analysisErrorLoc = b1;
-        	return false;
+            setErrorLocation(b1); return false;
         }
-
         if (arrayDecl.getDimensions() >= 2 && b2.getLowerboundValue() > b2.getUpperboundValue()) {
-        	analysisErrorLoc = b2;
-        	return false;
+            setErrorLocation(b2); return false;
         }
-
         return true;
     }
 
@@ -323,7 +419,7 @@ public class Semantics {
 
     @Action(number = 48) // Declare two dimensional array with specified bound.
     Boolean actionDeclareArray2D(ArrayDeclPart arrayDecl) {
-    	analysisErrorLoc = arrayDecl.getIdent();
+        setErrorLocation(arrayDecl.getIdent());
 
     	ArrayBound b1 = arrayDecl.getBound1();
     	ArrayBound b2 = arrayDecl.getBound2();
@@ -345,24 +441,21 @@ public class Semantics {
 
     @Action(number = 50) // Check that exit statement is inside a loop.
     Boolean actionCheckExit(ExitStmt exitStmt) {
-        LoopingStmt loop = (LoopingStmt) firstOf(exitStmt, LoopingStmt.class);
+        LoopingStmt loop = firstOf(exitStmt, LoopingStmt.class);
         return loop != null;
     }
 
     @Action(number = 51) // Check that result statement is directly inside a function.
     Boolean actionCheckResult(ResultStmt returnStmt) {
-        Scope scope = (Scope) firstOf(returnStmt, Scope.class);
-        return (scope != null
-             && scope.getParent() instanceof RoutineDecl
-             && ((RoutineDecl) scope.getParent()).isFunction());
+        RoutineDecl routine = returnStmt.getRoutine();
+        return (routine != null && routine.isFunction());
     }
 
     @Action(number = 52) // Check that return statement is directly inside a procedure.
     Boolean actionCheckReturn(ReturnStmt returnStmt) {
-        Scope scope = (Scope) firstOf(returnStmt, Scope.class);
-        return (scope != null
-             && scope.getParent() instanceof RoutineDecl
-             && !((RoutineDecl) scope.getParent()).isFunction());
+        RoutineDecl routine = returnStmt.getRoutine();
+        return (routine != null && !routine.isFunction());
+
     }
 
     @Action(number = 54) // Associate parameters if any with scope.
@@ -372,6 +465,16 @@ public class Semantics {
             || !symbolTable.scopeSet(entry.getKey(), entry.getValue())) return false;
         } return true;
     }
+    
+    @Action(number = 55) // Check that arrayname has been declared as a two dimensional array.
+    Boolean actionCheckArray2D(SubsExpn subsExpn) {
+        // Find the symbol
+        Symbol symbol = symbolTable.find(subsExpn.getIdent().getId());
+        // Verify result
+        return (symbol != null
+             && symbol.isVariable()
+             && ((VariableSymbol) symbol).getDimensions() == 2);
+    }       
 
     //
     // Processors
@@ -400,6 +503,10 @@ public class Semantics {
         if(!(scope.getParent() instanceof RoutineDecl))
             semanticAction(7); // S07: End statement scope.
     }
+    
+    //
+    // Declaration processing
+    //
 
     @PreProcessor(target = "MultiDeclarations")
     void preMultiDeclarations(MultiDeclarations multiDecls) {
@@ -461,33 +568,94 @@ public class Semantics {
              else                         semanticAction(17); // S17: Declare forward procedure.
         workingPop(); // Exit routine scope.
     }
-
-    @PostProcessor(target = "ExitStmt")
-    void postExitStmt(ExitStmt exitStmt) {
-        semanticAction(50); // S50: Check that exit statement is inside a loop.
-    }
-
-    @PostProcessor(target = "ResultStmt")
-    void postResultStmt(ResultStmt resultStmt) {
-        semanticAction(51); // S51: Check that result statement is directly inside a function.
-    }
-
-    @PostProcessor(target = "ReturnStmt")
-    void postReturnStmt(ReturnStmt returnStmt) {
-        semanticAction(52); // S52: Check that return statement is directly inside a procedure.
-    }
+    
+    //
+    // Statement processing
+    //
+    
+    @PreProcessor(target = "Stmt")
+    void preStmt(Stmt stmt) {
+        stmt.setRoutine(symbolTable.scopeRoutine());
+    }    
 
     @PostProcessor(target = "AssignStmt")
     void postAssignStmt(AssignStmt assignStmt) {
         semanticAction(34); // S34: Check that variable and expression in assignment are the same type.
     }
+   
+    /*
+     * 'if' expression S30 'then' statement 'fi' ,
+     * 'if' expression S30 'then' statement 'else' statement 'fi'
+     */
+    @PostProcessor(target = "IfStmt")
+    void postIfStmt(IfStmt ifStmt) {
+        setTop(ifStmt.getCondition());
+        semanticAction(30); // S30: Check that type of expression is boolean.
+    }
+    
+    /*
+     * 'while' expression S30 'do' statement 'end'
+     */
+    @PostProcessor(target = "WhileDoStmt")
+    void postWhileDoStmt(WhileDoStmt whileDoStmt) {
+        setTop(whileDoStmt.getExpn());
+        semanticAction(30); // S30: Check that type of expression is boolean.
+    }
+    
+    /* 
+     * 'exit' S50 ,
+     * 'exit' 'when' expression S30 S50
+     */
+    @PostProcessor(target = "ExitStmt")
+    void postExitStmt(ExitStmt exitStmt) {
+        semanticAction(50); // S50: Check that exit statement is inside a loop.
+        if(exitStmt.getCondition() != null) {
+            setTop(exitStmt.getCondition());
+            semanticAction(30); // S30: Check that type of expression is boolean.
+        }
+    }
 
+    /*
+     * 'result' expression S51 S35
+     */
+    @PostProcessor(target = "ResultStmt")
+    void postResultStmt(ResultStmt resultStmt) {
+        semanticAction(51); // S51: Check that result statement is directly inside a function.
+        setTop(resultStmt.getValue());
+        semanticAction(35); // S35: Check that expression type matches the return type of enclosing function.
+    }
+
+    /*
+     * 'return' S52
+     */
+    @PostProcessor(target = "ReturnStmt")
+    void postReturnStmt(ReturnStmt returnStmt) {        
+        semanticAction(52); // S52: Check that return statement is directly inside a procedure.
+    }    
+    
+    /*
+     * procedurename '(' S44 argumentList ')' S43
+     * argumentList: arguments ,
+     *               % EMPTY
+     * arguments: expression S45 S36 ,
+     *            arguments ',' arguments
+     */
     @PostProcessor(target = "ProcedureCallStmt")
-    void postProcedureCallStmt(ProcedureCallStmt procedureCallStmt) {
+    void postProcedureCallStmt(Callable procedureCallStmt) {
         semanticAction(41); // S41: Check that identifier has been declared as a procedure.
         setTop(procedureCallStmt.getIdent());
         semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
+        semanticAction(44); // S44: Set the argument count to zero.
+        for(int i = 0; i < procedureCallStmt.getArguments().getList().size(); i++) {
+            semanticAction(45); // S45: Increment the argument count by one.
+            semanticAction(36); // S36: Check that type of argument expression matches type of corresponding formal parameter.
+        }
+        semanticAction(43); // S43: Check that the number of arguments is equal to the number of formal parameters.
     }
+    
+    //
+    // Expression processing
+    //
 
     @PostProcessor(target = "IdentExpn")
     void postIdentExpn(IdentExpn identExpn) {
@@ -605,13 +773,38 @@ public class Semantics {
      * arguments: expression S45 S36 ,
      *            arguments ',' arguments
      */
-    // TODO: finish argument checking
     @PostProcessor(target = "FunctionCallExpn")
-    void postFunctionCallExpn(FunctionCallExpn functionCallExpn) {
-        semanticAction(40); // S40: Check that identifier has been declared as a function.
-        setTop(functionCallExpn.getIdent());
-        semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
+    void postFunctionCallExpn(Callable functionCallExpn) {
+        postProcedureCallStmt(functionCallExpn);
         semanticAction(28); // S28: Set result type to result type of function.
+    }
+    
+    /*
+     * arrayname '[' expression S31 ']' S38 S29 S27
+     * arrayname '[' expression S31 ',' expression S31 ']' S55 S29 S27
+     */
+    @PostProcessor(target = "SubsExpn")
+    void postSubsExpn(SubsExpn subsExpn) {
+        // 1D array
+        if(subsExpn.getSubscript2() == null) {
+            setTop(subsExpn.getSubscript1());
+            semanticAction(31); // S31: Check that type of expression or variable is integer.
+            semanticAction(38); // S38: Check that arrayname has been declared as a one dimensional array.
+            setTop(subsExpn.getIdent());
+            semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
+            semanticAction(27); // S27: Set result type to type of array element.
+        }
+        // 2D array
+        else {
+            setTop(subsExpn.getSubscript1());
+            semanticAction(31); // S31: Check that type of expression or variable is integer.
+            setTop(subsExpn.getSubscript2());
+            semanticAction(31); // S31: Check that type of expression or variable is integer.
+            semanticAction(55); // S55: Check that arrayname has been declared as a two dimensional array
+            setTop(subsExpn.getIdent());
+            semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
+            semanticAction(27); // S27: Set result type to type of array element.
+        }
     }
 
     //
@@ -670,14 +863,19 @@ public class Semantics {
     // Helpers
     //
 
-    static <T> AST firstOf(AST obj, Class<T> type) {
+    @SuppressWarnings("unchecked")
+    static <T> T firstOf(AST obj, Class<T> type) {
         for(AST node = obj; node != null; node = node.getParent())
-            if(type.isInstance(node)) return node;
+            if(type.isInstance(node)) return (T) node;
         return null;
     }
-
+    
     void setTop(AST node) {
         analysisSubTop = node;
+    }
+    
+    void setErrorLocation(AST node) {
+        analysisErrorLoc = node;
     }
 
     //
@@ -705,16 +903,24 @@ public class Semantics {
     }
 
     boolean invokeProcessor(AST obj, Map<String, Method> map) {
-        Method m = map.get(obj.getClass().getSimpleName());
-        if(m == null) return false;
-        analysisTop = obj;
-        analysisSubTop = null;
-
-        // Invoke the processor on object
-        try { m.invoke(this, obj); return true; }
-        catch (IllegalAccessException e)    { e.printStackTrace(); return false; }
-        catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
-        catch (InvocationTargetException e) { e.printStackTrace(); return false; }
+        // Get class tree
+        Deque<Class<?>> classes = new LinkedList<Class<?>>();
+        for(Class<?> cls = obj.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass())
+            classes.push(cls);
+        // Loop over classes
+        while(!classes.isEmpty()) {
+            Class<?> cls = classes.pop();
+            Method m = map.get(cls.getSimpleName());
+            if(m == null) continue;
+            analysisTop = obj;
+            analysisSubTop = null;
+    
+            // Invoke the processor on object
+            try { m.invoke(this, obj); }
+            catch (IllegalAccessException e)    { e.printStackTrace(); return false; }
+            catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
+            catch (InvocationTargetException e) { e.printStackTrace(); return false; }            
+        } return true;
     }
 
     void semanticAction(int actionNumber) {
@@ -747,7 +953,7 @@ public class Semantics {
             // Invoke the semantic action.
             try {
                 AST node = (analysisSubTop == null) ? analysisTop : analysisSubTop;
-                analysisErrorLoc = node;
+                setErrorLocation(node); // Set default error location to top node.
                 Boolean result = (Boolean) m.invoke(this, node);
                 analysisSubTop = null;
 
@@ -763,10 +969,12 @@ public class Semantics {
                     analysisErrors += 1;
                 }
             }
-            catch (IllegalAccessException e)    { e.printStackTrace(); }
-            catch (IllegalArgumentException e)  { e.printStackTrace(); }
+            catch (IllegalAccessException e)    {
+                System.out.println("Illegal access occured during action S" + actionNumber + ": "); e.printStackTrace(); }
+            catch (IllegalArgumentException e)  {
+                System.out.println("Illegal argument passed to action S" + actionNumber + ": "); e.printStackTrace(); }
             catch (InvocationTargetException e) {
-                System.out.println("Error while executing action S" + actionNumber + ": "); e.printStackTrace(); }
+                System.out.println("Exception occurred while executing action S" + actionNumber + ": "); e.printStackTrace(); }
         }
     }
 
@@ -847,16 +1055,16 @@ public class Semantics {
     private Map<Integer, Method> actionsMap;
 
     /** Analysis state */
-    private AST           analysisTop;
-    private AST           analysisSubTop;
-    private Set<AST>      analysisGrey;
-    private Deque<AST>    analysisStack;
-    private Deque<Object> analysisWorking;
-    private List<String>  analysisSource;
-    private Integer       analysisErrors;
-
-    /** Where a given semantic error originated in the source */
-    private SourceLoc     analysisErrorLoc;
+    private AST           analysisTop;      // Top AST node
+    private AST           analysisSubTop;   // Sub-top AST node
+    private Set<AST>      analysisGrey;     // Seen AST nodes
+    private Deque<AST>    analysisStack;    // AST node stack
+    private Deque<Object> analysisWorking;  // Working symbols
+    private Integer       analysisParams;   // Parameter count
+    private Integer       analysisArgs;     // Argument count
+    private List<String>  analysisSource;   // Original source listing 
+    private Integer       analysisErrors;   // Count of errors during semantic analysis
+    private SourceLoc     analysisErrorLoc; // Location in source where an error occurred
 }
 
 //

@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
+import compiler488.ast.Callable;
 import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.expn.Expn;
@@ -12,7 +13,7 @@ import compiler488.ast.expn.Expn;
 /**
  * Represents calling a procedure.
  */
-public class ProcedureCallStmt extends Stmt {
+public class ProcedureCallStmt extends Stmt implements Callable {
     private IdentNode ident; // The name of the procedure being called.
 
     private ASTList<Expn> arguments; // The arguments passed to the procedure.

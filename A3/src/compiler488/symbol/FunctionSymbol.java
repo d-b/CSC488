@@ -29,6 +29,11 @@ public class FunctionSymbol extends Symbol {
     @Override
     public void setType(LangType type) {
         this.type = (FunctionType) type;
+    }
+    
+    @Override
+    public Boolean isRoutine() {
+        return true;
     }    
     
     public Boolean hasBody() {

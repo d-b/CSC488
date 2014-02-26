@@ -1,6 +1,5 @@
 package compiler488.ast.decl;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -68,6 +67,10 @@ public class RoutineDecl extends Declaration {
 
     public Scope getBody() {
         return body;
+    }
+    
+    public LangType getReturnType() {
+        return returnType;
     }
 
     public FunctionType getFunctionType() {

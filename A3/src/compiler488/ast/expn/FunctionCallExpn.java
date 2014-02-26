@@ -5,13 +5,14 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
+import compiler488.ast.Callable;
 import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 
 /**
  * Represents a function call with or without arguments.
  */
-public class FunctionCallExpn extends Expn {
+public class FunctionCallExpn extends Expn implements Callable {
     private IdentNode ident; // The name of the function.
 
     private ASTList<Expn> arguments; // The arguments passed to the function.

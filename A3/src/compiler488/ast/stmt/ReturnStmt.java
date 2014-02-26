@@ -1,7 +1,5 @@
 package compiler488.ast.stmt;
 
-import java.io.PrintStream;
-
 import compiler488.ast.SourceLoc;
 
 /**

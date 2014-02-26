@@ -43,6 +43,11 @@ public class VariableSymbol extends Symbol {
         this.type = type;
     }
     
+    @Override
+    public Boolean isVariable() {
+        return true;
+    }
+    
     public int getDimensions() {
         return dimensions;
     }

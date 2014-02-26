@@ -1,8 +1,5 @@
 package compiler488.langtypes;
 
-import compiler488.ast.AST;
-import compiler488.ast.SourceLoc;
-
 /**
  * A placeholder for types.
  */
@@ -11,6 +8,7 @@ abstract public class LangType {
     public static final LangType TYPE_BOOLEAN = new BooleanType();
     public static final LangType TYPE_NIL     = new NilType();
     public static final LangType TYPE_ERROR   = new ErrorType();
+    public static final LangType TYPE_UNKNOWN = new UnknownType();
 
     public boolean equals(Object o) {
         return equals(o.getClass());
@@ -44,13 +42,17 @@ abstract public class LangType {
         return false;
     }
     
-    public LangType unifyTypes(LangType a, LangType b) {
+    public boolean isUnknown() {
+        return false;
+    }
+    
+    static final public LangType unifyTypes(LangType a, LangType b) {
         if (a.isError() || b.isError()) {
             return TYPE_ERROR;
         }
         
         if (!a.equals(b)) {
-            return TYPE_ERROR;
+            return TYPE_UNKNOWN;
         }
         
         return a;

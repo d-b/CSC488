@@ -2,7 +2,6 @@ package compiler488.ast.decl;
 
 import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
-import compiler488.langtypes.LangType;
 
 /**
  * Represents the declaration of a simple variable.

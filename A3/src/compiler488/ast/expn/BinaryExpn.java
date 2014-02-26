@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
-import compiler488.ast.decl.ScalarDecl;
 
 /**
  * The common features of binary expressions.
