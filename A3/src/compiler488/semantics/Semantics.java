@@ -101,7 +101,7 @@ public class Semantics {
         if(!(scope.getParent() instanceof RoutineDecl))
             semanticAction(7); // S07: End statement scope.
     }
-    
+
     //
     // Declaration processing
     //
@@ -161,7 +161,7 @@ public class Semantics {
      *      functionHead S49 S04 S54 scope S05 S13
      * functionHead:
      *      'func' functionname '(' S14 parameterList ')' ':' type S12
-     */    
+     */
     @PreProcessor(target = "RoutineDecl")
     void preRoutineDecl(RoutineDecl routineDecl) {
         workingPush(); // Prepare for routine declarations.
@@ -187,21 +187,21 @@ public class Semantics {
              else                         semanticAction(17); // S17: Declare forward procedure.
         workingPop(); // Exit routine scope.
     }
-    
+
     //
     // Helpers
     //
-    
+
     /*
      * procedurename/functionname '(' S44 argumentList ')' S43
-     * 
+     *
      * argumentList:
      *      arguments
      *      % EMPTY
      * arguments:
      *      expression S45 S36 ,
      *      arguments ',' arguments
-     */    
+     */
     void postCallable(Callable callable) {
         setTop(callable.getIdent());
         semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
@@ -210,17 +210,17 @@ public class Semantics {
             semanticAction(45); // S45: Increment the argument count by one.
             semanticAction(36); // S36: Check that type of argument expression matches type of corresponding formal parameter.
         }
-        semanticAction(43); // S43: Check that the number of arguments is equal to the number of formal parameters.        
-    }    
-    
+        semanticAction(43); // S43: Check that the number of arguments is equal to the number of formal parameters.
+    }
+
     //
     // Statement processing
     //
-    
+
     @PreProcessor(target = "Stmt")
     void preStmt(Stmt stmt) {
         stmt.setRoutine(symbolTable.scopeRoutine());
-    }    
+    }
 
     /*
      * variable ':' '=' expression S34
@@ -229,7 +229,7 @@ public class Semantics {
     void postAssignStmt(AssignStmt assignStmt) {
         semanticAction(34); // S34: Check that variable and expression in assignment are the same type.
     }
-   
+
     /*
      * 'if' expression S30 'then' statement 'fi' ,
      * 'if' expression S30 'then' statement 'else' statement 'fi'
@@ -239,7 +239,7 @@ public class Semantics {
         setTop(ifStmt.getCondition());
         semanticAction(30); // S30: Check that type of expression is boolean.
     }
-    
+
     /*
      * 'while' expression S30 'do' statement 'end'
      */
@@ -248,8 +248,8 @@ public class Semantics {
         setTop(whileDoStmt.getExpn());
         semanticAction(30); // S30: Check that type of expression is boolean.
     }
-    
-    /* 
+
+    /*
      * 'exit' S50 ,
      * 'exit' 'when' expression S30 S50
      */
@@ -276,10 +276,10 @@ public class Semantics {
      * 'return' S52
      */
     @PostProcessor(target = "ReturnStmt")
-    void postReturnStmt(ReturnStmt returnStmt) {        
+    void postReturnStmt(ReturnStmt returnStmt) {
         semanticAction(52); // S52: Check that return statement is directly inside a procedure.
     }
-    
+
     /*
      * 'put' output
      * output:
@@ -297,7 +297,7 @@ public class Semantics {
             semanticAction(31);
         }
     }
-    
+
     /*
      * 'get' input
      * input:
@@ -311,7 +311,7 @@ public class Semantics {
             semanticAction(31);
         }
     }
-    
+
     /*
      * procedurename '(' S44 argumentList ')' S43
      */
@@ -320,7 +320,7 @@ public class Semantics {
         semanticAction(41); // S41: Check that identifier has been declared as a procedure.
         postCallable(procedureCallStmt);
     }
-    
+
     //
     // Expression processing
     //
@@ -441,7 +441,7 @@ public class Semantics {
 
     /*
      * functionname '(' S44 argumentList ')' S43 S28
-     * 
+     *
      * argumentList:
      *      arguments
      *      % EMPTY
@@ -455,7 +455,7 @@ public class Semantics {
         postCallable(functionCallExpn);
         semanticAction(28); // S28: Set result type to result type of function.
     }
-    
+
     /*
      * arrayname '[' expression S31 ']' S38 S29 S27
      * arrayname '[' expression S31 ',' expression S31 ']' S55 S29 S27
@@ -482,8 +482,8 @@ public class Semantics {
             semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
             semanticAction(27); // S27: Set result type to type of array element.
         }
-    }    
-    
+    }
+
     ////////////////////////////////////////////////////////////////////
     // Actions
     ////////////////////////////////////////////////////////////////////
@@ -541,7 +541,7 @@ public class Semantics {
     Boolean actionProcedureStart(RoutineDecl routineDecl) {
         symbolTable.scopeEnter(SymbolTable.ScopeType.Wrapper);
         symbolTable.scopeSet(routineDecl.getName(),
-                new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType()));        
+                new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType()));
         symbolTable.scopeEnter(SymbolTable.ScopeType.Procedure, routineDecl);
         return true;
     }
@@ -561,7 +561,7 @@ public class Semantics {
 
     @Action(number = 11) // Declare forward function.
     Boolean actionDeclareForwardFunction(RoutineDecl routineDecl) {
-    	setErrorLocation(routineDecl.getIdent());
+        setErrorLocation(routineDecl.getIdent());
 
         return symbolTable.scopeSet(routineDecl.getName(),
                 new FunctionSymbol(routineDecl.getName(), routineDecl.getFunctionType(), false));
@@ -586,7 +586,7 @@ public class Semantics {
                     workingFind(routineDecl.getName(), false /* allScopes */));
         else if(FunctionSymbol.isForward(symbol))
             ((FunctionSymbol) symbol).hasBody(true);
-        
+
         // Ignore: any symbol not defined failures handled by S12
         return true;
     }
@@ -599,7 +599,7 @@ public class Semantics {
     @Action(number = 15) // Declare parameter with specified type.
     Boolean actionDeclareParameter(ScalarDecl scalarDecl) {
         setErrorLocation(scalarDecl.getIdent());
-        
+
         Symbol symbol = new VariableSymbol(scalarDecl.getName());
         symbol.setType(scalarDecl.getLangType());
         return workingSet(scalarDecl.getName(), symbol, true /* newScope */);
@@ -622,10 +622,10 @@ public class Semantics {
 
     @Action(number = 19) // Declare one dimensional array with specified bound.
     Boolean actionDeclareArray1D(ArrayDeclPart arrayDecl) {
-    	setErrorLocation(arrayDecl.getIdent());
-    	
-    	ArrayBound b1 = arrayDecl.getBound1();
-    	Symbol symbol = new VariableSymbol(arrayDecl.getName(),
+        setErrorLocation(arrayDecl.getIdent());
+
+        ArrayBound b1 = arrayDecl.getBound1();
+        Symbol symbol = new VariableSymbol(arrayDecl.getName(),
                 b1.getLowerboundValue(), b1.getUpperboundValue());
         return workingSet(arrayDecl.getName(), symbol);
     }
@@ -648,17 +648,17 @@ public class Semantics {
     @Action(number = 26) // Set result type to type of variablename.
     Boolean actionSetToVariable(VarRefExpn varRefExpn) {
         Symbol symbol = symbolTable.find(varRefExpn.getIdent().getId());
-        
+
         // If variable not declared
         if(symbol == null)
             varRefExpn.setEvalType(LangType.TYPE_ERROR);
-        // Otherwise evaluation type is identifier's declared type 
+        // Otherwise evaluation type is identifier's declared type
         else varRefExpn.setEvalType(symbol.getType());
-        
+
         // Ignore: errors are handled by other semantic actions
         return true;
     }
-    
+
     @Action(number = 27) // Set result type to type of array element.
     Boolean actionSetToArray(SubsExpn subsExpn) {
         return actionSetToVariable(subsExpn);
@@ -667,13 +667,13 @@ public class Semantics {
     @Action(number = 28) // Set result type to result type of function.
     Boolean actionSetToFunction(FunctionCallExpn functionCallExpn) {
         Symbol symbol = symbolTable.find(functionCallExpn.getIdent().getId());
-        
+
         // If identifier is not declared or is not a function
         if(symbol == null || !symbol.isRoutine())
             functionCallExpn.setEvalType(LangType.TYPE_ERROR);
         // Otherwise set evaluation type to function return type
         else functionCallExpn.setEvalType(((FunctionType) symbol.getType()).getReturnType());
-        
+
         // Ignore: errors are handled by other semantic actions
         return true;
     }
@@ -719,30 +719,30 @@ public class Semantics {
         if (leftSymbol == null) return true; // Ignore: already fails S29
         return leftSymbol.getType().equals(assignStmt.getRval().getEvalType());
     }
-    
+
     @Action(number = 35) // Check that expression type matches the return type of enclosing function.
-    Boolean actionCheckReturnType(Expn expn) { 
+    Boolean actionCheckReturnType(Expn expn) {
         RoutineDecl routine = firstOf(expn, Stmt.class).getRoutine();
         if(routine == null || !routine.isFunction()) return true; // Ignore: already fails S52
         LangType type = expn.getEvalType();
         return type.equals(routine.getReturnType()) || type.equals(LangType.TYPE_ERROR);
     }
-    
+
     @Action(number = 36) // Check that type of argument expression matches type of corresponding formal parameter.
     Boolean actionCheckArgument(Callable callable) {
         // Get zero based index
         int argumentIndex = analysisArgs - 1;
-        
+
         // Get the identifier and argument
         IdentNode ident = callable.getIdent();
         Expn argument = callable.getArguments().getList().get(argumentIndex);
         setErrorLocation(argument);
-        
+
         // Attempt to find the function symbol
         Symbol symbol = symbolTable.find(ident.getId());
         if(symbol == null || !symbol.isRoutine()) return true; // Ignore: already fails S40/S41
-       
-        // Verify number of arguments        
+
+        // Verify number of arguments
         FunctionType funcType = (FunctionType) ((FunctionSymbol) symbol).getType();
         if(analysisArgs > funcType.getArguments().size()) return true; // Ignore: already fails S43
         return argument.getEvalType().equals(funcType.getArguments().get(argumentIndex))
@@ -758,7 +758,7 @@ public class Semantics {
              && symbol.isVariable()
              && ((VariableSymbol) symbol).getDimensions() == 0);
     }
-    
+
     @Action(number = 38) // Check that arrayname has been declared as a one dimensional array.
     Boolean actionCheckArray1D(SubsExpn subsExpn) {
         // Find the symbol
@@ -785,29 +785,29 @@ public class Semantics {
              && symbol.isRoutine()
              && !FunctionSymbol.isFunction(symbol));
     }
-    
-    @Action(number = 43) // Check that the number of arguments is equal to the number of formal parameters. 
+
+    @Action(number = 43) // Check that the number of arguments is equal to the number of formal parameters.
     Boolean actionCheckArgumentCount(Callable callable) {
         // Attempt to find the function symbol
         IdentNode ident = callable.getIdent();
         Symbol symbol = symbolTable.find(ident.getId());
         if(symbol == null || !symbol.isRoutine()) return true; // Ignore: already fails S40/S41
-       
-        // Verify number of arguments        
+
+        // Verify number of arguments
         FunctionType funcType = (FunctionType) ((FunctionSymbol) symbol).getType();
         return analysisArgs == funcType.getArguments().size();
     }
 
-    @Action(number = 44) // Set the argument count to zero. 
+    @Action(number = 44) // Set the argument count to zero.
     Boolean actionResetArgumentsCount(AST node) {
         analysisArgs = 0; return true;
     }
-    
+
     @Action(number = 45) // Increment the argument count by one.
     Boolean actionIncrementArgumentsCount(AST node) {
         analysisArgs += 1; return true;
-    }    
-    
+    }
+
     @Action(number = 46) // Check that lower bound is <= upper bound.
     Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
         ArrayBound b1 = arrayDecl.getBound1(),
@@ -832,9 +832,9 @@ public class Semantics {
     Boolean actionDeclareArray2D(ArrayDeclPart arrayDecl) {
         setErrorLocation(arrayDecl.getIdent());
 
-    	ArrayBound b1 = arrayDecl.getBound1();
-    	ArrayBound b2 = arrayDecl.getBound2();
-    	Symbol symbol = new VariableSymbol(arrayDecl.getName(),
+        ArrayBound b1 = arrayDecl.getBound1();
+        ArrayBound b2 = arrayDecl.getBound2();
+        Symbol symbol = new VariableSymbol(arrayDecl.getName(),
                 b1.getLowerboundValue(), b1.getUpperboundValue(),
                 b2.getLowerboundValue(), b2.getUpperboundValue());
         return workingSet(arrayDecl.getName(), symbol);
@@ -876,7 +876,7 @@ public class Semantics {
             || !symbolTable.scopeSet(entry.getKey(), entry.getValue())) return false;
         } return true;
     }
-    
+
     @Action(number = 55) // Check that arrayname has been declared as a two dimensional array.
     Boolean actionCheckArray2D(SubsExpn subsExpn) {
         // Find the symbol
@@ -886,7 +886,7 @@ public class Semantics {
              && symbol.isVariable()
              && ((VariableSymbol) symbol).getDimensions() == 2);
     }
-    
+
     ////////////////////////////////////////////////////////////////////
     // Machinery
     ////////////////////////////////////////////////////////////////////
@@ -953,11 +953,11 @@ public class Semantics {
             if(type.isInstance(node)) return (T) node;
         return null;
     }
-    
+
     void setTop(AST node) {
         analysisSubTop = node;
     }
-    
+
     void setErrorLocation(AST node) {
         analysisErrorLoc = node;
     }
@@ -998,12 +998,12 @@ public class Semantics {
             if(m == null) continue;
             analysisTop = obj;
             analysisSubTop = null;
-    
+
             // Invoke the processor on object
             try { m.invoke(this, obj); }
             catch (IllegalAccessException e)    { e.printStackTrace(); return false; }
             catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
-            catch (InvocationTargetException e) { e.printStackTrace(); return false; }            
+            catch (InvocationTargetException e) { e.printStackTrace(); return false; }
         } return true;
     }
 
@@ -1120,7 +1120,7 @@ public class Semantics {
     private Deque<Object> analysisWorking;  // Working symbols
     private Integer       analysisParams;   // Parameter count
     private Integer       analysisArgs;     // Argument count
-    private List<String>  analysisSource;   // Original source listing 
+    private List<String>  analysisSource;   // Original source listing
     private Integer       analysisErrors;   // Count of errors during semantic analysis
     private SourceLoc     analysisErrorLoc; // Location in source where an error occurred
 }
