@@ -4,6 +4,8 @@ pass/A1c.488	Tests all forms of loop building and loop exit constructs.
 pass/A1d.488	Tests non-recursive functions and procedures with and without parameters.
 pass/A1e.fixed.488	Tests recursive functions and procedures with and without parameters, including nested procedure and nested function declarations.
 pass/prototype_for_proc_tests.488	Test for procedure forward declaration
+pass/recursive_function.488	Isolated test for recursive functions.
+pass/recursive_procedure.488	Isolated test for recursive procedures.
 pass/forward_declaration.488	Test for forward declaration of functions
 pass/S50.488	Tests exit statement used properly in loop.
 pass/S10.488	Tests duplicate scalars with different scopes.

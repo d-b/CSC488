@@ -1,0 +1,11 @@
+%
+% recursive function, isolated test.
+%
+{
+	func foo() : integer {
+		result foo()
+	}	
+	var dummy : integer
+	dummy := 0	
+}
+
