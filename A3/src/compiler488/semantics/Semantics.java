@@ -294,7 +294,7 @@ public class Semantics {
             Expn expn = (Expn) node;
             if(expn.getEvalType() == null) continue;
             setTop(expn);
-            semanticAction(31);
+            semanticAction(31); // S31: Check that type of expression or variable is integer.
         }
     }
 
@@ -308,7 +308,7 @@ public class Semantics {
         for(Readable node : getStmt.getInputs().getList()) {
             if(!(node instanceof IdentExpn)) continue;
             setTop((IdentExpn) node);
-            semanticAction(31);
+            semanticAction(31); // S31: Check that type of expression or variable is integer.
         }
     }
 
