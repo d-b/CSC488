@@ -37,3 +37,5 @@ fail/S31-2.488	Tests comparison operator on boolean
 fail/S38.488	Tests array access to scalar
 fail/S37.488	Tests scalar access to array variable
 fail/S30.488	Tests if statement on integer condition.
+fail/hiding_var_with_func.488	Test for hiding variable with function
+fail/hiding_func_with_proc.488	Test for hiding function with procedure

@@ -1,0 +1,11 @@
+%
+% Tests hiding function with procedure
+% @line=8
+{
+  var y : integer
+  func x() : integer {result 5}
+  {
+    proc x() {put "yah" return}
+    y := x()
+  }
+}
