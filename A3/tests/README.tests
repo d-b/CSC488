@@ -41,3 +41,4 @@ fail/S37.488	Tests scalar access to array variable
 fail/S30.488	Tests if statement on integer condition.
 fail/hiding_var_with_func.488	Test for hiding variable with function
 fail/hiding_func_with_proc.488	Test for hiding function with procedure
+fail/S55-array2d_1d_index.488	Test accessing a 2d array with a 1d index.
