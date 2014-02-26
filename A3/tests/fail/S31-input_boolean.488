@@ -1,0 +1,9 @@
+%
+% Input to boolean variable
+%
+% @line=8
+%
+{
+  var p : boolean
+  get p
+}

@@ -33,6 +33,8 @@ fail/S34.488	Tests assignment between different types.
 fail/S33.488	Tests conditional with different types in each case.
 fail/S35.488	Tests result type wrong.
 fail/S31.488	Tests arithmetic operator on boolean
+fail/S31-input_boolean.488	Tests input to boolean variable
+fail/S31-array_sub_boolean.488	Tests subscript boolean variable
 fail/S36.488	Tests argument type wrong for procedure
 fail/S32.488	Tests equality between different types.
 fail/S31-2.488	Tests comparison operator on boolean
