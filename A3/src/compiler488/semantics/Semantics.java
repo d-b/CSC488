@@ -948,8 +948,8 @@ public class Semantics {
     //
 
     @SuppressWarnings("unchecked")
-    static <T> T firstOf(AST obj, Class<T> type) {
-        for(AST node = obj; node != null; node = node.getParent())
+    static <T> T firstOf(AST start, Class<T> type) {
+        for(AST node = start; node != null; node = node.getParent())
             if(type.isInstance(node)) return (T) node;
         return null;
     }
@@ -986,21 +986,21 @@ public class Semantics {
         return invokeProcessor(node, postProcessorsMap);
     }
 
-    boolean invokeProcessor(AST obj, Map<String, Method> map) {
+    boolean invokeProcessor(AST node, Map<String, Method> map) {
         // Get class tree
         Deque<Class<?>> classes = new LinkedList<Class<?>>();
-        for(Class<?> cls = obj.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass())
+        for(Class<?> cls = node.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass())
             classes.push(cls);
         // Loop over classes
         while(!classes.isEmpty()) {
             Class<?> cls = classes.pop();
             Method m = map.get(cls.getSimpleName());
             if(m == null) continue;
-            analysisTop = obj;
+            analysisTop = node;
             analysisSubTop = null;
 
             // Invoke the processor on object
-            try { m.invoke(this, obj); }
+            try { m.invoke(this, node); }
             catch (IllegalAccessException e)    { e.printStackTrace(); return false; }
             catch (IllegalArgumentException e)  { e.printStackTrace(); return false; }
             catch (InvocationTargetException e) { e.printStackTrace(); return false; }
