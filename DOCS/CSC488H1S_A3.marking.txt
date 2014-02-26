@@ -1,0 +1,56 @@
+Marking Scheme for Assignment 3
+
+Design and implementation		        30%
+   How well structured and organized is their code.
+   Good internal comments counts toward the documentation mark.
+   Is their compiler complete, does it build a complete AST?  
+   Does it implement all of the semantic checks?
+
+Documentation					25%
+   Did they document
+   - the symbol table design ?
+     Document basic symbol table operations and scope handling.
+     Should document  how they deal with 
+       major (main program, function, procedure) scopes
+       minor scopes ( {} scopes embedded in major scopes )
+     How do they handle function/procedure parameters?
+     How do the handle array declarations?
+
+   - the AST building design ?
+     AST building  changes/additions to the AST should be well documented.
+     Additions for handling source tracking, symbol table links,
+       type tracking.
+
+   - the semantic analysis design ?
+     Should describe all of the mechanisms that they
+     added to the skeleton to implement semantic analysis.
+     e.g. type tracking, scope tracking, etc.
+     What method did they use to process the AST?
+
+   - their testing ?
+     They should document the testing that they did, 
+     what test cases they used, What parts of the compiler they tested.
+
+   - who did what ?
+
+Their testing					30%
+   - how thoroughly did they test their symbol table ?
+   - how thoroughly did they test their AST building ?
+   - how thoroughly did they test their semantic analysis?
+
+   They should test symbol table and semantic analysis with
+   correct programs and programs containing errors.
+
+   Just running their A1 programs through their compiler
+     isn't nearly enough for full testing marks
+
+Packaging					  5%
+   Did the submitted package follow the submit requirements?
+   Any extraneous material?  Did their compiler compile
+   correctly?
+
+Our testing					 10%
+    We will run a set of test cases against the teams
+    compilers.
+    
+    
