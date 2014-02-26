@@ -1,7 +1,5 @@
 package compiler488.semantics;
 
-import java.io.*;
-
 import compiler488.langtypes.FunctionType;
 import compiler488.langtypes.LangType;
 import compiler488.symbol.FunctionSymbol;
@@ -974,31 +972,8 @@ public class Semantics {
     }
 
     void semanticAction(int actionNumber) {
-        if( traceSemantics ){
-            if(traceFile.length() > 0 ){
-                //output trace to the file represented by traceFile
-                try{
-                    //open the file for writing and append to it
-                    new File(traceFile);
-                    Tracer = new FileWriter(traceFile, true);
-
-                    Tracer.write("Sematics: S" + actionNumber + "\n");
-                    //always be sure to close the file
-                    Tracer.close();
-                }
-                catch (IOException e) {
-                    System.out.println(traceFile +
-                            " could be opened/created.  It may be in use.");
-                }
-            }
-            else{
-                //output the trace to standard out.
-                System.out.println("Sematics: S" + actionNumber );
-            }
-        }
-
         Method m = actionsMap.get(actionNumber);
-        if(m == null) System.out.println("Unhandled Semantic Action: S" + actionNumber );
+        if(m == null) System.err.println("Unhandled Semantic Action: S" + actionNumber );
         else {
             // Invoke the semantic action.
             try {
@@ -1007,16 +982,15 @@ public class Semantics {
                 Boolean result = (Boolean) m.invoke(this, node);
                 analysisSubTop = null;
 
-                if (result) {
-                    System.out.println("Semantic Action: S" + actionNumber);
+                if(result) {
+                    if(verboseOutput) System.out.println("Semantic Action: S" + actionNumber);
                 } else {
                     String errorMessage = Errors.getError(actionNumber);
                     if(errorMessage == null) errorMessage = "Semantic Error S" + actionNumber;
                     else errorMessage = "S" + actionNumber + ": " + errorMessage;
-                    SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.out, analysisSource, analysisErrorLoc);
-                    System.out.println(pp.getFileRef() + ": " + errorMessage);
-                    pp.print();
-                    analysisErrors += 1;
+                    SourceLocPrettyPrinter pp = new SourceLocPrettyPrinter(System.err, analysisSource, analysisErrorLoc);
+                    System.err.println(pp.getFileRef() + ": " + errorMessage);
+                    pp.print(); analysisErrors += 1;
                 }
             }
             catch (IllegalAccessException e)    {
@@ -1091,13 +1065,11 @@ public class Semantics {
     // Members
     //
 
-    /** flag for tracing semantic analysis */
-    private boolean traceSemantics = false;
-    /** file sink for semantic analysis trace */
-    private String traceFile = new String();
+    /** Configuration */
+    public boolean verboseOutput = false;
+
+    /** The symbol table */
     private SymbolTable symbolTable;
-    public FileWriter Tracer;
-    public File f;
 
     /** Maps for processors and actions */
     private Map<String, Method>  preProcessorsMap;

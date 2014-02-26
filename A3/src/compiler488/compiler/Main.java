@@ -49,7 +49,7 @@ public class Main {
      */
 
     /** User option -- supress execution */
-    public static boolean supressExecution   = false ;
+    public static boolean supressExecution   = true ;
 
     // DUMP Options
     /** User option -- dump AST after parsing */
