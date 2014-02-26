@@ -10,6 +10,8 @@ import compiler488.semantics.Errors;
 import compiler488.ast.AST;
 import compiler488.ast.Callable;
 import compiler488.ast.IdentNode;
+import compiler488.ast.Printable;
+import compiler488.ast.Readable;
 import compiler488.ast.SourceLoc;
 import compiler488.ast.SourceLocPrettyPrinter;
 import compiler488.ast.decl.ArrayBound;
@@ -33,10 +35,12 @@ import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.expn.VarRefExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.ExitStmt;
+import compiler488.ast.stmt.GetStmt;
 import compiler488.ast.stmt.IfStmt;
 import compiler488.ast.stmt.LoopingStmt;
 import compiler488.ast.stmt.ProcedureCallStmt;
 import compiler488.ast.stmt.Program;
+import compiler488.ast.stmt.PutStmt;
 import compiler488.ast.stmt.ResultStmt;
 import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
@@ -274,6 +278,38 @@ public class Semantics {
     @PostProcessor(target = "ReturnStmt")
     void postReturnStmt(ReturnStmt returnStmt) {        
         semanticAction(52); // S52: Check that return statement is directly inside a procedure.
+    }
+    
+    /*
+     * 'put' output
+     * output:
+     *      expression S31
+     *      text
+     *      'newline'
+     */
+    @PostProcessor(target = "PutStmt")
+    void postPutStmt(PutStmt putStmt) {
+        for(Printable node : putStmt.getOutputs().getList()) {
+            if(!(node instanceof Expn)) continue;
+            Expn expn = (Expn) node;
+            if(expn.getEvalType() == null) continue;
+            setTop(expn);
+            semanticAction(31);
+        }
+    }
+    
+    /*
+     * 'get' input
+     * input:
+     *      variable S31
+     */
+    @PostProcessor(target = "GetStmt")
+    void postGetStmt(GetStmt getStmt) {
+        for(Readable node : getStmt.getInputs().getList()) {
+            if(!(node instanceof IdentExpn)) continue;
+            setTop((IdentExpn) node);
+            semanticAction(31);
+        }
     }
     
     /*
