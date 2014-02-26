@@ -62,7 +62,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
 
-/** Implement semantic analysis for compiler 488
+/** Semantic analysis for compiler 488
  *  @author Daniel Bloemendal
  */
 public class Semantics {
@@ -546,15 +546,15 @@ public class Semantics {
 
     @Action(number = 13) // Associate scope with function/procedure.
     Boolean actionAssociateRoutineDeclaration(RoutineDecl routineDecl) {
-    	setErrorLocation(routineDecl.getIdent());
-    	
         Symbol symbol = symbolTable.find(routineDecl.getName(), false /* allScopes */);
         if(symbol == null)
             return symbolTable.scopeSet(routineDecl.getName(),
                     workingFind(routineDecl.getName(), false /* allScopes */));
-        else if(FunctionSymbol.isForward(symbol)) {
-            ((FunctionSymbol) symbol).hasBody(true); return true;
-        } return false;
+        else if(FunctionSymbol.isForward(symbol))
+            ((FunctionSymbol) symbol).hasBody(true);
+        
+        // Ignore: any symbol not defined failures handled by S12
+        return true;
     }
 
     @Action(number = 14) // Set parameter count to zero.
@@ -616,15 +616,13 @@ public class Semantics {
         Symbol symbol = symbolTable.find(varRefExpn.getIdent().getId());
         
         // If variable not declared
-        if(symbol == null) {
+        if(symbol == null)
             varRefExpn.setEvalType(LangType.TYPE_ERROR);
-            return false;
-        }
         // Otherwise evaluation type is identifier's declared type 
-        else { 
-            varRefExpn.setEvalType(symbol.getType());
-            return true;
-        }
+        else varRefExpn.setEvalType(symbol.getType());
+        
+        // Ignore: errors are handled by other semantic actions
+        return true;
     }
     
     @Action(number = 27) // Set result type to type of array element.
@@ -635,18 +633,15 @@ public class Semantics {
     @Action(number = 28) // Set result type to result type of function.
     Boolean actionSetToFunction(FunctionCallExpn functionCallExpn) {
         Symbol symbol = symbolTable.find(functionCallExpn.getIdent().getId());
-        LangType type = symbol.getType();
         
         // If identifier is not declared or is not a function
-        if(symbol == null || !symbol.isRoutine()) {
+        if(symbol == null || !symbol.isRoutine())
             functionCallExpn.setEvalType(LangType.TYPE_ERROR);
-            return false;
-        }
         // Otherwise set evaluation type to function return type
-        else {
-            functionCallExpn.setEvalType(((FunctionType) type).getReturnType());
-            return true;
-        }
+        else functionCallExpn.setEvalType(((FunctionType) symbol.getType()).getReturnType());
+        
+        // Ignore: errors are handled by other semantic actions
+        return true;
     }
 
     @Action(number = 29) // Check that identifier is visible according to the language scope rule.
@@ -711,11 +706,11 @@ public class Semantics {
         
         // Attempt to find the function symbol
         Symbol symbol = symbolTable.find(ident.getId());
-        if(!symbol.isRoutine()) return true; // Ignore: already fails S40/S41
+        if(symbol == null || !symbol.isRoutine()) return true; // Ignore: already fails S40/S41
        
         // Verify number of arguments        
         FunctionType funcType = (FunctionType) ((FunctionSymbol) symbol).getType();
-        if(analysisArgs < funcType.getArguments().size()) return true; // Ignore: already fails S43
+        if(analysisArgs > funcType.getArguments().size()) return true; // Ignore: already fails S43
         return argument.getEvalType().equals(funcType.getArguments().get(argumentIndex))
             || argument.getEvalType().equals(LangType.TYPE_ERROR);
     }
@@ -762,7 +757,7 @@ public class Semantics {
         // Attempt to find the function symbol
         IdentNode ident = callable.getIdent();
         Symbol symbol = symbolTable.find(ident.getId());
-        if(!symbol.isRoutine()) return true; // Ignore: already fails S40/S41
+        if(symbol == null || !symbol.isRoutine()) return true; // Ignore: already fails S40/S41
        
         // Verify number of arguments        
         FunctionType funcType = (FunctionType) ((FunctionSymbol) symbol).getType();
@@ -1025,11 +1020,11 @@ public class Semantics {
                 }
             }
             catch (IllegalAccessException e)    {
-                System.out.println("Illegal access occured during action S" + actionNumber + ": "); e.printStackTrace(); }
+                System.out.println("Illegal access occured during action S"      + actionNumber + ": "); e.printStackTrace(); analysisErrors += 1; }
             catch (IllegalArgumentException e)  {
-                System.out.println("Illegal argument passed to action S" + actionNumber + ": "); e.printStackTrace(); }
+                System.out.println("Illegal argument passed to action S"         + actionNumber + ": "); e.printStackTrace(); analysisErrors += 1; }
             catch (InvocationTargetException e) {
-                System.out.println("Exception occurred while executing action S" + actionNumber + ": "); e.printStackTrace(); }
+                System.out.println("Exception occurred while executing action S" + actionNumber + ": "); e.printStackTrace(); analysisErrors += 1; }
         }
     }
 
