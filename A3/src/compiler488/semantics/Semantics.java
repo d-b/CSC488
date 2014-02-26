@@ -187,6 +187,31 @@ public class Semantics {
     }
     
     //
+    // Helpers
+    //
+    
+    /*
+     * procedurename/functionname '(' S44 argumentList ')' S43
+     * 
+     * argumentList:
+     *      arguments
+     *      % EMPTY
+     * arguments:
+     *      expression S45 S36 ,
+     *      arguments ',' arguments
+     */    
+    void postCallable(Callable callable) {
+        setTop(callable.getIdent());
+        semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
+        semanticAction(44); // S44: Set the argument count to zero.
+        for(int i = 0; i < callable.getArguments().getList().size(); i++) {
+            semanticAction(45); // S45: Increment the argument count by one.
+            semanticAction(36); // S36: Check that type of argument expression matches type of corresponding formal parameter.
+        }
+        semanticAction(43); // S43: Check that the number of arguments is equal to the number of formal parameters.        
+    }    
+    
+    //
     // Statement processing
     //
     
@@ -251,29 +276,15 @@ public class Semantics {
     @PostProcessor(target = "ReturnStmt")
     void postReturnStmt(ReturnStmt returnStmt) {        
         semanticAction(52); // S52: Check that return statement is directly inside a procedure.
-    }    
+    }
     
     /*
      * procedurename '(' S44 argumentList ')' S43
-     * 
-     * argumentList:
-     *      arguments
-     *      % EMPTY
-     * arguments:
-     *      expression S45 S36 ,
-     *      arguments ',' arguments
      */
     @PostProcessor(target = "ProcedureCallStmt")
     void postProcedureCallStmt(Callable procedureCallStmt) {
         semanticAction(41); // S41: Check that identifier has been declared as a procedure.
-        setTop(procedureCallStmt.getIdent());
-        semanticAction(29); // S29: Check that identifier is visible according to the language scope rule.
-        semanticAction(44); // S44: Set the argument count to zero.
-        for(int i = 0; i < procedureCallStmt.getArguments().getList().size(); i++) {
-            semanticAction(45); // S45: Increment the argument count by one.
-            semanticAction(36); // S36: Check that type of argument expression matches type of corresponding formal parameter.
-        }
-        semanticAction(43); // S43: Check that the number of arguments is equal to the number of formal parameters.
+        postCallable(procedureCallStmt);
     }
     
     //
@@ -406,7 +417,8 @@ public class Semantics {
      */
     @PostProcessor(target = "FunctionCallExpn")
     void postFunctionCallExpn(Callable functionCallExpn) {
-        postProcedureCallStmt(functionCallExpn);
+        semanticAction(40); // S40: Check that identifier has been declared as a function.
+        postCallable(functionCallExpn);
         semanticAction(28); // S28: Set result type to result type of function.
     }
     
