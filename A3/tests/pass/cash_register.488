@@ -1,0 +1,16 @@
+%
+% cash register program
+%
+{
+  var tot,pri,tax : integer    
+  tot := 0
+  put "Enter prices in cents, 0 to end."
+  repeat
+    get pri
+    tot := tot + pri
+  until pri = 0
+  put "subtotal:	",tot,newline
+  tax := tot * 3 / 20
+  put "sales tax:	",tax,newline
+  put "total:	",tot+tax,newline
+}

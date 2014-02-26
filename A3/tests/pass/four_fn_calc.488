@@ -1,0 +1,53 @@
+%
+% calculator
+%
+{
+  func getop() : integer {
+    var i : integer
+    put "select operation: + - * / neg exit",newline
+    put "                  1 2 3 4 5   0",newline
+    repeat
+      put "select(0-4): "
+      get i
+    until i <= 5 and i >= 1
+    result i
+  }
+  func getnum() : integer {
+    var i : integer
+    put "input number: "
+    get i
+    result i
+  }
+  var acc : integer
+  proc doop(op:integer, arg:integer) {
+    if op = 1 then
+      acc := acc + arg
+      return
+    fi
+    if op = 2 then
+      acc := acc - arg
+      return
+    fi
+    if op = 3 then
+      acc := acc * arg
+      return
+    fi
+    if op = 4 then
+      acc := acc / arg
+      return
+    fi
+  }
+  acc := 0
+  while true do{
+    var op:integer
+    put "value: ",acc,newline
+    op := getop()
+    exit when op = 0
+    if op = 5 then
+      acc := - acc
+    else
+      doop(op,getnum())
+    fi
+  }end
+  put "bye!"
+}
