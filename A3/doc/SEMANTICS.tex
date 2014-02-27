@@ -119,7 +119,7 @@ void postArithExpn(BinaryExpn binaryExpn) {
 }
 \end{lstlisting}
 
-At startup, these processors and then stored in a map from AST class name to
+At startup, these processors are then stored in a map from AST class name to
 function. This is done via reflection in the \texttt{populateMappings} routine
 in \texttt{Semantics}. Using reflection, all the methods in the
 \texttt{Semantics} class are enumerated and checked for annotations. If our
@@ -172,7 +172,7 @@ AST node where the failure occurred.
 \section{Symbol Table}
 The design of the symbol table is fairly straight forward. The symbol table
 stores a stack of scopes. Each scope has a map from identifier to symbol. A
-symbol object is either a an instance of \texttt{VariableSymbol} or
+symbol object is either an instance of \texttt{VariableSymbol} or
 \texttt{FunctionSymbol}. Each symbol stores information about a declared
 variable or function. The \texttt{VariableSymbol} class includes support for
 1D and 2D array variables.
@@ -189,15 +189,16 @@ class Scope {
 It should also be mentioned that each scope also has a type, which currently
 isn't used, specifying which type of scope it is, be it a program, function,
 procedure or statement scope. Also, it is possible to associate a scope with
-a routine. This is useful during semantic analysis, as it can then be used to
-tie statements to their enclosing routines.
+a routine. This is useful during semantic analysis, as it can be used to tie
+statements to their enclosing routines.
 
 The \texttt{SymbolTable} class has exposes functions to enter and exit scopes,
 \texttt{scopeEnter} and \texttt{scopeExit} respectively. The semantic analysis
-component can then call \texttt{scopeSet} to associate an identifier with a
-\texttt{Symbol} instance. As for retrieval, it has an interface, \texttt{find},
-to search for a visible symbol by walking up the stack of scopes. It should
-be noted that \texttt{find} also supports searching the current scope only.
+component can then enter and leave scopes and call \texttt{scopeSet} to
+associate an identifier with a \texttt{Symbol} instance. As for retrieval, it
+has an interface, \texttt{find}, to search for a visible symbol by walking up
+the stack of scopes. It should be noted that \texttt{find} also supports
+searching the current scope only.
 
 % ----------------------------------------------------------------
 \end{document}
