@@ -71,6 +71,51 @@
 % ----------------------------------------------------------------
 
 \section{Overview}
+While planning the design for semantic analysis, there were a number of alternative approaches to
+consider. One suggested approach was to implement all semantic analysis logic in the AST nodes
+themselves. Another approach was to implement some type of visitor pattern, as suggested in,
+CSC488H1S\_ast.pdf. Ultimately, I decided to consolidate all semantic analysis in the single class
+``Semantics'' in ``Semantics.java''. The rationale behind this was to avoid a haphazard
+implementation plan and opt for a thorough systematic approach. Each semantic action and language
+construct was handled one after another in a single file, with code which is both easy to read and
+understand. Another critical advantage of the approach is the ease with which it was possible to
+verify that the semantic analyzer covers all of the language grammar and each semantic action by a
+brief visual inspection of the code.
+
+\section{Processors}
+At its core, the semantic analyzer is based on a depth-first traversal of the AST. During traversal,
+as each node is visited a set of \emph{processors} have the opportunity to inspect the visited
+node. Each processor is bound to some target AST class. As a node is visited, any processor
+targeting the class of the visited node is fired. Furthermore, there are two types of processors,
+\emph{preprocessors} and \emph{postprocessors}. Preprocessors are fired when an AST node is
+seen for the first time. Postprocessors are fired when an AST node is seen for the second and last
+time, after all of the node's children have been processed.
+
+The processors are implemented using Java annotations and reflection. A processor is defined by 
+annotating a function with the ``@PreProcessor'' or ``@PostProcessor'' annotation with the target
+AST class as an annotation argument. Below is an example of a processor.
+\begin{lstlisting}
+/*
+ * expression S31 '+' expression S31 S21
+ * expression S31 '-' expression S31 S21
+ * expression S31 '*' expression S31 S21
+ * expression S31 '/' expression S31 S21
+ */
+@PostProcessor(target = "ArithExpn")
+void postArithExpn(BinaryExpn binaryExpn) {
+    setTop(binaryExpn.getLeft());
+    semanticAction(31); // S31: Check that type of expression or variable is integer.
+    setTop(binaryExpn.getRight());
+    semanticAction(31); // S31: Check that type of expression or variable is integer.
+    semanticAction(21); // S21: Set result type to integer.
+}
+\end{lstlisting}
+These processors and then stored in a map from AST class name to function at startup. This can be
+done via reflection, as it is possible to enumerate all functions in the ``Semantics'' class and
+filter them by annotation. The map is then used during AST traversal to call appropriate processors
+as each node is visited.
+
+\section{Actions}
 % ...
 
 % ----------------------------------------------------------------
