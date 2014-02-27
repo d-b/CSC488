@@ -17,16 +17,16 @@ and the AST tree structures that resulted.
 General Principles
 ------------------
 
-We aimed to keep mutable state in our AST node classes to a mininum. Every
+We aimed to keep mutable state in our AST node classes to a minimum. Every
 action in our parsers' grammar is one line, either a constructor call via
 `new`, or a method call to a factory that constructs a new AST node instance.
-There are no setter methods for any of the arguments you specifiy at the time
+There are no setter methods for any of the arguments you specify at the time
 of the constructor call. This kept the grammar action code itself rather
 simple, and helped keep the design focus on creating a clean and logical
 interface to AST node generation.
 
 While the AST is intended to be rather abstract, we did find that it followed
-the grammar nonterminals rather closely. Given that we wanted good error
+the grammar non-terminals rather closely. Given that we wanted good error
 locality, and given that the semantic actions we would eventually need to take
 are themselves specified positionally relative to the underlying tokens of
 program source text, this hybrid concrete & abstract was not too onerous.
