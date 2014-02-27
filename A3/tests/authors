@@ -1,0 +1,5 @@
+#!/bin/bash
+git ls-tree -r --name-only master ./ | while read file ; do
+    echo -n "$file "
+    git log --follow --pretty=format:%an -- $file | sort | uniq | sed ':a;N;$!ba;s/\n/, /g' 
+done
