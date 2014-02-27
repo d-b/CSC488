@@ -170,7 +170,32 @@ accurately display the location in source code of the failure, by passing it the
 AST node where the failure occurred.
 
 \section{Symbol Table}
-% ...
+The design of the symbol table is fairly straight forward. The symbol table
+stores a stack of scopes. Each scope has a map from identifier to symbol. A
+symbol object is either a an instance of \texttt{VariableSymbol} or
+\texttt{FunctionSymbol}. Each symbol stores information about a declared
+variable or function. The \texttt{VariableSymbol} class includes support for
+1D and 2D array variables.
+
+\begin{lstlisting}
+class Scope {
+    SymbolTable.ScopeType type;
+    Map<String, Symbol>   map;
+    RoutineDecl           routine;
+    ...
+}
+\end{lstlisting}
+
+It should also be mentioned that each scope also has a type, which currently
+isn't used, specifying which type of scope it is, be it a program, function,
+procedure or statement scope. Also, it is possible to associate a scope with
+a routine. This is useful during semantic analysis, as it can then be used to
+tie statements to their enclosing routines.
+
+The \texttt{SymbolTable} class has exposes functions to enter and exit scopes,
+\texttt{scopeEnter} and \texttt{scopeExit} respectively. Furthermore, it also
+has a routine, \texttt{find}, to search for a visible symbol by walking up the
+stack of scopes. The routine also supports searching the current scope only.
 
 % ----------------------------------------------------------------
 \end{document}
