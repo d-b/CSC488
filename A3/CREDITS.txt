@@ -1,0 +1,116 @@
+CSC488 GROUP 9      Credits
+
+g2watson - Watson Oren Isaac
+g2scotts - Simon Scott
+g2mccorm - Peter McCormick
+g0dbloem - Daniel Bloemendal
+mikeqin  - Mike Qin
+
+ASSIGNMENT 3 AST & Semantic analysis
+
+---------------------------------------------------------------
+AST & Error reporting/pretty printing
+---------------------------------------------------------------
+Code
+---------------
+src/compiler488/parser/csc488.cup                   - g2mccorm
+src/compiler488/ast/SourceLocPrettyPrinter.java     - g2mccorm
+src/compiler488/ast/ASTPrettyPrintable.java         - g2mccorm
+src/compiler488/ast/ASTPrettyPrinterContext.java    - g2mccorm
+src/compiler488/ast/SourceLoc.java                  - g2mccorm
+src/compiler488/ast/SourceLocImpl.java              - g2mccorm
+src/compiler488/langtypes/*.java                    - g2mccorm
+
+Miscellaneous modifications:
+adding getParent/setParent & getChildren to AST     - g0dbloem
+source location support throughout all AST classes  - g2mccorm
+getRoutine/setRoutine for statements                - g0dbloem
+
+Documentation
+---------------
+AST.pdf                                             - g2mccorm
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+Semantic analysis & symbol table
+---------------------------------------------------------------
+Code
+---------------
+src/compiler488/semantics/Semantics.java            - g0dbloem
+src/compiler488/semantics/Errors.java               - g0dbloem
+src/compiler488/symbol/SymbolTable.java             - g0dbloem
+src/compiler488/symbol/Symbol.java                  - g0dbloem
+src/compiler488/symbol/VariableSymbol.java          - g0dbloem
+src/compiler488/symbol/FunctionSymbol.java          - g0dbloem
+
+Documentation
+---------------
+SEMANTICS.pdf                                       - g0dbloem
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+Testing & bug discovery
+---------------------------------------------------------------
+Tests
+---------------
+tests/fail/S10-dup_scalar_decl.488                  - g2watson
+tests/fail/S11-dup_forward_func_decl.488            - g2watson
+tests/fail/S12-dup_func_decl.488                    - g2watson
+tests/fail/S15-dup_param_decl.488                   - g2watson
+tests/fail/S17-dup_forward_proc_decl.488            - g2watson
+tests/fail/S18-dup_proc_decl.488                    - g2watson
+tests/fail/S19-dup_array1d_decl.488                 - g2watson
+tests/fail/S29.488                                  - g0dbloem
+tests/fail/S30-2.488                                - g2watson
+tests/fail/S30.488                                  - g2watson
+tests/fail/S31-2.488                                - g2watson
+tests/fail/S31-array_sub_boolean.488                - g2watson
+tests/fail/S31-input_boolean.488                    - g2watson
+tests/fail/S31.488                                  - g2watson
+tests/fail/S32.488                                  - g2watson
+tests/fail/S33.488                                  - g2watson
+tests/fail/S34.488                                  - g2watson
+tests/fail/S35.488                                  - g2watson
+tests/fail/S36.488                                  - g2watson
+tests/fail/S37.488                                  - g2watson
+tests/fail/S38.488                                  - g2watson 
+tests/fail/S40-func_call_undecl.488                 - g2watson
+tests/fail/S41-proc_call_undecl.488                 - g2watson
+tests/fail/S43.488                                  - g2watson
+tests/fail/S46-bad_array1d_bounds.488               - g2watson
+tests/fail/S46-bad_array2d_bounds.488               - g2watson
+tests/fail/S48-dup_array2_decl.488                  - g2watson
+tests/fail/S49-func_decl_forward_body_mismatch.488  - g0dbloem
+tests/fail/S50-embedded_exit.488                    - g0dbloem
+tests/fail/S50-exit_outside_loop.488                - g2watson
+tests/fail/S51-2.488                                - mikeqin
+tests/fail/S51-not_directly_inside_func.488         - g0dbloem
+tests/fail/S51-result_outside_func.488              - g2mccorm
+tests/fail/S51-result_outside_func_inside_proc.488  - g2mccorm
+tests/fail/S52-2.488                                - mikeqin
+tests/fail/S52-not_directly_inside_proc.488         - g0dbloem
+tests/fail/S52-return_outside_proc.488              - g2mccorm
+tests/fail/S52-return_outside_proc_inside_func.488  - g2mccorm
+tests/fail/S55-array1d_2d_index.488                 - g2watson
+tests/fail/hiding_func_with_proc.488                - g2watson
+tests/fail/hiding_var_with_func.488                 - g2watson
+tests/pass/S10.488                                  - g0dbloem
+tests/pass/S50.488                                  - g2watson
+tests/pass/S51.488                                  - g0dbloem
+tests/pass/S52.488                                  - g0dbloem
+tests/pass/ackermann.488                            - g2watson
+tests/pass/cash_register.488                        - g2watson
+tests/pass/dectohex.488                             - g2watson
+tests/pass/forward_declaration.488                  - g2watson
+tests/pass/four_fn_calc.488                         - g2watson
+tests/pass/knuth_man_or_boy.488                     - g2watson
+tests/pass/prototype_for_proc_tests.488             - g2watson
+tests/pass/quicksort.488                            - g2watson
+tests/pass/recursive_function.488                   - g2watson
+tests/pass/recursive_procedure.488                  - g2watson
+
+Miscellaneous
+---------------
+TESTS.py                                            - g0dbloem
+tests/README.tests                                  - g2watson
+---------------------------------------------------------------
