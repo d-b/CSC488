@@ -1,52 +1,52 @@
-pass/A1a.488	Tests all logical, comparison, and arithmetic operators.
-pass/A1b.488	Tests using arrays including both forms of array declaration, positive and negative bounds.
-pass/A1c.488	Tests all forms of loop building and loop exit constructs.
-pass/A1d.488	Tests non-recursive functions and procedures with and without parameters.
-pass/A1e.fixed.488	Tests recursive functions and procedures with and without parameters, including nested procedure and nested function declarations.
-pass/prototype_for_proc_tests.488	Test for procedure forward declaration
-pass/recursive_function.488	Isolated test for recursive functions.
-pass/recursive_procedure.488	Isolated test for recursive procedures.
-pass/forward_declaration.488	Test for forward declaration of functions
-pass/S50.488	Tests exit statement used properly in loop.
-pass/S10.488	Tests duplicate scalars with different scopes.
-pass/dectohex.488	Convert a decimal number to a hexadecimal, using lots of (?:)
-pass/four_fn_calc.488	Does calculations according to user input.
-pass/cash_register.488	Adds up prices and outputs subtotal, taxes and total.
-pass/ackermann.488	Computes ackermann function of two integers.
-pass/knuth_man_or_boy.488	This is Donald Knuth's famous man or boy test. In this language you can only have 'boy' because there are no function pointers or closures. Boohoo.
-pass/quicksort.488	Does a quicksort on a list of numbers. Uses inner procedures a lot instead of parameter passing.
-fail/S10-dup_scalar_decl.488	Tests duplicate scalar variable definition in a single scope.
-fail/S11-dup_forward_func_decl.488	Tests duplicate forward functions
-fail/S12-dup_func_decl.488	Tests duplicate functions
-fail/S15-dup_param_decl.488	Tests duplicate parameters to func or proc
-fail/S17-dup_forward_proc_decl.488	Tests duplicate forward procedures
-fail/S18-dup_proc_decl.488	Tests duplicate procedures
-fail/S19-dup_array1d_decl.488	Tests duplicate arrays
-fail/S40-func_call_undecl.488	Tests undeclared function
-fail/S41-proc_call_undecl.488	Tests undeclared procedure
-fail/S46-bad_array1d_bounds.488	Tests array with lower bound above upper bound
-fail/S46-bad_array2d_bounds.488	Tests matrix with lower bound above upper bound
-fail/S48-dup_array2d_decl.488	Tests duplicate matrices (2d arrays)
-fail/S49-func_decl_forward_body_mismatch.488	Tests type mismatches between function forward declarations and definitions.
-fail/S50-exit_outside_loop.488	Tests exit statement used outside loop.
-fail/S51-result_outside_func.488	Tests result statement used outside function.
-fail/S51-result_outside_func_inside_proc.488	Tests result statement used in procedure.
-fail/S52-return_outside_proc.488	Tests return statement used outside procedure.
-fail/S52-return_outside_proc_inside_func.488	Tests return statement used inside function.
-fail/S43.488	Tests calling proc with wrong number of arguments.
-fail/S30-2.488	Tests not operator on integer.
-fail/S34.488	Tests assignment between different types.
-fail/S33.488	Tests conditional with different types in each case.
-fail/S35.488	Tests result type wrong.
-fail/S31.488	Tests arithmetic operator on boolean
-fail/S31-input_boolean.488	Tests input to boolean variable
-fail/S31-array_sub_boolean.488	Tests subscript boolean variable
-fail/S36.488	Tests argument type wrong for procedure
-fail/S32.488	Tests equality between different types.
-fail/S31-2.488	Tests comparison operator on boolean
-fail/S38.488	Tests array access to scalar
-fail/S37.488	Tests scalar access to array variable
-fail/S30.488	Tests if statement on integer condition.
-fail/hiding_var_with_func.488	Test for hiding variable with function
-fail/hiding_func_with_proc.488	Test for hiding function with procedure
-fail/S55-array2d_1d_index.488	Test accessing a 2d array with a 1d index.
+pass/A1a.488                                    Tests all logical, comparison, and arithmetic operators.
+pass/A1b.488                                    Tests using arrays including both forms of array declaration, positive and negative bounds.
+pass/A1c.488                                    Tests all forms of loop building and loop exit constructs.
+pass/A1d.488                                    Tests non-recursive functions and procedures with and without parameters.
+pass/A1e.fixed.488                              Tests recursive functions and procedures with and without parameters, including nested procedure and nested function declarations.
+pass/prototype_for_proc_tests.488               Test for procedure forward declaration
+pass/recursive_function.488                     Isolated test for recursive functions.
+pass/recursive_procedure.488                    Isolated test for recursive procedures.
+pass/forward_declaration.488                    Test for forward declaration of functions
+pass/S50.488                                    Tests exit statement used properly in loop.
+pass/S10.488                                    Tests duplicate scalars with different scopes.
+pass/dectohex.488                               Convert a decimal number to a hexadecimal, using lots of (?:)
+pass/four_fn_calc.488                           Does calculations according to user input.
+pass/cash_register.488                          Adds up prices and outputs subtotal, taxes and total.
+pass/ackermann.488                              Computes ackermann function of two integers.
+pass/knuth_man_or_boy.488                       This is Donald Knuth's famous man or boy test. In this language you can only have 'boy' because there are no function pointers or closures. Boohoo.             
+pass/quicksort.488                              Does a quicksort on a list of numbers. Uses inner procedures a lot instead of parameter passing.
+fail/S10-dup_scalar_decl.488                    Tests duplicate scalar variable definition in a single scope.
+fail/S11-dup_forward_func_decl.488              Tests duplicate forward functions
+fail/S12-dup_func_decl.488                      Tests duplicate functions
+fail/S15-dup_param_decl.488                     Tests duplicate parameters to func or proc
+fail/S17-dup_forward_proc_decl.488              Tests duplicate forward procedures
+fail/S18-dup_proc_decl.488                      Tests duplicate procedures
+fail/S19-dup_array1d_decl.488                   Tests duplicate arrays
+fail/S40-func_call_undecl.488                   Tests undeclared function
+fail/S41-proc_call_undecl.488                   Tests undeclared procedure
+fail/S46-bad_array1d_bounds.488                 Tests array with lower bound above upper bound
+fail/S46-bad_array2d_bounds.488                 Tests matrix with lower bound above upper bound
+fail/S48-dup_array2d_decl.488                   Tests duplicate matrices (2d arrays)
+fail/S49-func_decl_forward_body_mismatch.488    Tests type mismatches between function forward declarations and definitions.
+fail/S50-exit_outside_loop.488                  Tests exit statement used outside loop.
+fail/S51-result_outside_func.488                Tests result statement used outside function.
+fail/S51-result_outside_func_inside_proc.488    Tests result statement used in procedure.
+fail/S52-return_outside_proc.488                Tests return statement used outside procedure.
+fail/S52-return_outside_proc_inside_func.488    Tests return statement used inside function.
+fail/S43.488                                    Tests calling proc with wrong number of arguments.
+fail/S30-2.488                                  Tests not operator on integer.
+fail/S34.488                                    Tests assignment between different types.
+fail/S33.488                                    Tests conditional with different types in each case.
+fail/S35.488                                    Tests result type wrong.
+fail/S31.488                                    Tests arithmetic operator on boolean
+fail/S31-input_boolean.488                      Tests input to boolean variable
+fail/S31-array_sub_boolean.488                  Tests subscript boolean variable
+fail/S36.488                                    Tests argument type wrong for procedure
+fail/S32.488                                    Tests equality between different types.
+fail/S31-2.488                                  Tests comparison operator on boolean
+fail/S38.488                                    Tests array access to scalar
+fail/S37.488                                    Tests scalar access to array variable
+fail/S30.488                                    Tests if statement on integer condition.
+fail/hiding_var_with_func.488                   Test for hiding variable with function
+fail/hiding_func_with_proc.488                  Test for hiding function with procedure
+fail/S55-array2d_1d_index.488                   Test accessing a 2d array with a 1d index.
