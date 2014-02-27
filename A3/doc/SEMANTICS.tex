@@ -193,9 +193,11 @@ a routine. This is useful during semantic analysis, as it can then be used to
 tie statements to their enclosing routines.
 
 The \texttt{SymbolTable} class has exposes functions to enter and exit scopes,
-\texttt{scopeEnter} and \texttt{scopeExit} respectively. Furthermore, it also
-has a routine, \texttt{find}, to search for a visible symbol by walking up the
-stack of scopes. The routine also supports searching the current scope only.
+\texttt{scopeEnter} and \texttt{scopeExit} respectively. The semantic analysis
+component can then call \texttt{scopeSet} to associate an identifier with a
+\texttt{Symbol} instance. As for retrieval, it has an interface, \texttt{find},
+to search for a visible symbol by walking up the stack of scopes. It should
+be noted that \texttt{find} also supports searching the current scope only.
 
 % ----------------------------------------------------------------
 \end{document}
