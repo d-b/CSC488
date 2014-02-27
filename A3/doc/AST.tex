@@ -1,0 +1,239 @@
+% ----------------------------------------------------------------
+% AMS-LaTeX Paper ************************************************
+% **** -----------------------------------------------------------
+\documentclass[oneside]{amsart}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[letterpaper]{geometry}
+\usepackage[colorlinks=false,
+            pdfborder={0 0 0},
+            pdftitle={CSC488 A3},
+            pdfauthor={Peter McCormick},
+            pdfsubject={CSC488},
+            pdfstartview=FitH,
+            pdfmenubar=false,
+            pdfdisplaydoctitle=true,
+            bookmarks=false]{hyperref}
+\usepackage{subcaption}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage[table]{xcolor}
+% ----------------------------------------------------------------
+\vfuzz2pt % Don't report over-full v-boxes if over-edge is small
+\hfuzz2pt % Don't report over-full h-boxes if over-edge is small
+% THEOREMS -------------------------------------------------------
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\theoremstyle{remark}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+% MATH -----------------------------------------------------------
+\newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+\newcommand{\abs}[1]{\left\vert#1\right\vert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\Real}{\mathbb R}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\To}{\longrightarrow}
+\newcommand{\BX}{\mathbf{B}(X)}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\AND}{\wedge}
+\newcommand{\OR}{\vee}
+\newcommand{\NOT}{\neg}
+\newcommand{\IMPLIES}{\to}
+\newcommand{\TRUE}{\top}
+\newcommand{\FALSE}{\bot}
+\newcommand{\EQUALS}{\equiv}
+\DeclareMathOperator{\sech}{sech}
+\newcolumntype{B}{>{\columncolor{black}\color{white}}c}
+% ----------------------------------------------------------------
+\lstset {
+    basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
+    frame=none,
+    numbers=none
+}
+% ----------------------------------------------------------------
+
+\begin{document}
+
+\title[CSC488 A3]{CSC488\\ASSIGNMENT 3\\AST Design Notes}
+\author{Peter McCormick}
+
+% ----------------------------------------------------------------
+\begin{titlepage}
+\maketitle
+\thispagestyle{empty}
+\tableofcontents
+\end{titlepage}
+% ----------------------------------------------------------------
+
+\section{Introduction}
+We had two goals which governed our modifications to the AST class hierarchy.
+The first was that we wanted our compiler to provide helpful and illustrative
+error messages for end-users, and the second, to give ourselves a high degree
+of confidence in the consistency and correctness of our parser grammar actions
+and the AST tree structures that resulted.
+
+\section{General Principles}
+We aimed to keep mutable state in our AST node classes to a minimum. Every
+action in our parsers' grammar is one line, either a constructor call via
+\texttt{new}, or a method call to a factory that constructs a new AST node
+instance. There are no setter methods for any of the arguments you specify at
+the time of the constructor call. This kept the grammar action code itself
+rather simple, and helped keep the design focus on creating a clean and logical
+interface to AST node generation.
+
+While the AST is intended to be rather abstract, we did find that it followed
+the grammar non-terminals rather closely. Given that we wanted good error
+locality, and given that the semantic actions we would eventually need to take
+are themselves specified positionally relative to the underlying tokens of
+program source text, this hybrid concrete \& abstract was not too onerous.
+
+Our goal of general immutability is relaxed, however, for semantic checking
+purposes: we use a setParent() method call on child nodes in order to
+facilitate easy bi-directional navigation, and the classes related to
+expression nodes carry an ``evaluation type'' to help propagate types for type
+checking and symbol definition purposes.
+
+\section{Source Locations}
+At construction time, every AST node takes a \texttt{SourceLoc} instance, which
+specifies an interval of characters from the program source (given as a
+beginning and end pair of line and column positions.) This interval allows each
+node to directly relate to the exact program source from whence it came. Here
+is an example depicting a language statement with some of the source locations
+which correspond to child nodes:
+
+\begin{lstlisting}
+    foo := bar(x + 1, y not= true)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  AssignStmt
+    ^^^                             lval VarRefExpn ~> IdentExpn (containing an IdentNode)
+           ^^^^^^^^^^^^^^^^^^^^^^^  rval FunctionCallExpn
+           ^^^                      ident IdentNode
+               ^^^^^  ^^^^^^^^^^^   arguments ASTList<Expn>
+                      ^^^^^^^^^^^   EqualsExpn (which is a BinaryExpn subclass)
+                             ^^^^   right BoolConstExpn
+\end{lstlisting}
+
+In \texttt{compiler09.ast.SourceLocPrettyPrinter} you can see a simple
+implementation of pretty printing a source location given the underlying program
+source itself, generating an underlined highlight of a given \texttt{SourceLoc}
+instance. Since the base AST parent class itself implements that interface, and
+since every AST node constructed by the grammar actions includes a source
+location specific to the text interval that generated that node, whenever a
+semantic error is encountered we are able to easily display for the user exactly
+what the problematic place is from their original source code. If a variable
+name is being redefined in a declaration, we are able to highlight the exact
+\texttt{ast.IdentNode} (from within a DeclarationPart from a MultiDeclarations
+from a Scope from a Program) as it appeared when they wrote it.
+
+In Semantics.java circa lines 1027-1029 you can see that the SourceLoc pretty
+printer is used to highlight semantic errors. Run a test by hand from the
+fail directory to see it in action!
+
+\section{Equality Comparison}
+As a sanity check, we ensured that every AST sub- class had a correct
+\texttt{equals} method which performed structural equality comparison (ignoring
+the source locations attached to each node.) The utility of this was manifest in
+combination with the final piece.
+
+\section{Pretty Printing}
+We modified the original AST design in regards to how it regenerates valid 488
+language source code from a tree of AST nodes. First, we used \texttt{toString}
+methods on subclasses to pretty-print source fragments that represented less
+than a whole line of output, things like expressions or constants. Next, we
+added an interface \texttt{ASTPrettyPrintable} which the AST base class
+implements:
+
+\begin{lstlisting}
+    public interface ASTPrettyPrintable {
+        public void prettyPrint(ASTPrettyPrinterContext p);
+    }
+\end{lstlisting}
+
+The \texttt{ASTPrettyPrinterContext} provides primitive methods like print(),
+println() and newline(), as well as enterBlock() and exitBlock() would governed
+the nesting depth (and thus indentation level).
+
+In the case of the AST base class, the default implementation relies on the
+\texttt{toString}, which every child overrides:
+
+\begin{lstlisting}
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.print(toString());
+    }
+\end{lstlisting}
+
+For even a complex type like MultiDeclarations, since they will be
+pretty-printed on a single line, all it needs to do is override toString:
+
+\begin{lstlisting}
+    public String toString() {
+        return  "var " + elements + " : " + typeDecl;
+    }
+\end{lstlisting}
+
+Where \texttt{elements} (of type \texttt{ASTList<DeclarationPart>}) and
+\texttt{typeDecl} (of type \texttt{TypeDecl}) provided toString()'s which are
+used in the coercion.
+
+Since ASTList's are used extensively throughout, sometimes when pretty printing
+them you would want the output to be list of comma-separated values like
+function arguments, while for other cases, newline separated with a uniform
+indentation. To support this, ASTList adds \texttt{prettyPrintCommas} and
+\texttt{prettyPrintNewlines}, plus a convenience helper
+\texttt{prettyPrintBlock} which enters a block, prints newlines, and then exits
+the block.
+
+Putting all of this together, the usefulness of overriding the default
+\texttt{prettyPrint}, and using the pretty printer context, is seen in a multi-
+line block like an IfStmt:
+
+\begin{lstlisting}
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.println("if " + condition + " then ");
+        whenTrue.prettyPrintBlock(p);
+
+        if (whenFalse != null) {
+            p.println("else");
+            whenFalse.prettyPrintBlock(p);
+        }
+
+        p.println("fi");
+    }
+\end{lstlisting}
+
+Just for reference, \texttt{whenTrue} and \texttt{whenFalse} are of type Scope,
+and that class has a \texttt{prettyPrint} override too which handles the braces:
+
+\begin{lstlisting}
+    public void prettyPrint(ASTPrettyPrinterContext p) {
+        p.println("{");
+        p.enterBlock();
+        declarations.prettyPrintNewlines(p);
+        statements.prettyPrintNewlines(p);
+        p.exitBlock();
+        p.print("}");
+    }
+\end{lstlisting}
+
+Overall I feel that this code structure is very clean and nicely expresses
+intent.
+
+With the final piece of the puzzle in place, we were ready for the big boolean
+check. in main.java there is a helper method \texttt{boolean
+verifyprettyprint(program prog)} which, given an ast generated by the parser,
+will pretty-print the ast, re-parse that output generating a second ast, and
+then check the two for structural equality. try it out by passing in the option
+\texttt{-{}-roundtrip} when invoking the compiler.
+
+\section{Conclusion}
+We achieved what we set out to: created confidence in our implementation, and
+provided user friendly error diagnostics.
+
+% ----------------------------------------------------------------
+\end{document}
+% ----------------------------------------------------------------
