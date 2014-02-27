@@ -6,7 +6,7 @@ import compiler488.ast.SourceLoc;
 import compiler488.langtypes.LangType;
 
 /**
- * A placeholder for all expressions.
+ * The common parent of all nodes representing expressions.
  */
 public class Expn extends AST implements Printable {
     private LangType evalType;

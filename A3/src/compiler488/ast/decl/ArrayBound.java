@@ -7,11 +7,32 @@ import compiler488.ast.AST;
 import compiler488.ast.IntConstNode;
 import compiler488.ast.SourceLoc;
 
+/**
+ * An AST node representing the specified bound of an array declaration, with a
+ * possibly implicit lower bound of 1.
+ * 
+ * Example, from which two ArrayBound nodes will be generated:
+ * 
+ *     var x[1 .. 2, 4] : integer
+ *           ^^^^^^  ^
+ *           
+ * NB: The source location interval corresponds to the start of the first bound literal
+ * to the right end of the upper bound, including all whitespace and the two dots.
+ */
 public class ArrayBound extends AST {
+    /** Whether the 1 lower bound was omitted and thus is implicit */
     private boolean implicit_lb;
+    
+    /** The AST node for the literal lower bound constant (if any) */
     private IntConstNode lb;
+    
+    /** The AST node for the literal upper bound constant */
     private IntConstNode ub;
 
+    /**
+     * Construct this node with an explicit upper bound specified (and 
+     * implicit lower bound.)
+     */
     public ArrayBound(IntConstNode ub, SourceLoc loc) {
         super(loc);
 
@@ -20,6 +41,9 @@ public class ArrayBound extends AST {
         ub.setParent(this);
     }
 
+    /**
+     * Construct this node from both an explicit upper and lower bound.
+     */
     public ArrayBound(IntConstNode lb, IntConstNode ub, SourceLoc loc) {
         this(ub, loc);
 

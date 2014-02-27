@@ -10,12 +10,14 @@ import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 
 /**
- * Represents a function call with or without arguments.
+ * Represents a function call with zero or more arguments.
  */
 public class FunctionCallExpn extends Expn implements Callable {
-    private IdentNode ident; // The name of the function.
+    /** The identifier that names the function to be called */
+    private IdentNode ident;
 
-    private ASTList<Expn> arguments; // The arguments passed to the function.
+    /** he arguments passed to the function. */
+    private ASTList<Expn> arguments;
 
     public FunctionCallExpn(IdentNode ident, ASTList<Expn> arguments, SourceLoc loc) {
         super(loc);

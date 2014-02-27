@@ -8,8 +8,8 @@ import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 
 /**
- * References to an array element variable
- *
+ * An expression reference to an array element variable including subscripts for 
+ * 1 or 2 dimensions (which can be used as an l-value)
  */
 public class SubsExpn extends VarRefExpn {
     private Expn subscript1;	 // first subscript

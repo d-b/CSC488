@@ -4,7 +4,7 @@ import compiler488.ast.SourceLoc;
 
 /**
  * Place holder for all binary expression where both operands could be either
- * integer or boolean expressions. e.g. = and not = comparisons
+ * integer or boolean expressions. e.g. = and not= comparisons
  */
 public class EqualsExpn extends BinaryExpn {
     public final static String OP_EQUAL = "=";

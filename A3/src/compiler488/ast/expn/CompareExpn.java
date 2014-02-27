@@ -3,7 +3,7 @@ package compiler488.ast.expn;
 import compiler488.ast.SourceLoc;
 
 /**
- * Place holder for all ordered comparisions expression where both operands must
+ * Place holder for all ordered comparisons expression where both operands must
  * be integer expressions. e.g. < , > etc. comparisons
  */
 public class CompareExpn extends BinaryExpn {

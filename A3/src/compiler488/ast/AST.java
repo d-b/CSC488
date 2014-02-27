@@ -8,7 +8,9 @@ import compiler488.ast.SourceLocNull;
 /**
  * This is a placeholder at the top of the Abstract Syntax Tree hierarchy. It is
  * a convenient place to add common behaviour.
- * @author  Dave Wortman, Marsha Chechik, Danny House
+ * 
+ * @author Dave Wortman, Marsha Chechik, Danny House
+ * @author pdmccormick
  */
 public class AST implements SourceLoc, ASTPrettyPrintable {
     protected AST parent;
@@ -19,6 +21,11 @@ public class AST implements SourceLoc, ASTPrettyPrintable {
         loc = new SourceLocNull();
     }
 
+    /**
+     * Construct an AST node with the given source location coordinates. 
+     * 
+     * @param loc the source location 
+     */
     public AST(SourceLoc loc) {
         this();
 

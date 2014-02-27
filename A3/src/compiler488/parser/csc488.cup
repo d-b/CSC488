@@ -1,8 +1,8 @@
-// CSC488S Winter 2013/2014  
-//
-// File:  csc488.cup
-//
-// Package and import specifications section.
+/**
+ * CSC488 Winter 2014 -- Group 09
+ *
+ * pdmccormick: added AST construction actions
+ */
 
 package compiler488.parser;
 
@@ -69,7 +69,7 @@ import compiler488.ast.expn.FunctionCallExpn;
  action code {:
     /** The name of the file currently being parsed.
      *
-     * @pdmccormick: A bit hackish, should be with the scanner, but we don't readily have
+     * pdmccormick: A bit hackish, should be with the scanner, but we don't readily have
      * access to a private member of type `Lexer`, only one of the underlying
      * interface `java_cup.runtime.Scanner`, so given how much mess we are already
      * dealing with in the mass of `new SourceLocImpl(_startleft, _startright, ...)`,
@@ -239,13 +239,6 @@ nonterminal	ScalarDecl parameter;
 nonterminal ConstExpn constant;
 
 nonterminal TypeDecl type;
-
-// CSC488S PLEASE NOTE: your grammar CAN NOT use the 'precedence'
-// feature of java-cup. The lines below should remain
-// commented.
-//
-//precedence left PLUS, MINUS;
-//precedence left TIMES, DIVIDE;		// Higher precedence.
 
 // The grammar section.
 

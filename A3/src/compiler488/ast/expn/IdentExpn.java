@@ -3,7 +3,8 @@ package compiler488.ast.expn;
 import compiler488.ast.IdentNode;
 
 /**
- *  References to a scalar variable.
+ * A scalar variable reference that appears as an expression (and can be used 
+ * as an l-value)
  */
 public class IdentExpn extends VarRefExpn {
     public IdentExpn(IdentNode ident) {

@@ -6,13 +6,18 @@ import java.util.Vector;
 import compiler488.ast.AST;
 import compiler488.ast.SourceLoc;
 
-/** Represents a conditional expression (i.e., x>0?3:4). */
+/**
+ * Represents a conditional expression (i.e., x>0?3:4).
+ */
 public class ConditionalExpn extends Expn {
-    private Expn condition; // Evaluate this to decide which value to yield.
+    /** Evaluate this to decide which value to yield. */
+    private Expn condition;
 
-    private Expn trueValue; // The value is this when the condition is true.
+    /** The value is this when the condition is true. */
+    private Expn trueValue;
 
-    private Expn falseValue; // Otherwise, the value is this.
+    /** Otherwise, the value is this. */
+    private Expn falseValue;
 
     public ConditionalExpn(Expn condition, Expn trueValue, Expn falseValue, SourceLoc loc) {
         super(loc);

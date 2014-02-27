@@ -4,6 +4,9 @@ import compiler488.ast.IdentNode;
 import compiler488.ast.Readable;
 import compiler488.ast.SourceLoc;
 
+/**
+ * Expressions which can be used as l-values in assignment statements
+ */
 public abstract class VarRefExpn extends Expn implements Readable {
     protected IdentNode ident;
 

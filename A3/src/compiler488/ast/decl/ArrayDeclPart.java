@@ -4,16 +4,27 @@ import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 
 /**
- * Holds the declaration part of an array.
+ * Holds the declaration part of an array for a MultiDeclaration consisting 
+ * of a variable identifier and 1 or 2 dimensions of array bounds.
+ * 
+ * Example:
+ *     var foo, y[1, 2], z [1..5], bar : integer
+ *              ^^^^^^^  ^^^^^^^^ 
  */
 public class ArrayDeclPart extends DeclarationPart {
-    /* The lower and upper boundaries of the array. */
-    private ArrayBound b1, b2;
+    /** The first dimension boundary of the array */
+    private ArrayBound b1;
+    
+    /** The second dimension boundary of the array (iff is2D is true) */ 
+    private ArrayBound b2;
     private Boolean is2D = false;
 
-    /* The number of objects the array holds. */
+    /** The number of objects the array holds. */
     private Integer size;
 
+    /**
+     * Construct a node for a 1D array. 
+     */
     public ArrayDeclPart(IdentNode ident, ArrayBound b, SourceLoc loc) {
         super(ident, loc);
 
@@ -22,6 +33,9 @@ public class ArrayDeclPart extends DeclarationPart {
         size = b1.getUpperboundValue() - b1.getLowerboundValue() + 1;
     }
 
+    /**
+     * Construct a node for a 2D array. 
+     */
     public ArrayDeclPart(IdentNode ident, ArrayBound b1, ArrayBound b2, SourceLoc loc) {
         this(ident, b1, loc);
 

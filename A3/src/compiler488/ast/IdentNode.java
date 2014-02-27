@@ -1,5 +1,9 @@
 package compiler488.ast;
 
+/**
+ * An AST node that represents an identifier literal with its source location 
+ * from the original file. 
+ */
 public class IdentNode extends AST {
     private String id;
 

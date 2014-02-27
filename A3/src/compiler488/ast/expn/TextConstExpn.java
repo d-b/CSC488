@@ -4,7 +4,7 @@ import compiler488.ast.Printable;
 import compiler488.ast.SourceLoc;
 
 /**
- * Represents a literal text constant.
+ * Represents a literal text string constant.
  */
 public class TextConstExpn extends ConstExpn implements Printable {
     private String value; // The value of this literal.

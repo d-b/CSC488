@@ -4,9 +4,16 @@ import compiler488.ast.IdentNode;
 import compiler488.ast.SourceLoc;
 
 /**
- * Represents the declaration of a simple variable.
+ * Represents the declaration of a simple variable (only used in function or procedure arguments.)
+ * 
+ * Example:
+ *      forward proc foo(x : integer, y : boolean)
+ *                       ^^^^^^^^^^^  ^^^^^^^^^^^
  */
 public class ScalarDecl extends Declaration {
+    /**
+     * Construct a scalar declaration from a given identifier and type declaration
+     */
     public ScalarDecl(IdentNode ident, TypeDecl typeDecl, SourceLoc loc) {
         super(ident, typeDecl, loc);
     }

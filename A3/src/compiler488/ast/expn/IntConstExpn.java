@@ -3,7 +3,7 @@ package compiler488.ast.expn;
 import compiler488.ast.IntConstNode;
 
 /**
- * Represents a literal integer constant.
+ * Represents a literal integer constant expression.
  */
 public class IntConstExpn extends ConstExpn {
     private IntConstNode intconst;

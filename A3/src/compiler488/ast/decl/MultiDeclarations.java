@@ -8,7 +8,11 @@ import compiler488.ast.ASTList;
 import compiler488.ast.SourceLoc;
 
 /**
- * Holds the declaration of multiple elements.
+ * Holds the declaration of multiple variables (whether scalar or arrays) of a given type.
+ * 
+ * Example:
+ *    var x, y[2], z[2..5, 10..100] : integer
+ *    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  */
 public class MultiDeclarations extends Declaration {
     /* The elements being declared */

@@ -3,7 +3,7 @@ package compiler488.ast.expn;
 import compiler488.ast.SourceLoc;
 
 /**
- * Boolean literal constants.
+ * Boolean literal constants expression.
  */
 public class BoolConstExpn extends ConstExpn {
     private boolean value;	/* value of the constant */

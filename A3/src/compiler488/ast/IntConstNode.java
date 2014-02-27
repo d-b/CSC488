@@ -1,5 +1,9 @@
 package compiler488.ast;
 
+/**
+ * An AST node that represents a positive or negative integer literal along 
+ * with its source location from the original file. 
+ */
 public class IntConstNode extends AST {
     private Integer i;
 
@@ -13,6 +17,9 @@ public class IntConstNode extends AST {
         this(Integer.valueOf(str), loc);
     }
 
+    /**
+     * Return a newly constructed node representing the literals' negated value.
+     */
     public IntConstNode negate(SourceLoc loc) {
         return new IntConstNode(-i, loc);
     }
@@ -37,4 +44,3 @@ public class IntConstNode extends AST {
         return i.equals(o.i);
     }
 }
-

@@ -4,8 +4,8 @@ import compiler488.ast.Printable;
 import compiler488.ast.SourceLoc;
 
 /**
- * Represents the special literal constant associated with writing a new-line
- * character on the output device.
+ * Represents the special literal keyword 'newline' associated with writing a 
+ * newline character on the output device.
  */
 public class NewlineConstExpn extends ConstExpn implements Printable {
     public NewlineConstExpn(SourceLoc loc) {
