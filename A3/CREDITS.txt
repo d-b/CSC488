@@ -113,4 +113,8 @@ Miscellaneous
 ---------------
 TESTS.py                                            - g0dbloem
 tests/README.tests                                  - g2watson
+
+Documentation
+---------------
+TESTING.pdf                                         - g0dbloem
 ---------------------------------------------------------------
