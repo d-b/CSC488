@@ -51,6 +51,9 @@ public class Main {
     /** User option -- supress execution */
     public static boolean supressExecution   = false ;
 
+    /** User option -- roundtrip the AST and verify the pretty print */
+    private static boolean checkRoundtrip = false;
+    
     // DUMP Options
     /** User option -- dump AST after parsing */
     private static boolean dumpAST1  = false;
@@ -149,6 +152,8 @@ public class Main {
                 for (i = 0; i < length; i++) {
                     if (arguments[i].equals("-X")) {
                         supressExecution = true;
+                    } else if (arguments[i].equals("--roundtrip")) {
+                        checkRoundtrip = true;
                     } else if (arguments[i].equals("-D")) {
                         i++;	// advance to next argument
                         argTmp = arguments[ i ] ;
@@ -447,7 +452,15 @@ public class Main {
             return;
         }
         
-        //verifyPrettyPrint(programAST);
+        if (checkRoundtrip) {
+            if (verifyPrettyPrint(programAST)) {
+                System.out.println("Roundtrip successfully");
+            } else {
+                System.out.println("Error, roundtrip didn't match, sorry!");
+            }
+            
+            return;
+        }
 
         // Dump AST after parsing if requested
         if (dumpAST1) {
@@ -598,7 +611,7 @@ public class Main {
         System.out.println("End of Execution");
     }
     
-    static void verifyPrettyPrint(Program prog) {
+    static boolean verifyPrettyPrint(Program prog) {
         ByteArrayOutputStream output_stream = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(output_stream);
         ASTPrettyPrinterContext pp = new ASTPrettyPrinterContext(ps);
@@ -617,9 +630,7 @@ public class Main {
 
             Program prog2 = (Program) p.parse().value;
             
-            if (!prog.equals(prog2)) {
-                throw new RuntimeException("Roundtrip didn't match, oops");
-            }
+            return prog.equals(prog2);
         } catch (SyntaxErrorException e) {
             System.err.println("Error parsing pretty print output");
         } catch (Exception e) {
@@ -627,5 +638,7 @@ public class Main {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             e.printStackTrace();
         }
+        
+        return false;
     }
 }

@@ -156,7 +156,7 @@ public class RoutineDecl extends Declaration {
     
     public boolean equals(RoutineDecl o) {
         return ident.equals(o.ident) &&
-                typeDecl.equals(o.typeDecl) && 
+                returnType.equals(o.returnType) && 
                 params.equals(o.params) && 
                 ((body == null) ? (o.body == null) : body.equals(o.body));
     }
