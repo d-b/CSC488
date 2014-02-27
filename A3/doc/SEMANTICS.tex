@@ -84,12 +84,12 @@ brief visual inspection of the code.
 
 \section{Processors}
 At its core, the semantic analyzer is based on a depth-first traversal of the AST. During traversal,
-as each node is visited a set of \emph{processors} have the opportunity to inspect the visited
-node. Each processor is bound to some target AST class. As a node is visited, any processor
-targeting the class of the visited node is fired. Furthermore, there are two types of processors,
-\emph{preprocessors} and \emph{postprocessors}. Preprocessors are fired when an AST node is
-seen for the first time. Postprocessors are fired when an AST node is seen for the second and last
-time, after all of the node's children have been processed.
+as each node is visited a set of \emph{processors} have the opportunity to inspect the visited node
+and call the various semantic actions. Each processor is bound to some target AST class. As a node
+is visited, any processor targeting the class of the visited node is fired. Furthermore, there are
+two types of processors, \emph{preprocessors} and \emph{postprocessors}. Preprocessors are fired
+when an AST node is seen for the first time. Postprocessors are fired when an AST node is seen for
+the second and last time, after all of the node's children have been processed.
 
 The processors are implemented using Java annotations and reflection. A processor is defined by 
 annotating a function with the ``@PreProcessor'' or ``@PostProcessor'' annotation with the target
@@ -110,12 +110,48 @@ void postArithExpn(BinaryExpn binaryExpn) {
     semanticAction(21); // S21: Set result type to integer.
 }
 \end{lstlisting}
-These processors and then stored in a map from AST class name to function at startup. This can be
-done via reflection, as it is possible to enumerate all functions in the ``Semantics'' class and
-filter them by annotation. The map is then used during AST traversal to call appropriate processors
-as each node is visited.
+At startup, these processors and then stored in a map from AST class name to function. This is done
+via reflection in the ``populateMappings'' routine in ``Semantics.java''. Using reflection, all the
+methods in the ``Semantics'' class are enumerated and checked for annotations. If our annotations
+are found tied to a method the method is then stored in the appropriate map. The maps are then used
+during AST traversal to call appropriate processors as each node is visited.
 
 \section{Actions}
+As each processor is executed during AST traversal, those processors in turn call on semantic
+actions to perform the necessary semantic checks outlined in the given semantics documentation,
+CSC488H1S\_semantics.pdf. Actions are also implemented using annotations and reflection in a manner
+almost identical to processors. This time, an action is defined by declaring an action function
+annotated with ``@Action'' with the semantic action number as the argument passed to the annotation.
+An example of an action is provided below.
+\begin{lstlisting}
+@Action(number = 46) // Check that lower bound is <= upper bound.
+Boolean actionCheckArrayBounds(ArrayDeclPart arrayDecl) {
+    ArrayBound b1 = arrayDecl.getBound1(),
+               b2 = arrayDecl.getBound2();
+    if (arrayDecl.getDimensions() >= 1 && b1.getLowerboundValue() > b1.getUpperboundValue()) {
+        setErrorLocation(b1); return false;
+    }
+    if (arrayDecl.getDimensions() >= 2 && b2.getLowerboundValue() > b2.getUpperboundValue()) {
+        setErrorLocation(b2); return false;
+    }
+    return true;
+}
+\end{lstlisting}
+As previously mentioned, the actions are called on by processors as they operate on the various
+nodes of the AST. They are called through the ``semanticAction'' function in ``Semantics''.
+The ``semanticAction'' function looks up the function corresponding to the semantic action number
+and invokes it, passing to it the AST node currently being visited by the processor. It should be
+mentioned that processors have the opportunity to change the target AST node that is being inspected
+before every semanticAction call via the ``setTop'' function.
+
+The actions have the opportunity to perform either some internal bookkeeping or a semantic check.
+If an action performs a semantic check it returns whether the check succeeded or failed via the
+return value of the action function. If an action returns a failure the ``semanticAction'' function
+will report the failure. It calls on my team mate Peter's pretty printing facilities to accurately
+display the location in source code of the failure, by passing it the AST node where the failure
+occurred.
+
+\section{Symbol Table}
 % ...
 
 % ----------------------------------------------------------------
