@@ -1,0 +1,107 @@
+% ----------------------------------------------------------------
+% AMS-LaTeX Paper ************************************************
+% **** -----------------------------------------------------------
+\documentclass[oneside]{amsart}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[letterpaper]{geometry}
+\usepackage[colorlinks=false,
+            pdfborder={0 0 0},
+            pdftitle={CSC488 A3},
+            pdfauthor={Daniel Bloemendal},
+            pdfsubject={CSC488},
+            pdfstartview=FitH,
+            pdfmenubar=false,
+            pdfdisplaydoctitle=true,
+            bookmarks=false]{hyperref}
+\usepackage{subcaption}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage[table]{xcolor}
+% ----------------------------------------------------------------
+\vfuzz2pt % Don't report over-full v-boxes if over-edge is small
+\hfuzz2pt % Don't report over-full h-boxes if over-edge is small
+% THEOREMS -------------------------------------------------------
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\theoremstyle{remark}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+% MATH -----------------------------------------------------------
+\newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+\newcommand{\abs}[1]{\left\vert#1\right\vert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\Real}{\mathbb R}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\To}{\longrightarrow}
+\newcommand{\BX}{\mathbf{B}(X)}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\AND}{\wedge}
+\newcommand{\OR}{\vee}
+\newcommand{\NOT}{\neg}
+\newcommand{\IMPLIES}{\to}
+\newcommand{\TRUE}{\top}
+\newcommand{\FALSE}{\bot}
+\newcommand{\EQUALS}{\equiv}
+\DeclareMathOperator{\sech}{sech}
+\newcolumntype{B}{>{\columncolor{black}\color{white}}c}
+% ----------------------------------------------------------------
+\lstset {
+    basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
+    frame=none,
+    numbers=none
+}
+% ----------------------------------------------------------------
+
+\begin{document}
+
+\title[CSC488 A3]{CSC488\\ASSIGNMENT 3\\Testing}
+\author{Daniel Bloemendal}
+
+% ----------------------------------------------------------------
+\begin{titlepage}
+\maketitle
+\thispagestyle{empty}
+\tableofcontents
+\end{titlepage}
+% ----------------------------------------------------------------
+
+\section{Overview}
+Our approach to testing was to stress each semantic action. To clarify this, it
+should be noted that some semantic actions perform internal book keeping rather
+than a check. So we decided to write one or more tests for every semantic action
+that involve a semantic check of some kind. Please refer to the
+tests/README.tests for a listing of all tests.
+
+\section{Passing tests}
+The passing tests are relatively straight forward. We tried to include a variety 
+of relatively complicated code stressing many of the features of the language.
+Some individual tests for possible corner cases were included as well.
+Those tests are \texttt{pass/S10.488}, \texttt{pass/S50.488},
+\texttt{pass/S51.488} and \texttt{pass/S52.488}. Please see the comments within
+the tests for more information on each test.
+
+\section{Failing tests}
+As mentioned in the overview, our approach for failing tests was to include one
+or more case for each semantic action involving checks. Each failing tests
+includes a comment describing the point of failure and some meta data
+\texttt{@line=<line>} or \texttt{@line=[<line\_1>, <line\_2>, ..., <line\_n>]}.
+This is important to note because the test runner \texttt{TESTS.py} that I
+developed uses this meta data to verify that the test does indeed fail on the
+line(s) specified. The test cases are named according to the semantic actions
+they fail on. The test runner also uses the filenames to ensure that the
+failures do indeed correspond to the correct semantic action.
+
+\section{Test runner}
+The test runner \texttt{TESTS.py} is a Python program which tests each passing
+and failing test case, and uses the meta data in the failing test cases to
+verify that the failures are the expected failures.
+
+% ----------------------------------------------------------------
+\end{document}
+% ----------------------------------------------------------------
