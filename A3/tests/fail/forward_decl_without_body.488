@@ -1,0 +1,10 @@
+% 
+% Forward routine declaration without corresponding body
+%
+% @line=[7, 8]
+%
+{
+    forward func f(u : integer) : integer
+    forward procedure p(u : integer)
+}
+
