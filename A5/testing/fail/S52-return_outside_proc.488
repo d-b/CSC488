@@ -1,0 +1,9 @@
+%
+% Return statement outside of a procedure (top level scope)
+%
+% @line=7
+%
+{
+    return
+}
+

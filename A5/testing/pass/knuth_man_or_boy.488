@@ -1,0 +1,17 @@
+%
+% Knuth's man or boy test
+%
+{
+  func A(k : integer, x1:integer, x2:integer,x3:integer,x4:integer,x5:integer) : integer {    
+    func B():integer {
+      k := k-1
+      result A(k, 888, x1, x2, x3, x4)
+    }
+    if k <= 0 then
+      result (x4=888?B():x4) + (x5=888?B():x5)
+    else
+      result B()
+    fi
+  }
+  put A(10,1,-1,-1,1,0),newline
+}

@@ -1,0 +1,7 @@
+The file compiler488.man contains a traditional Unix/Linux style
+man page for the compiler.
+
+To obtain a printable version of the man page, use the command:
+
+    make
+

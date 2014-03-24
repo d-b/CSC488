@@ -1,0 +1,8 @@
+%
+% Use of undeclared identifier
+%
+% @line=7
+%
+{
+    x := 0
+}

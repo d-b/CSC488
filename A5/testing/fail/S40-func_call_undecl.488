@@ -1,0 +1,17 @@
+%
+% Call to undeclared function
+%
+% @line=9
+%
+{
+    forward func foo() : integer
+
+    func xyzzy() : integer { result baz() + 2 }
+    func baz() : integer { result 3 }
+
+    var x : integer
+
+    x := xyzzy()
+    x := foo()
+}
+

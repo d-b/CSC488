@@ -1,0 +1,176 @@
+% Assignment : 1
+% Group      : 09
+% Members    : g0dbloem, g2mccorm, g2scotts, g2watson
+% File       : A1a.488
+
+% A program that uses all arithmetic, logical and comparison operators
+
+{
+    var x, y : integer
+    var b : boolean
+
+
+    % assignment with integer literal constant
+    x := 1
+
+    % NB: also valid because of two distinct tokens
+    x : = 1
+
+    % unary minus
+    x := - 1
+    x := -1
+
+    % addition
+    x := 1 + 1
+
+    % subtraction
+    x := 1 - 1
+
+    % multiplication
+    x := 1 * 1
+
+    % division
+    x := 1 / 1
+
+
+    % Boolean constant true
+    b := true
+
+    % Boolean constant false
+    b := false
+
+    % Boolean not
+    b := not false
+
+    % Boolean and
+    b := true and true
+
+    % Boolean or
+    b := true or false
+
+
+    % equality comparison
+    b := 1 = 1
+
+    % inequality comparison
+    b := 1 not= 2
+    b := 2 not = 1
+
+    % less than comparison
+    b := 1 < 2
+
+    % less than or equal comparison
+    b := 1 <= 1
+    b := 2 < = 2
+
+    % greater than comparison
+    b := 2 > 1
+
+    % greater than or equal comparison
+    b := 1 >= 1
+    b := 2 > = 2
+
+
+    % conditional expression
+    b := ( 1 > 2 ? false : true )
+
+    % reference to a variable    
+    y := x
+
+
+    % conditional statement
+    if false then
+        b := false
+    fi
+
+    if not true then
+        b := false
+    else
+        b := true
+    fi
+
+
+    % Operator Precedence -- all the following values for `b` MUST be true
+
+    % NB: Arithmetic operators associate from left to right
+    x := 3 * 4 / 6 * 2
+    y := ((3 * 4) / 6) * 2
+    b := x = y
+
+    x := 6 / 3 * 2 / 2
+    y := ((6 / 3) * 2) / 2
+    b := x = y
+
+    % NB: Mulitply & division binds tighter than addition and subtraction
+    x := 1 * 2 + 3 * 4
+    y := (1 * 2) + (3 * 4)
+    b := x = y
+
+    x := -1 * 2 + 3 * -4
+    y := ((-1) * 2) + (3 * (-4))
+    b := x = y
+
+    x := 2 * 3 - 12 / 2 + 1 * 2
+    y := ((2 * 3) - (12 / 2)) + (1 * 2)
+    b := x = y
+
+    % Boolean comparisons
+    b := 1 + 2 = 2 + 1
+    b := (1 + 2) = (2 + 1)
+    b := 3 = 3
+    b := true
+
+    b := 1 + 2 not = 3 + 4
+    b := (1 + 2) not = (3 + 4)
+    b := 3 not = 7
+    b := true
+
+    b := 1 * 2 < 3 + 4
+    b := (1 * 2) < (3 + 4)
+    b := 2 < 7
+    b := true
+    
+    b := -1 * 2 > -3 * 4
+    b := ((-1) * 2) > ((-3) * 4)
+    b := -2 > -12
+    b := true
+
+    b := -1 + 2 * 3 <= 2 + 3
+    b := ((-1) + (2 * 3)) <= (2 + 3)
+    b := 5 <= 5
+    b := true
+
+    b := 1 + 2 * 3 >= -4
+    b := (1 + (2 * 3)) >= -4
+    b := 7 >= -4
+    b := true
+
+    b := not 2 < 1
+    b := not (2 < 1)
+    b := not false
+    b := true
+
+    b := not 3 * 4 < 1 * 2
+    b := not ((3 * 4) < (1 * 2))
+    b := not (12 < 2)
+    b := not false
+    b := true
+
+    b := not not true and not false
+    b := (not (not true)) and (not false)
+    b := (not false) and true
+    b := true and true
+    b := true
+
+    b := true and false or true
+    b := (true and false) or true
+    b := false or true
+    b := true
+
+    b := not false or not true and not false
+    b := (not false) or ((not true) and (not false))
+    b := true or (false and true)
+    b := true or false
+    b := true
+}
+

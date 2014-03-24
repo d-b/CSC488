@@ -1,0 +1,10 @@
+%
+% type error, scalar access to array variable
+%
+% @line=8
+%
+{
+    var x[3] : boolean
+    x := true
+    a := 1
+}

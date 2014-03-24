@@ -1,0 +1,9 @@
+%
+% type error, equality between different types.
+%
+% @line=8
+%
+{
+    var x : boolean
+    x := 2 not = true
+}

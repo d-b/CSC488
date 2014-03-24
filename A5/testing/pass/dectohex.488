@@ -1,0 +1,48 @@
+%
+% convert number to hexadecimal
+%
+{
+  func w0():integer{put "0" result 0}
+  func w1():integer{put "1" result 0}
+  func w2():integer{put "2" result 0}
+  func w3():integer{put "3" result 0}
+  func w4():integer{put "4" result 0}
+  func w5():integer{put "5" result 0}
+  func w6():integer{put "6" result 0}
+  func w7():integer{put "7" result 0}
+  func w8():integer{put "8" result 0}
+  func w9():integer{put "9" result 0}
+  func wA():integer{put "A" result 0}
+  func wB():integer{put "B" result 0}
+  func wC():integer{put "C" result 0}
+  func wD():integer{put "D" result 0}
+  func wE():integer{put "E" result 0}
+  func wF():integer{put "F" result 0}
+  proc puthex(i : integer){
+    i := 
+    (i<8?
+      (i<4?
+        (i<2?(i=0?w0():w1())
+            :(i=2?w2():w3()))
+       :(i<6?(i=4?w4():w5())
+            :(i=6?w6():w7())))
+     :(i<12?(i<10?(i=8?w8():w9())
+            :(i=10?wA():wB()))
+       :(i<14?(i=12?wC():wD())
+            :(i=14?wE():wF()))))
+  }
+  var n,i,d[4] : integer
+  get n
+  i := 0
+  while i < 4 do
+    d[i] := n - n/16*16
+    n := n/16*16
+    i := i +1
+  end
+  i := 3
+  repeat i := i - 1 until i = 0 or d[i] not= 0
+  while i >= 0 do
+    puthex(d[i])
+  end
+  put newline  
+}

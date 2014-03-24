@@ -1,0 +1,46 @@
+%
+% Quicksort, using inner functions instead of passing variables.
+%
+{
+  var n, a[100], i : integer
+  proc swap(i:integer,j:integer){
+    var t : integer
+    t := a[i]
+    a[i] := a[j]
+    a[j] := t
+  }
+  proc qsort(st:integer,ed:integer) {
+    var piv : integer
+    proc part(){
+      var j : integer
+      piv := st
+      swap(piv,ed)
+      j := st
+      while j < ed do 
+        if a[j] < a[ed] then
+          swap(piv, j)
+          piv := piv + 1
+        fi
+        j := j + 1
+      end
+      swap(piv,ed)
+    }
+    if st < ed then
+      part()
+      qsort(st,piv-1)
+      qsort(piv+1,ed)
+    fi
+  }
+  get n
+  i := 0
+  while i < n do
+    get a[i]
+    i := i + 1
+  end
+  qsort(0,n-1)
+  i := 0
+  while i < n do
+    put a[i]
+    i := i + 1
+  end
+}

@@ -1,0 +1,13 @@
+%
+% Return statement which lies within a minor scope of a procedure
+%
+{
+    proc P() {
+        {
+            return
+        }
+    }
+
+    var x : integer
+    x := 0
+}

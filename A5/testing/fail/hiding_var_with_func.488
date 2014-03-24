@@ -1,0 +1,11 @@
+%
+% Tests hiding variable with function
+% @line=9
+%
+{
+    var x : integer
+    {
+        func x() : integer {result 5}
+        x := 2
+    }
+}

@@ -1,0 +1,587 @@
+/**
+ * CSC488 Winter 2014 -- Group 09
+ *
+ * pdmccormick: added AST construction actions
+ */
+
+package compiler488.parser;
+
+import java_cup.runtime.*;		// Must always import this.
+
+import java.util.List;
+
+import compiler488.ast.ASTList;
+import compiler488.ast.Readable;
+import compiler488.ast.SourceLoc;
+import compiler488.ast.IdentNode;
+import compiler488.ast.IntConstNode;
+import compiler488.ast.SourceLocImpl;
+import compiler488.ast.Printable;
+import compiler488.ast.SourceLocPrettyPrinter;
+
+import compiler488.ast.decl.TypeDecl;
+import compiler488.ast.decl.ScalarDecl;
+import compiler488.ast.decl.ArrayBound;
+import compiler488.ast.decl.Declaration;
+import compiler488.ast.decl.RoutineDecl;
+import compiler488.ast.decl.ArrayDeclPart;
+import compiler488.ast.decl.ScalarDeclPart;
+import compiler488.ast.decl.DeclarationPart;
+import compiler488.ast.decl.MultiDeclarations;
+
+import compiler488.ast.stmt.Scope;
+import compiler488.ast.stmt.Stmt;
+import compiler488.ast.stmt.IfStmt;
+import compiler488.ast.stmt.Program;
+import compiler488.ast.stmt.PutStmt;
+import compiler488.ast.stmt.GetStmt;
+import compiler488.ast.stmt.ExitStmt;
+import compiler488.ast.stmt.ResultStmt;
+import compiler488.ast.stmt.ReturnStmt;
+import compiler488.ast.stmt.AssignStmt;
+import compiler488.ast.stmt.WhileDoStmt;
+import compiler488.ast.stmt.RepeatUntilStmt;
+import compiler488.ast.stmt.ProcedureCallStmt;
+
+import compiler488.ast.expn.Expn;
+import compiler488.ast.expn.NotExpn;
+import compiler488.ast.expn.SubsExpn;
+import compiler488.ast.expn.BoolExpn;
+import compiler488.ast.expn.IdentExpn;
+import compiler488.ast.expn.ArithExpn;
+import compiler488.ast.expn.ConstExpn;
+import compiler488.ast.expn.VarRefExpn;
+import compiler488.ast.expn.BinaryExpn;
+import compiler488.ast.expn.EqualsExpn;
+import compiler488.ast.expn.CompareExpn;
+import compiler488.ast.expn.IntConstExpn;
+import compiler488.ast.expn.BoolConstExpn;
+import compiler488.ast.expn.TextConstExpn;
+import compiler488.ast.expn.UnaryMinusExpn;
+import compiler488.ast.expn.ConditionalExpn;
+import compiler488.ast.expn.NewlineConstExpn;
+import compiler488.ast.expn.FunctionCallExpn;
+
+/* User code components 1: action code components.
+ * Code to be used inside the actions triggered when productions are matched.
+ * If any common code is needed for more than one action , put it here.
+ */
+ action code {:
+    /** The name of the file currently being parsed.
+     *
+     * pdmccormick: A bit hackish, should be with the scanner, but we don't readily have
+     * access to a private member of type `Lexer`, only one of the underlying
+     * interface `java_cup.runtime.Scanner`, so given how much mess we are already
+     * dealing with in the mass of `new SourceLocImpl(_startleft, _startright, ...)`,
+     * we relent to the ugliness and make our lives easier.
+     *
+     * Speaking of the `_startleft` and `_startright` convention seen below, it would
+     * be much nicer if CUP would give us both the typed terminal itself as well as a
+     * `java_cup.runtime.Symbol` for it, then we could enhance the `SourceLocImpl` 
+     * constructors to directly accept that type and extract the `left` and `right`
+     * fields itself. Oh well...
+     */
+    public String filename = "<unknown file (via action class)>";
+:};
+
+/* User code components 2: parser code components. 
+ * Modifications to the default generated parser
+ */
+parser code {:
+    /** The name of the file currently being parsed (same reasons as in the
+     * action class case.) */
+    public String filename = "<unknown file>";
+
+    /** List of lines from the file (for error reporting) */
+    public List<String> source_lines;
+
+    String lastError;
+
+    /** Override the report_error method so it will display the line and
+     * column of where the error occurred in the input as well as the
+     * reason for the error which is passed into the method in the
+     * String 'message'.
+     * @param message  error message to print
+     * @param info     symbol containing line/column numbers
+     */
+    public void report_error(String message, Object info)
+    {
+        String st = "Error";
+        SourceLocPrettyPrinter pp = null;
+
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+
+            // Synthesize a SourceLocImpl here so we can use the pretty-printer
+            SourceLoc loc = new SourceLocImpl(filename, s.left, s.right);
+
+            if (s.left >= 0) {
+                pp = new SourceLocPrettyPrinter(System.err, source_lines, loc);
+                st = pp.getFileRef();
+            } else {
+                st += " at end of input";
+            }
+        }
+        st += ": " + message;
+        System.err.println(st);
+
+        if (pp != null) {
+            pp.print();
+        }
+
+        lastError = st;
+    }
+
+    /** Override the report_fatal_error method to use the report_error method. */
+    /** @throws SyntaxErrorException						*/
+    public void report_fatal_error (String message, Object info) throws SyntaxErrorException
+    {
+        report_error (message, info);
+        throw new SyntaxErrorException (lastError); 
+    }
+
+    :};
+
+/* User code components 3: initialization code.
+ * If you want some code to be executed before the parser asks for the first
+ * token, add it here.
+ */
+init with {:
+    /* BEWARE OF HACKS: shovel in the filename for source locations in action
+     * AST generation
+     * 
+     * Both the action class and the parser class need a public String member
+     * for this, and we are assuming here that `user_init` (this block of code)
+     * is run _AFTER_ `init_actions` has been run (since it constructs `action_obj`.)
+     */
+    action_obj.filename = filename;
+:};
+
+/* User code components 4: scanner specification code.
+ * If you need to override the way the parser asks the scanner for the
+ * next token, put your preferred method here.  Uncomment the line following
+ * this comment, replace the line after that with your code, and uncomment
+ * the line after that.
+ */
+// scan with {:
+// your code goes here
+// :};
+
+/* Symbol lists section.
+ * The names of terminals and non-terminals are not allowed to be CUP
+ * reserved words.  These include "code", "action", "parser", "terminal",
+ * "non", "nonterminal", "init", "scan", "with", "start", "precedence",
+ * "left", "right", "nonassoc", "import", and "package".
+ */
+
+// DEFINITIONS for CSC488S Source Language  Winter  2013/2014 
+
+// Terminals returned by the scanner with no value attached.  
+terminal 	BOOLEAN,	INTEGER,	DO	;
+terminal	ELSE,	END,	EXIT,   FI,	FORWARD, FUNC	;
+terminal	IF,	GET, 	PROCEDURE,	PUT	;
+terminal	WHILE,	REPEAT,	UNTIL,	VAR,	NEWLINE	;
+terminal	RESULT,	RETURN,	THEN,	WHEN	;
+
+// Special-character terminals, no value attached
+terminal	AND,	OR,	NOT,	TRUE,	FALSE	;
+terminal	L_PAREN	,R_PAREN,L_SQUARE, R_SQUARE, L_CURLEY, R_CURLEY  	;
+terminal	EQUAL,	GREATER,LESS,	COMMA,  DOT, COLON	;
+terminal	PLUS,	MINUS,	TIMES,  DIVIDE, QUESTION	;
+
+// Terminals returned by the scanner with a value.
+terminal String IDENT;
+terminal Integer INTCONST;
+terminal String TEXTCONST;
+
+nonterminal IdentNode ident;
+nonterminal IntConstNode intconst;
+
+nonterminal Program program;
+nonterminal Scope scope;
+
+nonterminal ASTList<Stmt> statements;
+nonterminal ASTList<Declaration> declarations;
+
+nonterminal Stmt statement;
+nonterminal Declaration declaration;
+
+nonterminal ASTList<Printable> outputs;
+nonterminal	Printable output;
+
+nonterminal ASTList<Readable> inputs;
+
+nonterminal ASTList<DeclarationPart> variablenames;
+nonterminal DeclarationPart variablename;
+nonterminal IntConstNode generalBound;
+nonterminal ArrayBound bound;
+
+nonterminal RoutineDecl functionHead;
+nonterminal RoutineDecl procedureHead;
+
+nonterminal Expn expression;
+nonterminal VarRefExpn variable;
+nonterminal Expn conjunction;
+nonterminal Expn negation;
+nonterminal Expn compareExpn;
+nonterminal	Expn arithExpn;
+nonterminal Expn term;
+nonterminal Expn factor;
+nonterminal	Expn primary;
+
+nonterminal ASTList<Expn> argumentList;
+nonterminal ASTList<Expn> arguments;
+
+nonterminal	ASTList<ScalarDecl> parameterList;
+nonterminal	ASTList<ScalarDecl> parameters;
+nonterminal	ScalarDecl parameter;
+
+nonterminal ConstExpn constant;
+
+nonterminal TypeDecl type;
+
+// The grammar section.
+
+// This specifies the initial symbol of the grammar.
+start with program;
+
+/* Notice that sometimes the action must be inside the production rule,
+ * not after it.  This is a subtle yet significant difference from YACC.
+ * This is because the CUP parser is looking ahead one token.  It ALWAYS
+ * reads one more token before it will act on the production.
+ */
+
+program
+        ::= scope:scope                                                         // the main program
+                {: RESULT = new Program(scope, new SourceLocImpl(filename, scope)); :}
+        ;
+
+scope
+        ::= L_CURLEY:_start declarations:decls statements:stmts R_CURLEY:_end   // scope with declarations and statement
+                {: RESULT = new Scope(decls, stmts, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+
+        |   L_CURLEY:_start statements:stmts R_CURLEY:_end                      // scope with statments only
+                {: RESULT = new Scope(null, stmts, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+
+        |   L_CURLEY:_start R_CURLEY:_end                                       // empty scope
+                {: RESULT = new Scope(null, null, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+        ;
+
+statements
+        ::= statement:stmt
+                {: RESULT = new ASTList<Stmt>(stmt); :}
+
+        |   statements:head statement:tail                          // sequence of statements
+                {: RESULT = head.addLast(tail); :}
+        ;
+
+declarations
+        ::= declaration:stmt
+                {: RESULT = new ASTList<Declaration>(stmt); :}
+
+        |   declarations:head declaration:tail                      // sequence of declarations
+                {: RESULT = head.addLast(tail); :}
+        ;
+
+statement
+        ::= variable:lval COLON EQUAL expression:rval                                                       // assignment statement
+                {: RESULT = new AssignStmt(lval, rval, new SourceLocImpl(filename, lval, rval)); :}
+
+		|   IF:_start expression:condition THEN statements:whenTrue FI:_end                                 // if-then statements
+                {: RESULT = new IfStmt(condition, whenTrue, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 2)); :}
+		
+        |   IF:_start expression:condition THEN statements:whenTrue ELSE statements:whenFalse FI:_end       // if-then-else statements
+                {: RESULT = new IfStmt(condition, whenTrue, whenFalse, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 2)); :}
+
+        |   WHILE:_start expression:condition DO statements:body END:_end                                   // while statement
+                {: RESULT = new WhileDoStmt(body, condition, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 3)); :}
+
+        |   REPEAT:_start statements:body UNTIL expression:condition                                        // repeat statement
+                {: RESULT = new RepeatUntilStmt(body, condition, new SourceLocImpl(filename, _startleft, _startright, condition)); :}
+
+        |   EXIT:_start                                                                                     // exit statement (no conditional)
+                {: RESULT = new ExitStmt(new SourceLocImpl(filename, _startleft, _startright, "exit")); :}
+
+        |   EXIT:_start WHEN expression:condition                                                           // exit statement (with conditional)
+                {: RESULT = new ExitStmt(condition, new SourceLocImpl(filename, _startleft, _startright, condition)); :}
+
+        |   RESULT:_start expression:value                                                                  // return from function
+                {: RESULT = new ResultStmt(value, new SourceLocImpl(filename, _startleft, _startright, value)); :}
+
+        |   RETURN:_start                                                                                   // return from procedure
+                {: RESULT = new ReturnStmt(new SourceLocImpl(filename, _startleft, _startright, "return")); :}
+
+        |   PUT:_start outputs:outputs                                                                      // output statement
+                {: RESULT = new PutStmt(outputs, new SourceLocImpl(filename, _startleft, _startright, outputs)); :}
+
+        |   GET:_start inputs:inputs                                                                        // input statement
+                {: RESULT = new GetStmt(inputs, new SourceLocImpl(filename, _startleft, _startright, inputs)); :}
+
+        |   ident:id L_PAREN argumentList:arguments R_PAREN:_end                                            // call procedure
+                {: RESULT = new ProcedureCallStmt(id, arguments, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+
+        |   scope:scope                                                                                     // embedded scope
+                {: RESULT = scope; :}
+		;
+
+declaration
+        ::= VAR:_start variablenames:vars COLON type:type       // declare scalar/array variables
+                {: RESULT = new MultiDeclarations(vars, type, new SourceLocImpl(filename, _startleft, _startright, type)); :}
+
+        |   functionHead:func scope:body                        // function declaration
+                {:  RESULT = func.withBody(body, new SourceLocImpl(filename, func, body)); :}
+        
+        |   procedureHead:proc scope:body                       // procedure declaration
+                {:  RESULT = proc.withBody(body, new SourceLocImpl(filename, proc, body)); :}
+
+        |   FORWARD functionHead:func                           // forward function declaration
+                {:  RESULT = func; :}
+        
+        |   FORWARD procedureHead:proc                          // forward procedure declaration
+                {:  RESULT = proc; :}
+		;
+
+variablenames
+        ::= variablename:var                                    // list of variables being declared
+                {: RESULT = new ASTList<DeclarationPart>().addLast(var); :}
+        
+        |   variablenames:head COMMA variablename:tail
+                {: RESULT = head.addLast(tail); :}
+        ;
+
+variablename
+        ::= ident:id                                                    // scalar variable
+                {: RESULT = new ScalarDeclPart(id); :}
+
+        |   ident:id L_SQUARE bound:b R_SQUARE:_end                     // 1 dimensional array
+                {: RESULT = new ArrayDeclPart(id, b, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+
+        |   ident:id L_SQUARE bound:b1 COMMA bound:b2 R_SQUARE:_end     // 1 dimensional array
+                {: RESULT = new ArrayDeclPart(id, b1, b2, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+        ;
+
+bound
+        ::= intconst:ub                                     // integer array bound
+                {: RESULT = new ArrayBound(ub, new SourceLocImpl(filename, ubleft, ubright, ub.toString())); :}
+
+        |   generalBound:lb DOT DOT generalBound:ub
+                {: RESULT = new ArrayBound(lb, ub, new SourceLocImpl(filename, lb, ub)); :}
+        ;
+
+generalBound
+        ::= intconst:i                                      // positive array bound
+                {: RESULT = i; :}
+
+        |   MINUS:_start intconst:i                         // negative array bound
+                {: RESULT = i.negate(new SourceLocImpl(filename, _startleft, _startright, i)); :}
+        ;
+
+type
+        ::= INTEGER:_start                                                                      // integer type
+                {: RESULT = TypeDecl.makeInteger(new SourceLocImpl(filename, _startleft, _startright, "integer")); :}
+
+        |   BOOLEAN:_start                                                                      // boolean type
+                {: RESULT = TypeDecl.makeBoolean(new SourceLocImpl(filename, _startleft, _startright, "boolean")); :}
+        ;
+
+functionHead
+        ::= FUNC:_start ident:id L_PAREN parameterList:params R_PAREN COLON type:returnType     // function head
+                {: RESULT = new RoutineDecl(id, returnType, params, new SourceLocImpl(filename, _startleft, _startright, returnType)); :}
+        ;
+
+procedureHead
+        ::= PROCEDURE:_start ident:id L_PAREN parameterList:params R_PAREN:_end                 // function head
+                {: RESULT = new RoutineDecl(id, params, new SourceLocImpl(filename, _startleft, _startright, _endleft, _endright + 1)); :}
+        ;
+
+outputs
+        ::= output:output                                               // list of output expressions
+                {: RESULT = new ASTList<Printable>().addLast(output); :}
+
+        |   outputs:head COMMA output:tail
+                {: RESULT = head.addLast(tail); :}
+        ;
+
+output
+        ::= expression:expr                                             // integer expression
+                {: RESULT = expr; :}
+
+        |   TEXTCONST:text                                              // text constant
+                {: RESULT = new TextConstExpn(text, new SourceLocImpl(filename, textleft, textright, text)); :}
+
+        |   NEWLINE:_start                                              // newline constant
+                {: RESULT = new NewlineConstExpn(new SourceLocImpl(filename, _startleft, _startright)); :}
+        ;
+
+inputs
+        ::= variable:var                                                // list of variables being read into
+                {: RESULT = new ASTList<Readable>(var); :}
+        |   inputs:head COMMA variable:tail
+                {: RESULT = head.addLast(tail); :}
+        ;
+
+argumentList
+        ::= arguments:arguments                                         // function/procedure arguments
+                {: RESULT = arguments; :}
+
+        |   // EMPTY
+                {: RESULT = new ASTList<Expn>(); :}
+        ;
+
+arguments
+        ::= expression:expr
+                {: RESULT = new ASTList<Expn>(expr); :}
+
+        |   arguments:head COMMA expression:tail                        // list of function/procedure arguments
+                {: RESULT = head.addLast(tail); :}
+        ;
+
+parameterList
+        ::= parameters:parameters                                       //  function/procedure formal parameters
+                {: RESULT = parameters; :}
+
+        |   // EMPTY
+                {: RESULT = new ASTList<ScalarDecl>(); :}
+		;
+
+parameters
+        ::= parameter:parameter                                         // list of function/procedure formal parameters
+                {: RESULT = new ASTList<ScalarDecl>().addLast(parameter); :}
+
+        |   parameters:head COMMA parameter:tail
+                {: RESULT = head.addLast(tail); :}
+        ;
+
+parameter
+        ::= ident:id COLON type:type                                    // declare one parameter
+                {: RESULT = new ScalarDecl(id, type, new SourceLocImpl(filename, idleft, idright, type)); :}
+        ;
+
+expression
+        ::= conjunction:expr                                            // disjunctions, associate left-to-right
+                {: RESULT = expr; :}
+
+        |   expression:left OR conjunction:right
+                {: RESULT = new BoolExpn(BoolExpn.OP_OR, left, right, new SourceLocImpl(filename, left, right)); :}
+		;
+
+conjunction
+        ::= negation:expr                                               // conjunctions, associate left-to-right
+                {: RESULT = expr; :}
+
+        |   conjunction:left AND negation:right
+                {: RESULT = new BoolExpn(BoolExpn.OP_AND, left, right, new SourceLocImpl(filename, left, right)); :}
+        ;
+
+negation
+        ::= compareExpn:expr                                            // negations
+                {: RESULT = expr; :}
+
+        |   NOT:_start negation:expr
+                {: RESULT = new NotExpn(expr, new SourceLocImpl(filename, _startleft, _startright, expr)); :}
+        ;
+
+compareExpn
+        ::= arithExpn:expr                                              // comparisons, do not associate
+                {: RESULT = expr; :}
+
+        |   arithExpn:left EQUAL arithExpn:right
+                {: RESULT = new EqualsExpn(EqualsExpn.OP_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
+
+        |   arithExpn:left NOT EQUAL arithExpn:right
+                {: RESULT = new EqualsExpn(EqualsExpn.OP_NOT_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
+
+        |   arithExpn:left LESS arithExpn:right
+                {: RESULT = new CompareExpn(CompareExpn.OP_LESS, left, right, new SourceLocImpl(filename, left, right)); :}
+
+        |   arithExpn:left LESS EQUAL arithExpn:right
+                {: RESULT = new CompareExpn(CompareExpn.OP_LESS_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
+
+        |   arithExpn:left GREATER EQUAL arithExpn:right
+                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER_EQUAL, left, right, new SourceLocImpl(filename, left, right)); :}
+
+        |   arithExpn:left GREATER arithExpn:right
+                {: RESULT = new CompareExpn(CompareExpn.OP_GREATER, left, right, new SourceLocImpl(filename, left, right)); :}
+        ;
+
+arithExpn
+        ::= term:expr                                                   // expressions, associate + , - left-to-right
+                {: RESULT = expr; :}
+
+        |   arithExpn:left PLUS term:right
+                {: RESULT = new ArithExpn(ArithExpn.OP_PLUS, left, right, new SourceLocImpl(filename, left, right)); :}
+ 
+        |   arithExpn:left MINUS term:right
+                {: RESULT = new ArithExpn(ArithExpn.OP_MINUS, left, right, new SourceLocImpl(filename, left, right)); :}
+        ;
+
+term
+        ::= factor:expr                                                 // terms, associate * , /   left-to-right
+                {: RESULT = expr; :}
+
+        |   term:left TIMES factor:right
+                {: RESULT = new ArithExpn(ArithExpn.OP_TIMES, left, right, new SourceLocImpl(filename, left, right)); :}
+
+        |   term:left DIVIDE factor:right
+                {: RESULT = new ArithExpn(ArithExpn.OP_DIVIDE, left, right, new SourceLocImpl(filename, left, right)); :}
+        ;
+
+factor
+        ::= primary:expr
+                {: RESULT = expr; :}
+
+        |   MINUS:_start factor:expr                                    // unary minus
+                {: RESULT = new UnaryMinusExpn(expr, new SourceLocImpl(filename, _startleft, _startright, expr)); :}
+        ;
+
+primary
+        ::= constant:expr                                               // integer or boolean constant
+                {: RESULT = expr; :}
+
+        |   variable:expr                                               // scalar, array element 
+                {: RESULT = expr; :}
+
+        |   L_PAREN expression:expr R_PAREN                             // parenthesized expression
+                {: RESULT = expr; :}
+
+        |   L_PAREN:_start expression:condition QUESTION:s expression:trueValue COLON expression:falseValue R_PAREN:_end    // conditional expression
+                {: RESULT = new ConditionalExpn(condition, trueValue, falseValue, new SourceLocImpl(filename, _startleft, _startright + 1)); :}
+
+        |   ident:id L_PAREN argumentList:arguments R_PAREN:_end        // function call
+                {: RESULT = new FunctionCallExpn(id, arguments, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+        ;
+
+constant
+        ::= intconst:i                                                  // integer constant
+                {: RESULT = new IntConstExpn(i); :}
+
+        |   TRUE:_start                                                 // constant true
+                {: RESULT = new BoolConstExpn(true, new SourceLocImpl(filename, _startleft, _startright, "true")); :}
+
+        |   FALSE:_start                                                // constant false
+                {: RESULT = new BoolConstExpn(false, new SourceLocImpl(filename, _startleft, _startright, "false")); :}
+        ;
+
+variable
+        ::= ident:id                                                                // scalar variable or parameter
+                {: RESULT = new IdentExpn(id); :}
+
+        |   ident:id L_SQUARE expression:sub1 R_SQUARE:_end                         // element of 1 dimensional array
+                {: RESULT = new SubsExpn(id, sub1, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+
+        |   ident:id L_SQUARE expression:sub1 COMMA expression:sub2 R_SQUARE:_end   // element of 2 dimensional array
+                {: RESULT = new SubsExpn(id, sub1, sub2, new SourceLocImpl(filename, idleft, idright, _endleft, _endright + 1)); :}
+        ;
+
+ident
+        ::= IDENT:id
+                {: RESULT = new IdentNode(id, new SourceLocImpl(filename, idleft, idright, id)); :}
+        ;
+
+intconst
+        ::= INTCONST:i
+                {: RESULT = new IntConstNode(i, new SourceLocImpl(filename, ileft, iright, i.toString())); :}
+        ;
+
+/* The End */
+

@@ -1,0 +1,10 @@
+%
+% Test should work if forward declaration of functions works.
+%
+{
+  forward func baz() : integer
+  func xyzzy() : integer {result baz() + 2}
+  func baz() :integer {result 3}
+  var x : integer
+  x := xyzzy()
+}

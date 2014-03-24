@@ -1,0 +1,15 @@
+%
+% Result statement outside of a function (procedure scope)
+%
+% @line=10
+%
+{
+    var x : integer
+    proc foo()
+    {
+        result 0
+    }
+
+    x := 0
+}
+
