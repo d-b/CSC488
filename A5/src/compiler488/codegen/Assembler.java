@@ -28,8 +28,7 @@ class Assembler {
         Assembler assembler = new Assembler();
         String code = "SECTION .code\n"
                     + "PUSH label\n"
-                    + "label:\n"
-                    + "PUSH 0\n";
+                    + "label: PUSH 0\n";
         InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
         Machine.powerOn();
         assembler.Assemble(stream);
@@ -257,32 +256,13 @@ class Section {
         instructions.add(instruction);
     }
    
-    //
-    // Getters
-    //
-    
-    public String getName() {
-        return name;
-    }
-    
-    
-    public Short getLabel(String name) {
-        return labels.get(name);
-    }    
-    
-    
-    public List<Instruction> getInstructions() {
-        return Collections.unmodifiableList(instructions);
-    }
-        
-    public short getAddress() {
-        return address;
-    }        
+    // Getters    
+    public String getName() { return name; }
+    public Short getLabel(String name) { return labels.get(name); }    
+    public List<Instruction> getInstructions() { return Collections.unmodifiableList(instructions); }        
+    public short getAddress() { return address; }        
+    public short getSize() { return size; }
 
-    public short getSize() {
-        return size;
-    }
-        
     // Internal members
     private String name;
     private List<Instruction> instructions;
@@ -303,7 +283,7 @@ class Instruction {
         this.size = size;
     }
     
-    // Getters/setters
+    // Getters
     public String getName() { return name; }
     public List<Operand> getOperands() { return operands; }
     public int getSize() { return size; }
