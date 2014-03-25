@@ -275,7 +275,6 @@ class Assembler {
     private Pattern patternInstruction;   
     private Pattern patternSection;
     private Pattern patternOpString;
-    private Pattern patternOpInteger;
     private Pattern patternOpLabel;
     
     // Instantiated sections & instructions
