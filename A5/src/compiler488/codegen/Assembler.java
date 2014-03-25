@@ -1,13 +1,140 @@
 package compiler488.codegen;
 
 import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import compiler488.runtime.Machine;
+import compiler488.runtime.MemoryAddressException;
+import compiler488.runtime.TextReader;
 
 class Assembler {
-    Assembler(InputStream input) {
-        
+    //
+    // Instructions
+    //
+    
+    @Processor(target="PUSH")
+    void instructionPush(Instruction i) throws MemoryAddressException {
+        Machine.writeMemory(next(), Machine.PUSH);
     }
+    
+    
+    //
+    // Helper routines
+    //
+            
+    private short next() {
+        return next((short) 1);
+    }    
+    
+    private short next(short offset) {
+        short old = codeAddress;
+        codeAddress += offset;
+        return old;
+    }
+    
+    //
+    // Assembler life cycle
+    //
+    
+    // Instantiate an assembler
+    Assembler() {
+        // Instantiate internals
+        instructionMap     = new HashMap<String, Method>();
+        codeCurrent        = null;
+        codeSections       = new LinkedList<Section>();
+        patternInstruction = Pattern.compile("\\s*(\\w+)(\\s+.*)?");
+        patternSection     = Pattern.compile("SECTION\\s+(\\.\\w+)", Pattern.CASE_INSENSITIVE);
+        // Populate instruction processors 
+        populateProcessors();
+    }
+   
+    // Assemble an IR program
+    public Boolean Assemble(InputStream input) {
+        // Instantiate the text reader
+        reader = new TextReader(input);
+        
+        // Pass 1: instantiate list of instructions
+        for(;;) {
+            String line; // Input line
+            try { line = reader.readLine(); }
+            // RuntimeException at EOF
+            catch(RuntimeException e) { break; }
+            
+            // TODO: parse line via regular expressions
+        }
+        
+        return true;
+    }
+    
+    //
+    // Instruction parsing
+    //
+    
+    void processInstruction(Instruction instruction) {
+        // Get instruction method
+        Method m = instructionMap.get(instruction.name.toUpperCase());
+        if(m == null)
+            {System.err.println("Instruction '" + instruction.name + "' not implemented!"); return;}
+        
+        // Invoke the processor on  instruction
+        try { m.invoke(this, instruction); }
+        catch (IllegalAccessException e)    { e.printStackTrace(); }
+        catch (IllegalArgumentException e)  { e.printStackTrace(); }
+        catch (InvocationTargetException e) { e.printStackTrace(); }
+    }
+    
+    void populateProcessors() {
+        Class<? extends Assembler> thisClass = this.getClass();
+        for(Method method : thisClass.getDeclaredMethods()) {
+            Processor procInfo = method.getAnnotation(Processor.class);
+            if(procInfo != null) instructionMap.put(procInfo.target(), method);
+        }        
+    }
+    
+    // TODO: parse operands
+    List<Operand> parseOperands(String operands) {
+        return new LinkedList<Operand>();
+    }    
+    
+    // Instruction map
+    private Map<String, Method> instructionMap;
+    
+    // Input stream reader
+    private TextReader reader;
+    
+    // Regular expression patterns
+    private Pattern patternInstruction;   
+    private Pattern patternSection;
+    private Pattern patternComment;
+    
+    // Instantiated sections & instructions
+    private short         codeAddress;
+    private Section       codeCurrent;
+    private List<Section> codeSections;
+    
 }
+
+//
+// Section
+//
+
+class Section {
+    public String name;
+    public List<Instruction> instructions;
+    public short size;
+    public short address;
+}
+
 
 //
 // Instructions and operands
@@ -56,7 +183,12 @@ class StringOperand implements Operand {
     public boolean isString()  { return true; }
 }
 
-class LabelNotResolvedError extends Exception {
-    private static final long serialVersionUID = 1L;
-    LabelNotResolvedError(String message) {super(message);}
+//
+// Instruction processor
+//
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Processor {
+    String target();
 }
