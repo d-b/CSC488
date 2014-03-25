@@ -248,8 +248,11 @@ class Assembler {
         if(s == null) { System.err.println("Instruction '" + name + "' not implemented!"); return; }
         
         // Check number of arguments
-        if(operands.size() != s.operands().length)
-            {System.err.println("Instruction '" + s.target() + "' has " + s.operands().length + " operands!"); return;}
+        if(operands.size() != s.operands().length){
+        	System.err.print("Instruction '" + s.target() + "' has " + s.operands().length + " operands! ");
+        	System.err.println("While input has " + operands.size());
+        	return;
+        }
         
         // Check argument types
         for(int i = 0; i < operands.size(); i++)
