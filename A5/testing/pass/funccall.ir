@@ -1,0 +1,48 @@
+sumArray:
+;; sumArray(a, n) LL=0
+SAVECTX 0
+PUSH 0 ; i
+sumArrayTop:
+DUP
+ADDR 0 -1 ; n
+LOAD
+LT
+PUSH sumArrayOut
+BF
+DUP
+ADDR 0 -2
+ADD
+LOAD
+ADDR 0 -4
+LOAD
+ADD
+ADDR 0 -4
+SWAP
+STORE
+PUSH 1
+ADD
+PUSH sumArrayTop
+BR
+sumArrayOut:
+POP
+RESTORECTX 0 2
+BR
+
+main:
+SAVECTX 0
+PUSH 0
+PUSH 1
+PUSH 2
+PUSH 3
+PUSH 4
+SETUPCALL __call_main_sumArray
+PUSHMT
+PUSH -7
+ADD
+PUSH 5
+PUSH sumArray
+__call_main_sumArray: BR
+PRINTI
+RESTORECTX 0 0
+
+HALT
