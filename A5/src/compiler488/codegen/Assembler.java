@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import compiler488.codegen.Operand.OperandType;
 import compiler488.runtime.Machine;
 import compiler488.runtime.MemoryAddressException;
 import compiler488.runtime.TextReader;
@@ -23,6 +24,7 @@ class Assembler {
     //
     
     @Processor(target="PUSH")
+    @Specification(operands={OperandType.OPERAND_INTEGER})
     void instructionPush(Instruction i) throws MemoryAddressException, LabelNotResolvedError {
         Machine.writeMemory(next(), Machine.PUSH);
         Machine.writeMemory(next(), i.val(0));
@@ -152,16 +154,16 @@ class Instruction {
         {return ((StringOperand) operands.get(op)).getValue();}
 }
 
+
 interface Operand {
-    public boolean isInteger();
-    public boolean isString();
+    enum OperandType { OPERAND_INTEGER, OPERAND_STRING }
+    public OperandType getType();
 }
 
 class IntegerOperand implements Operand  {
     IntegerOperand(short value) { this.value = value; }
     public short getValue()  throws LabelNotResolvedError { return value; }
-    public boolean isInteger() { return true; }
-    public boolean isString()  { return false; }
+    public OperandType getType() { return OperandType.OPERAND_INTEGER; }
     
     // Internal members
     private short value;
@@ -187,8 +189,7 @@ class LabelOperand extends IntegerOperand {
 class StringOperand implements Operand {
     StringOperand(String value) { this.value = value; }
     public String getValue() { return value; }
-    public boolean isInteger() { return false; }
-    public boolean isString() { return true; }
+    public OperandType getType() { return OperandType.OPERAND_STRING; }
     private String value;
 }
 
@@ -200,4 +201,10 @@ class StringOperand implements Operand {
 @Retention(RetentionPolicy.RUNTIME)
 @interface Processor {
     String target();
+}
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Specification {
+    Operand.OperandType[] operands(); 
 }
