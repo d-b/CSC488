@@ -171,7 +171,6 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
 		short topLabel = emitter.emit(Machine.DUP);
 		emitter.emit(Machine.PUSH, strAddr);
 		emitter.emit(Machine.LOAD);
-		emitter.emit(Machine.SWAP);
 		emitter.emit(Machine.LT);
 		emitter.emit(Machine.PUSH, (short) (topLabel + 21));
 		emitter.emit(Machine.BF);
@@ -184,6 +183,7 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
 		emitter.emit(Machine.ADD);
 		emitter.emit(Machine.PUSH, (short) topLabel);
 		emitter.emit(Machine.BR);
+		emitter.emit(Machine.POP);
 	}
 	
 	@Processor(target="SETUPCALL", operands={OperandType.OPERAND_INTEGER}, size=4)
