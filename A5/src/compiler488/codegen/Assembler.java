@@ -1,6 +1,8 @@
 package compiler488.codegen;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,9 +18,27 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import compiler488.runtime.ExecutionException;
+import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
 
-class Assembler {   
+class Assembler {
+    // Rough test code
+    // TODO: add real tests
+    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException {
+        Assembler assembler = new Assembler();
+        String code = "SECTION .code\n"
+                    + "PUTSTR \"Hello world!\"\n"
+                    + "HALT\n";
+        InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
+        Machine.powerOn();      
+        Machine.setPC((short) 0);
+        Machine.setMSP((short) 5000);
+        Machine.setMLP((short) (Machine.memorySize - 1));
+        assembler.Assemble(stream);
+        Machine.run();
+    }    
+    
     //
     // Configuration
     //
@@ -47,9 +67,10 @@ class Assembler {
     // Assemble an IR program
     public Boolean Assemble(InputStream input) {
         // Reset internal state
+        Emitter emitter = new Emitter();
         codeCurrent = null;
         codeSections.clear();
-        codeEmitter.setEmitter(new Emitter());        
+        codeEmitter.setEmitter(emitter);        
         // Instantiate the text reader
         reader = new TextReader(input);
         
@@ -85,12 +106,18 @@ class Assembler {
             }
         }
         
+        // Add section for text constants
+        enterSection(".textconst");
+        
         // Pass 2: layout sections
         short baseAddress = 0;
         for(Section section : codeSections) {
             section.setAddress(baseAddress);
             baseAddress = section.getSize();
         }
+        
+        // Set emitter data section
+        emitter.setDataSection(currentSection().getAddress());
         
         // Pass 3: resolve label operands
         for(Section section : codeSections)
@@ -151,9 +178,10 @@ class Assembler {
         return codeEmitter;
     }    
     
-    List<Operand> parseOperands(String operands) {
+    List<Operand> parseOperands(String operands) { 
         List<Operand> result = new LinkedList<Operand>();
-        for(String part : operands.split(" ")) {
+        if(operands == null) return result;
+        for(String part : operands.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
             // If it is a string
             if(part.charAt(0) == '"')
                 result.add(new StringOperand(part.substring(1, part.length() - 2)));
