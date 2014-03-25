@@ -11,7 +11,7 @@ import java.util.Map;
  * 
  * @author Daniel Bloemendal
  */
-class Section {
+public class Section {
     // New section
     Section(String name) {
         this.name = name;
@@ -42,6 +42,16 @@ class Section {
     
     public List<Instruction> getInstructions() {
         return Collections.unmodifiableList(instructions);
+    }
+    
+    //
+    // Memory allocation
+    //
+    
+    public short allocateMemory(short words) {
+        short addr = (short)(address + size);
+        size += words;
+        return addr;
     }
    
     // Getters/setters

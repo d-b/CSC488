@@ -39,10 +39,10 @@ class Assembler {
                     + "HALT\n";
         InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
         Machine.powerOn();      
-        Machine.setPC((short) 0);
-        Machine.setMSP((short) 5000);
-        Machine.setMLP((short) (Machine.memorySize - 1));
         assembler.Assemble(stream);
+        Machine.setPC((short) 0);
+        Machine.setMSP((short) assembler.getEnding());
+        Machine.setMLP((short) (Machine.memorySize - 1));        
         Machine.run();
     }    
     
@@ -114,7 +114,8 @@ class Assembler {
         }
         
         // Add section for text constants
-        enterSection(".textconst");
+        Section textConst = enterSection(".textconst");
+        emitter.setDataSection(textConst);
         
         // Pass 2: layout sections
         short baseAddress = 0;
@@ -122,9 +123,6 @@ class Assembler {
             section.setAddress(baseAddress);
             baseAddress = section.getSize();
         }
-        
-        // Set emitter data section
-        emitter.setDataSection(currentSection().getAddress());
         
         // Pass 3: resolve label operands
         for(Section section : codeSections)
@@ -143,6 +141,12 @@ class Assembler {
         
         // Successful assembly
         return true;
+    }
+    
+    public short getEnding() {
+        Section sec = currentSection();
+        if(sec == null) return 0;
+        return (short)(sec.getAddress() + sec.getSize());
     }
     
     //
@@ -209,11 +213,12 @@ class Assembler {
         return codeCurrent; 
     }    
     
-    void enterSection(String name) {
+    Section enterSection(String name) {
          Section sec = new Section(name);
          codeCurrent = sec;
          if(name == SECTION_CODE) codeSections.add(0, sec);
          else codeSections.add(sec);
+         return sec;
     }
     
     void addLabel(String name) {
@@ -267,7 +272,6 @@ class Assembler {
     
     // Machine code emitter
     AssemblerIREmitter codeEmitter;
-    
 }
 
 //

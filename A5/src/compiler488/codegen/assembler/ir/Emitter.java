@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import compiler488.runtime.Machine;
 import compiler488.runtime.MemoryAddressException;
+import compiler488.codegen.assembler.Section;
 
 /**
  * CodeEmitter, emit the code to the Machine class. It can figure out the
@@ -15,9 +16,8 @@ import compiler488.runtime.MemoryAddressException;
  */
 public class Emitter {
 	private short codeSec = 0;
-	private short dataSec = -1;
 	private short codeCur = 0;
-	private short dataCur = 0;
+	private Section dataSec;
 	
 	private HashMap<String, Short> strDedupMap;
 	
@@ -37,17 +37,15 @@ public class Emitter {
 	}
 	
 	public short addConstant(short w) throws MemoryAddressException {
-		short base = (short) (dataSec + dataCur);
+		short base = dataSec.allocateMemory((short) 1);
 		Machine.writeMemory(base, w);
-		dataCur++;
 		return base;
 	}
 	public short addConstant(char constant[]) throws MemoryAddressException {
-		short base = (short) (dataSec + dataCur);
+		short base = dataSec.allocateMemory((short) constant.length);
 		for (int i = 0; i < constant.length; i++) {
 			Machine.writeMemory((short) (base + i), (short) constant[i]);
 		}
-		dataCur += constant.length;
 		return base;
 	}
 	
@@ -64,9 +62,8 @@ public class Emitter {
 		return base;
 	}
 	
-	public void setDataSection(short offset) {
-		dataSec = offset;
-		// data section is ready
+	public void setDataSection(Section dataSection) {
+		dataSec = dataSection;
 		strDedupMap = new HashMap<String, Short>();
 	}
 }
