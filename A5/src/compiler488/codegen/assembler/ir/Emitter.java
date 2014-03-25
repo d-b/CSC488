@@ -1,4 +1,4 @@
-package compiler488.codegen;
+package compiler488.codegen.assembler.ir;
 
 import java.util.HashMap;
 

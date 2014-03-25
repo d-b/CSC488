@@ -1,15 +1,10 @@
-package compiler488.codegen;
+package compiler488.codegen.assembler;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,7 +17,14 @@ import compiler488.compiler.Main;
 import compiler488.runtime.ExecutionException;
 import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
+import compiler488.codegen.assembler.ir.AssemblerIREmitter;
+import compiler488.codegen.assembler.ir.Emitter;
 
+/**
+ * Assembler core for IR to 488 machine code.
+ * 
+ * @author Daniel Bloemendal
+ */
 class Assembler {
     // Rough test code
     // TODO: add real tests
@@ -269,89 +271,8 @@ class Assembler {
 }
 
 //
-// Section
+// Instruction operand classes
 //
-
-class Section {
-    // New section
-    Section(String name) {
-        this.name = name;
-        this.instructions = new LinkedList<Instruction>();
-        this.labels = new HashMap<String, Short>();
-        this.size = 0;
-        this.address = 0;
-    }
-    
-    //
-    // Labels & instructions
-    //
-    
-    public void addLabel(String name) {
-        labels.put(name, size);
-    }
-    
-    public Short getLabel(String name) {
-        Short offset = labels.get(name);
-        if (offset == null) return null;
-        return (short)(address + offset);
-    }
-    
-    public void addInstruction(Instruction instruction) {
-        this.size += instruction.getSize();
-        instructions.add(instruction);
-    }
-    
-    public List<Instruction> getInstructions() {
-        return Collections.unmodifiableList(instructions);
-    }
-   
-    // Getters/setters
-    public String getName() { return name; }    
-    public short getAddress() { return address; }
-    public void setAddress(short address) { this.address = address; }
-    public short getSize() { return size; }
-
-    // Internal members
-    private String name;
-    private List<Instruction> instructions;
-    private Map<String, Short> labels;
-    private short size;
-    private short address;
-}
-
-//
-// Instructions and operands
-//
-
-class Instruction {   
-    // New instruction
-    Instruction(String name, List<Operand> operands, int size) {
-        this.name = name;
-        this.operands = operands;
-        this.size = size;
-    }
-    
-    // Getters
-    public String getName() { return name; }
-    public List<Operand> getOperands() { return operands; }
-    public int getSize() { return size; }
-
-    // Helpers
-    public short val(int op) throws LabelNotResolvedError
-        {return ((IntegerOperand) operands.get(op)).getValue();}
-    public String str(int op)
-        {return ((StringOperand) operands.get(op)).getValue();}
-    
-    // Internal members
-    private String name;
-    private List<Operand> operands;
-    private int size;
-}
-
-interface Operand {
-    enum OperandType { OPERAND_INTEGER, OPERAND_STRING }
-    public OperandType getType();
-}
 
 class IntegerOperand implements Operand  {
     IntegerOperand(short value) { this.value = value; }
@@ -386,16 +307,4 @@ class StringOperand implements Operand {
     
     // Internal members
     private String value;
-}
-
-//
-// Instruction processor
-//
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface Processor {
-    String target();
-    Operand.OperandType[] operands();
-    int size();
 }
