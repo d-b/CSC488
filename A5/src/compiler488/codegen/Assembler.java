@@ -59,6 +59,13 @@ class Assembler {
         currentSection().addLabel(name);
     }
     
+    Short getLabel(String name) {
+        for(Section sec : codeSections) {
+            Short addr = sec.getLabel(name);
+            if(addr != null) return addr;
+        } return null;
+    }
+    
     void addInstruction(String name, List<Operand> operands) {
         // Get instruction specification
         name = name.toUpperCase();
@@ -87,19 +94,21 @@ class Assembler {
         // Instantiate internals
         instructionMap     = new HashMap<String, Method>();
         instructionSpec    = new HashMap<String, Processor>();
-        codeCurrent        = null;
         codeSections       = new LinkedList<Section>();
         patternInstruction = Pattern.compile("\\s*(?:(\\w+):)?\\s*(?:(\\w+)(?:\\s+(.*))?)?");
         patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)", Pattern.CASE_INSENSITIVE);
         // Instantiate the code emitter
         codeEmitter        = new AssemblerIREmitter();
-        codeEmitter.setEmitter(new Emitter());
         // Populate instruction processors 
         populateProcessors();
     }
    
     // Assemble an IR program
     public Boolean Assemble(InputStream input) {
+        // Reset internal state
+        codeCurrent = null;
+        codeSections.clear();
+        codeEmitter.setEmitter(new Emitter());        
         // Instantiate the text reader
         reader = new TextReader(input);
         
@@ -131,17 +140,24 @@ class Assembler {
             }
         }
         
-        // Pass 2: resolve label operands
+        // Pass 2: layout sections
+        short baseAddress = 0;
+        for(Section section : codeSections) {
+            section.setAddress(baseAddress);
+            baseAddress = section.getSize();
+        }
+        
+        // Pass 3: resolve label operands
         for(Section section : codeSections)
             for(Instruction instr : section.getInstructions())
                 for(Operand op : instr.getOperands())
                     if(op instanceof LabelOperand) {
                         LabelOperand lop = (LabelOperand) op;
-                        Short addr = section.getLabel(lop.getLabel());
+                        Short addr = getLabel(lop.getLabel());
                         if(addr != null) lop.setAddress(addr);
                     }
         
-        // Pass 3: generate machine code
+        // Pass 4: generate machine code
         for(Section section : codeSections)
             for(Instruction instr : section.getInstructions())
                 processInstruction(instr);
@@ -244,23 +260,32 @@ class Section {
     }
     
     //
-    // Adding labels/instructions
+    // Labels & instructions
     //
     
     public void addLabel(String name) {
         labels.put(name, size);
     }
     
+    public Short getLabel(String name) {
+        Short offset = labels.get(name);
+        if (offset == null) return null;
+        return (short)(address + offset);
+    }
+    
     public void addInstruction(Instruction instruction) {
         this.size += instruction.getSize();
         instructions.add(instruction);
     }
+    
+    public List<Instruction> getInstructions() {
+        return Collections.unmodifiableList(instructions);
+    }
    
-    // Getters    
-    public String getName() { return name; }
-    public Short getLabel(String name) { return labels.get(name); }    
-    public List<Instruction> getInstructions() { return Collections.unmodifiableList(instructions); }        
-    public short getAddress() { return address; }        
+    // Getters/setters
+    public String getName() { return name; }    
+    public short getAddress() { return address; }
+    public void setAddress(short address) { this.address = address; }
     public short getSize() { return size; }
 
     // Internal members
