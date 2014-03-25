@@ -160,9 +160,19 @@ class Assembler {
         }        
     }
     
-    // TODO: parse operands
     List<Operand> parseOperands(String operands) {
-        return new LinkedList<Operand>();
+        List<Operand> result = new LinkedList<Operand>();
+        for(String part : operands.split(" ")) {
+            // If it is a string
+            if(part.charAt(0) == '"')
+                result.add(new StringOperand(part.substring(1, part.length() - 2)));
+            // If it is a number
+            else if(Character.isDigit(part.charAt(0)))
+                result.add(new IntegerOperand((short) Integer.parseInt(part)));
+            // If it is a label
+            else if(Character.isAlphabetic(part.charAt(0)))
+                result.add(new LabelOperand(part));
+        } return result;
     }    
    
     //
@@ -275,7 +285,7 @@ class IntegerOperand implements Operand  {
 }
 
 class LabelOperand extends IntegerOperand {
-    LabelOperand() {super((short) 0);}
+    LabelOperand(String label) {super((short) 0); this.label = label;}
     public void setAddress(short address) { resolved = true; value = address; }
     public String getLabel() { return label; }
     
