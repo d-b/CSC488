@@ -7,6 +7,9 @@ import compiler488.codegen.assembler.LabelNotResolvedError;
 import compiler488.runtime.Machine;
 import compiler488.runtime.MemoryAddressException;
 
+/**
+ * @author Mike
+ */
 public class AssemblerIREmitter extends AssemblerMachineEmitter {
 	@Processor(target="PUTSTR", operands={OperandType.OPERAND_STRING}, size=23)
 	public void emitPutString(Instruction ins) throws MemoryAddressException {

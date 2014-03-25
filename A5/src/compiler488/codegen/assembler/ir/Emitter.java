@@ -12,7 +12,6 @@ import compiler488.codegen.assembler.Section;
  * automatically.
  * 
  * @author Mike
- *
  */
 public class Emitter {
 	private short codeSec = 0;
