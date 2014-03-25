@@ -1,6 +1,10 @@
 package compiler488.codegen.assembler;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Deque;
@@ -11,9 +15,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import compiler488.runtime.ExecutionException;
+import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
 import compiler488.codegen.assembler.ir.AssemblerIREmitter;
 import compiler488.codegen.assembler.ir.Emitter;
+import compiler488.compiler.Main;
 
 /**
  * Assembler core for IR to 488 machine code.
@@ -27,6 +34,30 @@ class Assembler {
 
     private final static String    SECTION_CODE = ".code";
     private final static Character COMMENT_CHAR = ';';
+    
+    //
+    // Assemble from command line
+    //
+    
+    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException, FileNotFoundException {
+        // Check arguments
+        if(argv.length <= 0) { System.err.println("Usage: <filename>"); return; }
+        
+        // Start the machine
+        Main.traceStream = System.out;
+        Machine.powerOn();
+        
+        // Assemble the file
+        Assembler assembler = new Assembler();
+        InputStream stream = new FileInputStream(argv[0]);
+        assembler.Assemble(stream);
+        
+        // Run the code
+        Machine.setPC((short) 0);
+        Machine.setMSP((short) assembler.getSize());
+        Machine.setMLP((short) (Machine.memorySize - 1));        
+        Machine.run();
+    }
     
     //
     // Assembler life cycle

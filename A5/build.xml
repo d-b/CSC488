@@ -155,6 +155,23 @@
     </jar>
   </target>
 
+ <target name="assembler" depends="compile"
+        description="generate the assembler distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <!-- Put everything in ${build} into the csc488.jar file -->
+    <jar destfile="${dist}/assembler488.jar" basedir="${build}">
+      <!-- Also include files unpacked from java-cup-11a-runtime.jar so assembler488.jar  can run stand alone -->
+      <fileset dir="${runlib}" />
+      <manifest>
+    <attribute
+     name="Main-Class" value="compiler488.codegen.assembler.Assembler"
+     />
+      </manifest>
+    </jar>
+  </target>
+
   <target name="submit" depends="compile"
         description="generate the distribution" >
     <!-- Create the distribution directory -->
