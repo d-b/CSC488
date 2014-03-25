@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -87,6 +88,8 @@ class Assembler {
         codeSections       = new LinkedList<Section>();
         patternInstruction = Pattern.compile("\\s*(?:(\\w+):)?\\s*(?:(\\w+)(?:\\s+(.*))?)?");
         patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)", Pattern.CASE_INSENSITIVE);
+        // Instantiate the code emitter
+        codeEmitter        = new AssemblerIREmitter();
         // Populate instruction processors 
         populateProcessors();
     }
@@ -143,22 +146,35 @@ class Assembler {
         Method m = instructionMap.get(name); 
         
         // Invoke the processor on  instruction
-        try { m.invoke(this, instruction); }
+        try { m.invoke(getProcessorManager(), instruction); }
         catch (IllegalAccessException e)    { e.printStackTrace(); }
         catch (IllegalArgumentException e)  { e.printStackTrace(); }
         catch (InvocationTargetException e) { e.printStackTrace(); }
     }
     
     void populateProcessors() {
-        Class<? extends Assembler> thisClass = this.getClass();
-        for(Method method : thisClass.getDeclaredMethods()) {
-            Processor procInfo = method.getAnnotation(Processor.class);
-            if(procInfo != null) {
-                instructionMap.put(procInfo.target(), method);
-                instructionSpec.put(procInfo.target(), procInfo);
+        // Target class
+        Class<?> target = getProcessorManager().getClass();
+        // Get class tree
+        Deque<Class<?>> classes = new LinkedList<Class<?>>();
+        for(Class<?> cls = target; !cls.equals(Object.class); cls = cls.getSuperclass())
+            classes.push(cls);
+        // Loop over classes
+        while(!classes.isEmpty()) {
+            Class<?> cls = classes.pop();
+            for(Method method : cls.getDeclaredMethods()) {
+                Processor procInfo = method.getAnnotation(Processor.class);
+                if(procInfo != null) {
+                    instructionMap.put(procInfo.target(), method);
+                    instructionSpec.put(procInfo.target(), procInfo);
+                }
             }
-        }        
+        }
     }
+    
+    Object getProcessorManager() {
+        return codeEmitter;
+    }    
     
     List<Operand> parseOperands(String operands) {
         List<Operand> result = new LinkedList<Operand>();
@@ -180,7 +196,7 @@ class Assembler {
     //
     
     // Instruction maps
-    private Map<String, Method>    instructionMap;
+    private Map<String, Method> instructionMap;
     private Map<String, Processor> instructionSpec;
     
     // Input stream reader
@@ -192,7 +208,11 @@ class Assembler {
     
     // Instantiated sections & instructions
     private List<Section> codeSections;
-    private Section       codeCurrent;    
+    private Section codeCurrent;
+    
+    // Machine code emitter
+    AssemblerIREmitter codeEmitter;
+    
 }
 
 //
