@@ -1,7 +1,6 @@
 package compiler488.codegen;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,24 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.ByteArrayInputStream;
 
-import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
 
-class Assembler {
-    // Rough test code
-    // TODO: add real tests
-    public static void main(String argv[]) throws UnsupportedEncodingException {
-        Assembler assembler = new Assembler();
-        String code = "SECTION .code \n"
-                    + "PUSH label \n"
-                    + "label: PUSH 0 \n";
-        InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
-        Machine.powerOn();
-        assembler.Assemble(stream);
-    }
-    
+class Assembler {   
     //
     // Configuration
     //
