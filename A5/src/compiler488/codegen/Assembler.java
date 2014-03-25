@@ -30,8 +30,8 @@ class Assembler {
         Main.traceStream = System.out;
         Assembler assembler = new Assembler();
         String code = "SECTION .code\n"
-                    + "TRON\n"
-                    + "PUTSTR \"Hello world!\"\n"
+                    + "PUTSTR \"Hello world! #1\"\n"
+                    + "PUTSTR \"Hello world! #2\"\n"
                     + "HALT\n";
         InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
         Machine.powerOn();      
@@ -187,7 +187,7 @@ class Assembler {
         for(String part : operands.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
             // If it is a string
             if(part.charAt(0) == '"')
-                result.add(new StringOperand(part.substring(1, part.length() - 2)));
+                result.add(new StringOperand(part.substring(1, part.length() - 1) + "\n"));
             // If it is a number
             else if(Character.isDigit(part.charAt(0)))
                 result.add(new IntegerOperand((short) Integer.parseInt(part)));
