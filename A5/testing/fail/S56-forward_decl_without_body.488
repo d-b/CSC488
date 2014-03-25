@@ -5,6 +5,8 @@
 %
 {
     forward func f(u : integer) : integer
-    forward procedure p(u : integer)
-}
+    forward proc p(u : integer)
 
+    var x : integer
+    x := 0
+}

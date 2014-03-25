@@ -7,7 +7,7 @@ public class FunctionSymbol extends Symbol {
     public FunctionSymbol(String name, FunctionType type) {
         this.name = name;
         this.type = type;
-        this.defined = false;
+        this.defined = true;
     }
     
     public FunctionSymbol(String name, FunctionType type, Boolean hasBody) {

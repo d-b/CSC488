@@ -36,6 +36,7 @@ class Errors {
         put(51, "Result statement must lie directly within a function.");
         put(52, "Return statement must lie directly within a procedure.");
         put(55, "Identifier was not declared as a two dimensional array.");
+        put(56, "Forward declared routine has no body.");
     }};
     
     static final public String getError(int actionNumber) {

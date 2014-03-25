@@ -72,6 +72,10 @@ public class Semantics {
     // Processors
     ////////////////////////////////////////////////////////////////////
 
+    //
+    // Scope processing
+    //
+        
     /*
      * program:
      *      S00 scope S01
@@ -82,7 +86,8 @@ public class Semantics {
     }
     @PostProcessor(target = "Program")
     void postProgram(Program program) {
-        semanticAction(1); // S01: End program scope.
+        checkForwards(program); // Check forward declarations.
+        semanticAction(1); // S01: End program scope. 
     }
 
     /*
@@ -98,9 +103,23 @@ public class Semantics {
     }
     @PostProcessor(target = "Scope")
     void postScope(Scope scope) {
+        checkForwards(scope); // Check forward declarations.
         if(!(scope.getParent() instanceof RoutineDecl))
             semanticAction(7); // S07: End statement scope.
     }
+    
+    /*
+     * forward declaration checking
+     */
+    void checkForwards(Scope scope) {
+        for(Declaration decl : scope.getDeclarations().getList()) {
+            if(decl instanceof RoutineDecl) {
+                RoutineDecl routineDecl = (RoutineDecl) decl;
+                setTop(routineDecl); // Set top to routine declaration.
+                semanticAction(56); // S56: Forward declared routine has no body.
+            }
+        }
+    }    
 
     //
     // Declaration processing
@@ -887,6 +906,13 @@ public class Semantics {
              && ((VariableSymbol) symbol).getDimensions() == 2);
     }
 
+    @Action(number = 56) // Check that the declaration is not a forward declared routine with no body.
+    Boolean actionCheckForwardDecl(RoutineDecl routineDecl) {
+        Symbol symbol = symbolTable.find(routineDecl.getName());
+        if(symbol == null || !symbol.isRoutine()) return true; // Ignore: handled by other action.
+        return ((FunctionSymbol) symbol).hasBody();
+    }    
+    
     ////////////////////////////////////////////////////////////////////
     // Machinery
     ////////////////////////////////////////////////////////////////////
