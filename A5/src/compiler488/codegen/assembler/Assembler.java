@@ -206,8 +206,7 @@ class Assembler {
             else if(part.charAt(0) == '-' || Character.isDigit(part.charAt(0)))
                 result.add(new IntegerOperand((short) Integer.parseInt(part)));
             // If it is a label
-            else if(Character.isAlphabetic(part.charAt(0)))
-                result.add(new LabelOperand(part));
+            else result.add(new LabelOperand(part));
         } return result;
     }
     
