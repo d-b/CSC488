@@ -1,5 +1,26 @@
 SECTION .code
 
+;; main
+
+TRON
+SAVECTX 0
+PUSH 0
+PUSH 1
+PUSH 2
+PUSH 3
+PUSH 4
+SETUPCALL __call_main_sumArray
+PUSHMT
+PUSH -7
+ADD
+PUSH 5
+PUSH sumArray
+__call_main_sumArray: BR
+PRINTI
+RESTORECTX 0 0
+
+HALT
+
 sumArray:
 ;; sumArray(a, n) LL=0
 SAVECTX 0
@@ -30,21 +51,4 @@ POP
 RESTORECTX 0 2
 BR
 
-main:
-SAVECTX 0
-PUSH 0
-PUSH 1
-PUSH 2
-PUSH 3
-PUSH 4
-SETUPCALL __call_main_sumArray
-PUSHMT
-PUSH -7
-ADD
-PUSH 5
-PUSH sumArray
-__call_main_sumArray: BR
-PRINTI
-RESTORECTX 0 0
 
-HALT

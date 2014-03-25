@@ -32,7 +32,7 @@ public class Emitter {
 		return base;
 	}
 	public short emit(short op, short v0, short v1) throws MemoryAddressException {
-		short base = emit(op); emit(v0); emit(v0);
+		short base = emit(op); emit(v0); emit(v1);
 		return base;
 	}
 	
