@@ -66,5 +66,7 @@ public class Emitter {
 	
 	public void setDataSection(short offset) {
 		dataSec = offset;
+		// data section is ready
+		strDedupMap = new HashMap<String, Short>();
 	}
 }
