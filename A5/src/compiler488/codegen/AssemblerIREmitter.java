@@ -186,6 +186,12 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
 		emitter.emit(Machine.POP);
 	}
 	
+	@Processor(target="PUTNEWLINE", operands={}, size=3)
+	void emitPutNewLine(Instruction ins) throws MemoryAddressException {
+		emitter.emit(Machine.PUSH, (short) '\n');
+		emitter.emit(Machine.PRINTC);
+	}
+	
 	@Processor(target="SETUPCALL", operands={OperandType.OPERAND_INTEGER}, size=4)
 	void emitSetupCall(Instruction ins) throws MemoryAddressException, LabelNotResolvedError {
 		// assuming later arguments are pushed using push, plus a push address and BR instruction
