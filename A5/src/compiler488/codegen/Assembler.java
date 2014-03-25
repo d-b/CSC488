@@ -23,7 +23,7 @@ class Assembler {
     // Instructions
     //
     
-    @Processor(target="PUSH", operands={OperandType.OPERAND_INTEGER})
+    @Processor(target="PUSH", operands={OperandType.OPERAND_INTEGER}, size = 2)
     void instructionPush(Instruction i) throws MemoryAddressException, LabelNotResolvedError {
         Machine.writeMemory(next(), Machine.PUSH);
         Machine.writeMemory(next(), i.val(0));
@@ -83,9 +83,20 @@ class Assembler {
     
     void processInstruction(Instruction instruction) {
         // Get instruction method
-        Method m = instructionMap.get(instruction.name.toUpperCase());
-        if(m == null)
+        String name = instruction.name.toUpperCase();
+        Method m = instructionMap.get(name);
+        Processor s = instructionSpec.get(name);
+        if(m == null || s == null)
             {System.err.println("Instruction '" + instruction.name + "' not implemented!"); return;}
+        
+        // Check number of arguments
+        if(instruction.operands.size() != s.operands().length)
+            {System.err.println("Instruction '" + instruction.name + "' has " + s.operands().length + " operands!"); return;}
+        
+        // Check argument types
+        for(int i = 0; i < instruction.operands.size(); i++)
+            if(instruction.operands.get(i).getType() != s.operands()[i])
+                {System.err.println("Invalid argument type for instruction '" + instruction.name + "'"); return;}
         
         // Invoke the processor on  instruction
         try { m.invoke(this, instruction); }
@@ -98,7 +109,10 @@ class Assembler {
         Class<? extends Assembler> thisClass = this.getClass();
         for(Method method : thisClass.getDeclaredMethods()) {
             Processor procInfo = method.getAnnotation(Processor.class);
-            if(procInfo != null) instructionMap.put(procInfo.target(), method);
+            if(procInfo != null) {
+                instructionMap.put(procInfo.target(), method);
+                instructionSpec.put(procInfo.target(), procInfo);
+            }
         }        
     }
     
@@ -107,8 +121,9 @@ class Assembler {
         return new LinkedList<Operand>();
     }    
     
-    // Instruction map
-    private Map<String, Method> instructionMap;
+    // Instruction maps
+    private Map<String, Method>    instructionMap;
+    private Map<String, Processor> instructionSpec;
     
     // Input stream reader
     private TextReader reader;
@@ -122,7 +137,6 @@ class Assembler {
     private short         codeAddress;
     private Section       codeCurrent;
     private List<Section> codeSections;
-    
 }
 
 //
@@ -201,4 +215,5 @@ class StringOperand implements Operand {
 @interface Processor {
     String target();
     Operand.OperandType[] operands();
+    int size();
 }
