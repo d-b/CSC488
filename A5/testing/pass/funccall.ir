@@ -2,7 +2,7 @@ SECTION .code
 
 ;; main
 
-TRON
+;TRON
 SAVECTX 0
 PUSH 0
 PUSH 1
@@ -27,19 +27,20 @@ SAVECTX 0
 PUSH 0 ; i
 sumArrayTop:
 DUP
-ADDR 0 -1 ; n
+ADDR 0 -2 ; n
 LOAD
 LT
 PUSH sumArrayOut
 BF
 DUP
-ADDR 0 -2
+ADDR 0 -3 ; reference of a on stack
+LOAD      ; a
 ADD
 LOAD
-ADDR 0 -4
+ADDR 0 -5 ; return val
 LOAD
 ADD
-ADDR 0 -4
+ADDR 0 -5 ; return val
 SWAP
 STORE
 PUSH 1
