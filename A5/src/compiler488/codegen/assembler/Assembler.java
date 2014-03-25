@@ -41,7 +41,7 @@ class Assembler {
         Machine.powerOn();      
         assembler.Assemble(stream);
         Machine.setPC((short) 0);
-        Machine.setMSP((short) assembler.getEnding());
+        Machine.setMSP((short) assembler.getSize());
         Machine.setMLP((short) (Machine.memorySize - 1));        
         Machine.run();
     }    
@@ -143,7 +143,7 @@ class Assembler {
         return true;
     }
     
-    public short getEnding() {
+    public short getSize() {
         Section sec = currentSection();
         if(sec == null) return 0;
         return (short)(sec.getAddress() + sec.getSize());
