@@ -98,6 +98,9 @@ class Assembler {
             if(instruction.operands.get(i).getType() != s.operands()[i])
                 {System.err.println("Invalid argument type for instruction '" + instruction.name + "'"); return;}
         
+        // Set instruction size before invoking the processor
+        instruction.size = s.size();
+        
         // Invoke the processor on  instruction
         try { m.invoke(this, instruction); }
         catch (IllegalAccessException e)    { e.printStackTrace(); }
