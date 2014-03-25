@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.ByteArrayInputStream;
 
+import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
 
 class Assembler {
@@ -26,8 +27,11 @@ class Assembler {
     public static void main(String argv[]) throws UnsupportedEncodingException {
         Assembler assembler = new Assembler();
         String code = "SECTION .code\n"
+                    + "PUSH label\n"
+                    + "label:\n"
                     + "PUSH 0\n";
         InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
+        Machine.powerOn();
         assembler.Assemble(stream);
     }
     
@@ -90,6 +94,7 @@ class Assembler {
         patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)", Pattern.CASE_INSENSITIVE);
         // Instantiate the code emitter
         codeEmitter        = new AssemblerIREmitter();
+        codeEmitter.setEmitter(new Emitter());
         // Populate instruction processors 
         populateProcessors();
     }
@@ -128,11 +133,21 @@ class Assembler {
         }
         
         // Pass 2: resolve label operands
-        // ...
+        for(Section section : codeSections)
+            for(Instruction instr : section.getInstructions())
+                for(Operand op : instr.getOperands())
+                    if(op instanceof LabelOperand) {
+                        LabelOperand lop = (LabelOperand) op;
+                        Short addr = section.getLabel(lop.getLabel());
+                        if(addr != null) lop.setAddress(addr);
+                    }
         
         // Pass 3: generate machine code
-        // ...
+        for(Section section : codeSections)
+            for(Instruction instr : section.getInstructions())
+                processInstruction(instr);
         
+        // Successful assembly
         return true;
     }
     
@@ -220,6 +235,7 @@ class Assembler {
 //
 
 class Section {
+    // New section
     Section(String name) {
         this.name = name;
         this.instructions = new LinkedList<Instruction>();
@@ -228,9 +244,9 @@ class Section {
         this.address = 0;
     }
     
-    public String getName() {
-        return name;
-    }
+    //
+    // Adding labels/instructions
+    //
     
     public void addLabel(String name) {
         labels.put(name, size);
@@ -240,11 +256,25 @@ class Section {
         this.size += instruction.getSize();
         instructions.add(instruction);
     }
+   
+    //
+    // Getters
+    //
+    
+    public String getName() {
+        return name;
+    }
+    
+    
+    public Short getLabel(String name) {
+        return labels.get(name);
+    }    
+    
     
     public List<Instruction> getInstructions() {
         return Collections.unmodifiableList(instructions);
     }
-    
+        
     public short getAddress() {
         return address;
     }        
