@@ -203,7 +203,7 @@ class Assembler {
             if(part.charAt(0) == '"')
                 result.add(new StringOperand(part.substring(1, part.length() - 1)));
             // If it is a number
-            else if(Character.isDigit(part.charAt(0)))
+            else if(part.charAt(0) == '-' || Character.isDigit(part.charAt(0)))
                 result.add(new IntegerOperand((short) Integer.parseInt(part)));
             // If it is a label
             else if(Character.isAlphabetic(part.charAt(0)))

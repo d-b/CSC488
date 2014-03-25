@@ -1,3 +1,5 @@
+SECTION .code
+
 sumArray:
 ;; sumArray(a, n) LL=0
 SAVECTX 0
