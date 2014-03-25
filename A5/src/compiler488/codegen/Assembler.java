@@ -23,10 +23,10 @@ class Assembler {
     //
     
     @Processor(target="PUSH")
-    void instructionPush(Instruction i) throws MemoryAddressException {
+    void instructionPush(Instruction i) throws MemoryAddressException, LabelNotResolvedError {
         Machine.writeMemory(next(), Machine.PUSH);
+        Machine.writeMemory(next(), i.val(0));
     }
-    
     
     //
     // Helper routines
@@ -141,9 +141,15 @@ class Section {
 //
 
 class Instruction {
-    String name;
-    List<Operand> operands;
-    int size;   
+    public String name;
+    public List<Operand> operands;
+    public int size;
+
+    // Helpers
+    public short val(int op) throws LabelNotResolvedError
+        {return ((IntegerOperand) operands.get(op)).getValue();}
+    public String str(int op)
+        {return ((StringOperand) operands.get(op)).getValue();}
 }
 
 interface Operand {
@@ -179,8 +185,11 @@ class LabelOperand extends IntegerOperand {
 }
 
 class StringOperand implements Operand {
+    StringOperand(String value) { this.value = value; }
+    public String getValue() { return value; }
     public boolean isInteger() { return false; }
-    public boolean isString()  { return true; }
+    public boolean isString() { return true; }
+    private String value;
 }
 
 //
