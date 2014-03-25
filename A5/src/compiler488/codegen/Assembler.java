@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import compiler488.compiler.Main;
 import compiler488.runtime.ExecutionException;
 import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
@@ -26,8 +27,10 @@ class Assembler {
     // Rough test code
     // TODO: add real tests
     public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException {
+        Main.traceStream = System.out;
         Assembler assembler = new Assembler();
         String code = "SECTION .code\n"
+                    + "TRON\n"
                     + "PUTSTR \"Hello world!\"\n"
                     + "HALT\n";
         InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
