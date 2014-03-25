@@ -69,8 +69,11 @@ class Assembler {
         instructionMap     = new HashMap<String, Method>();
         instructionSpec    = new HashMap<String, Processor>();
         codeSections       = new LinkedList<Section>();
+        // Regular expressions
         patternInstruction = Pattern.compile("\\s*(?:(\\w+):)?\\s*(?:(\\w+)(?:\\s+(.*))?)?");
         patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)\\s*", Pattern.CASE_INSENSITIVE);
+        patternOpString    = Pattern.compile("\"[^\"]*\"");
+        patternOpLabel     = Pattern.compile("[a-zA-Z_]\\w*");
         // Instantiate the code emitter
         codeEmitter        = new AssemblerIREmitter();
         // Populate instruction processors 
@@ -200,13 +203,14 @@ class Assembler {
         if(operands == null) return result;
         for(String part : operands.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
             // If it is a string
-            if(part.charAt(0) == '"')
+            if(patternOpString.matcher(part).matches())
                 result.add(new StringOperand(part.substring(1, part.length() - 1)));
-            // If it is a number
-            else if(part.charAt(0) == '-' || Character.isDigit(part.charAt(0)))
-                result.add(new IntegerOperand((short) Integer.parseInt(part)));
             // If it is a label
-            else result.add(new LabelOperand(part));
+            else if(patternOpLabel.matcher(part).matches())
+                result.add(new LabelOperand(part));            
+            // If it is a number
+            else try { result.add(new IntegerOperand((short)Integer.parseInt(part))); }
+            catch(NumberFormatException e) {}
         } return result;
     }
     
@@ -270,6 +274,9 @@ class Assembler {
     // Regular expression patterns
     private Pattern patternInstruction;   
     private Pattern patternSection;
+    private Pattern patternOpString;
+    private Pattern patternOpInteger;
+    private Pattern patternOpLabel;
     
     // Instantiated sections & instructions
     private List<Section> codeSections;
