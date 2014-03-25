@@ -27,51 +27,6 @@ class Assembler {
     private final static Character COMMENT_CHAR = ';';
     
     //
-    // Helper routines
-    //
-            
-    Section currentSection() {
-        return codeCurrent; 
-    }    
-    
-    void enterSection(String name) {
-         Section sec = new Section(name);
-         codeCurrent = sec;
-         if(name == SECTION_CODE) codeSections.add(0, sec);
-         else codeSections.add(sec);
-    }
-    
-    void addLabel(String name) {
-        currentSection().addLabel(name);
-    }
-    
-    Short getLabel(String name) {
-        for(Section sec : codeSections) {
-            Short addr = sec.getLabel(name);
-            if(addr != null) return addr;
-        } return null;
-    }
-    
-    void addInstruction(String name, List<Operand> operands) {
-        // Get instruction specification
-        name = name.toUpperCase();
-        Processor s = instructionSpec.get(name);
-        if(s == null) { System.err.println("Instruction '" + name + "' not implemented!"); return; }
-        
-        // Check number of arguments
-        if(operands.size() != s.operands().length)
-            {System.err.println("Instruction '" + s.target() + "' has " + s.operands().length + " operands!"); return;}
-        
-        // Check argument types
-        for(int i = 0; i < operands.size(); i++)
-            if(operands.get(i).getType() != s.operands()[i])
-                {System.err.println("Invalid argument type for instruction '" + s.target() + "'"); return;}
-        
-        // Instantiate and add the instruction
-        currentSection().addInstruction(new Instruction(name, operands, s.size()));
-    }
-    
-    //
     // Assembler life cycle
     //
     
@@ -209,6 +164,51 @@ class Assembler {
             else if(Character.isAlphabetic(part.charAt(0)))
                 result.add(new LabelOperand(part));
         } return result;
+    }
+    
+    //
+    // Helper routines
+    //
+            
+    Section currentSection() {
+        return codeCurrent; 
+    }    
+    
+    void enterSection(String name) {
+         Section sec = new Section(name);
+         codeCurrent = sec;
+         if(name == SECTION_CODE) codeSections.add(0, sec);
+         else codeSections.add(sec);
+    }
+    
+    void addLabel(String name) {
+        currentSection().addLabel(name);
+    }
+    
+    Short getLabel(String name) {
+        for(Section sec : codeSections) {
+            Short addr = sec.getLabel(name);
+            if(addr != null) return addr;
+        } return null;
+    }
+    
+    void addInstruction(String name, List<Operand> operands) {
+        // Get instruction specification
+        name = name.toUpperCase();
+        Processor s = instructionSpec.get(name);
+        if(s == null) { System.err.println("Instruction '" + name + "' not implemented!"); return; }
+        
+        // Check number of arguments
+        if(operands.size() != s.operands().length)
+            {System.err.println("Instruction '" + s.target() + "' has " + s.operands().length + " operands!"); return;}
+        
+        // Check argument types
+        for(int i = 0; i < operands.size(); i++)
+            if(operands.get(i).getType() != s.operands()[i])
+                {System.err.println("Invalid argument type for instruction '" + s.target() + "'"); return;}
+        
+        // Instantiate and add the instruction
+        currentSection().addInstruction(new Instruction(name, operands, s.size()));
     }    
    
     //
