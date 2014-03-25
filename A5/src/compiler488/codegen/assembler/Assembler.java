@@ -1,8 +1,6 @@
 package compiler488.codegen.assembler;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Deque;
@@ -13,9 +11,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import compiler488.compiler.Main;
-import compiler488.runtime.ExecutionException;
-import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
 import compiler488.codegen.assembler.ir.AssemblerIREmitter;
 import compiler488.codegen.assembler.ir.Emitter;
@@ -26,26 +21,6 @@ import compiler488.codegen.assembler.ir.Emitter;
  * @author Daniel Bloemendal
  */
 class Assembler {
-    // Rough test code
-    // TODO: add real tests
-    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException {
-        Main.traceStream = System.out;
-        Assembler assembler = new Assembler();
-        String code = "SECTION .code\n"
-                    + "PUTSTR \"Hello world! #1\"\n"
-                    + "PUTNEWLINE\n"
-                    + "PUTSTR \"Hello world! #2\"\n"
-                    + "PUTNEWLINE\n"
-                    + "HALT\n";
-        InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
-        Machine.powerOn();      
-        assembler.Assemble(stream);
-        Machine.setPC((short) 0);
-        Machine.setMSP((short) assembler.getSize());
-        Machine.setMLP((short) (Machine.memorySize - 1));        
-        Machine.run();
-    }    
-    
     //
     // Configuration
     //
