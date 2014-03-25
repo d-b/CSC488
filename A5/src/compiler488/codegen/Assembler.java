@@ -23,8 +23,7 @@ class Assembler {
     // Instructions
     //
     
-    @Processor(target="PUSH")
-    @Specification(operands={OperandType.OPERAND_INTEGER})
+    @Processor(target="PUSH", operands={OperandType.OPERAND_INTEGER})
     void instructionPush(Instruction i) throws MemoryAddressException, LabelNotResolvedError {
         Machine.writeMemory(next(), Machine.PUSH);
         Machine.writeMemory(next(), i.val(0));
@@ -201,10 +200,5 @@ class StringOperand implements Operand {
 @Retention(RetentionPolicy.RUNTIME)
 @interface Processor {
     String target();
-}
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface Specification {
-    Operand.OperandType[] operands(); 
+    Operand.OperandType[] operands();
 }
