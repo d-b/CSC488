@@ -26,9 +26,9 @@ class Assembler {
     // TODO: add real tests
     public static void main(String argv[]) throws UnsupportedEncodingException {
         Assembler assembler = new Assembler();
-        String code = "SECTION .code\n"
-                    + "PUSH label\n"
-                    + "label: PUSH 0\n";
+        String code = "SECTION .code \n"
+                    + "PUSH label \n"
+                    + "label: PUSH 0 \n";
         InputStream stream = new ByteArrayInputStream(code.getBytes("UTF-8"));
         Machine.powerOn();
         assembler.Assemble(stream);
@@ -38,7 +38,8 @@ class Assembler {
     // Configuration
     //
 
-    private final static String SECTION_CODE = ".code";
+    private final static String    SECTION_CODE = ".code";
+    private final static Character COMMENT_CHAR = ';';
     
     //
     // Helper routines
@@ -96,7 +97,7 @@ class Assembler {
         instructionSpec    = new HashMap<String, Processor>();
         codeSections       = new LinkedList<Section>();
         patternInstruction = Pattern.compile("\\s*(?:(\\w+):)?\\s*(?:(\\w+)(?:\\s+(.*))?)?");
-        patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)", Pattern.CASE_INSENSITIVE);
+        patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)\\s*", Pattern.CASE_INSENSITIVE);
         // Instantiate the code emitter
         codeEmitter        = new AssemblerIREmitter();
         // Populate instruction processors 
@@ -121,6 +122,10 @@ class Assembler {
             try { line = reader.readLine(); }
             // RuntimeException at EOF
             catch(RuntimeException e) { break; }
+            
+            // Remove any comments
+            int comment = line.indexOf(COMMENT_CHAR);
+            if(comment >= 0) line = line.substring(0, comment);
                        
             // Try parsing it as a section
             m = patternSection.matcher(line);
