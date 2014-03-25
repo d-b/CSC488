@@ -130,7 +130,7 @@ class Assembler {
         short baseAddress = 0;
         for(Section section : codeSections) {
             section.setAddress(baseAddress);
-            baseAddress = section.getSize();
+            baseAddress += section.getSize();
         }
         
         // Pass 3: resolve label operands
@@ -223,11 +223,11 @@ class Assembler {
     }    
     
     Section enterSection(String name) {
-         Section sec = new Section(name);
-         codeCurrent = sec;
-         if(name == SECTION_CODE) codeSections.add(0, sec);
-         else codeSections.add(sec);
-         return sec;
+        Section sec = new Section(name);
+        codeCurrent = sec;
+        if(name.equals(SECTION_CODE)) codeSections.add(0, sec);
+        else codeSections.add(sec);
+        return sec;
     }
     
     void addLabel(String name) {
