@@ -39,33 +39,9 @@ import compiler488.runtime.Machine;
  */
 
 public class CodeGen
-{
+{   
     //
-    // Assembler
-    //
-    
-    Boolean assemblerStart() {
-        assemblerThread = new AssemblerThread();        
-        assemblerStream = new PrintStream(assemblerThread.getPipe());
-        assemblerThread.start();
-        return true;
-    }
-       
-    void assemblerClose() {
-        assemblerStream.close();
-    }
-    
-    int assemblerJoin() {
-        try {
-            assemblerThread.join();
-            return assemblerThread.getResult();
-        } catch (InterruptedException e) {
-            return -1;
-        }
-    }
-    
-    //
-    // CodGen life cycle
+    // Code generator life cycle
     //
 
     public void Initialize()
@@ -83,8 +59,7 @@ public class CodeGen
     public Boolean Finalize()
 	{
         // Finish assembling code
-        assemblerClose();
-        int result = assemblerJoin();
+        int result = assemblerEnd();
         if(result < 0) return false;
         // Set initial machine state
         Machine.setPC((short) 0);
@@ -93,7 +68,28 @@ public class CodeGen
         return true;
 	}
     
-    // Assembler 
+    //
+    // Assembler
+    //
+    
+    Boolean assemblerStart() {
+        assemblerThread = new AssemblerThread();        
+        assemblerStream = new PrintStream(assemblerThread.getPipe());
+        assemblerThread.start();
+        return true;
+    }
+
+    int assemblerEnd() {
+        try {
+            assemblerStream.close();
+            assemblerThread.join();
+            return assemblerThread.getResult();
+        } catch (InterruptedException e) {
+            return -1;
+        }
+    }    
+    
+    // Assembler internals
     PrintStream     assemblerStream;
     AssemblerThread assemblerThread;
 }
