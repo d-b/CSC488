@@ -549,11 +549,16 @@ public class Main {
         }
 
         try {
-            // INSERT CODE HERE TO DO CODE GENERATION
-            // e.g.
-            // programAST.doCodeGen() ;
-            // or
-            // codeGen.doIt( programAST );
+            System.out.println("Begin Code Generation");
+            CodeGen codegen = new CodeGen();
+            codegen.Initialize();
+            codegen.Generate();
+            if(codegen.Finalize())
+                System.out.println("End of Code Generation");
+            else {
+                System.out.println("Ended Code Generation with failures");
+                errorOccurred = true ;
+            }
         } catch(Exception e) {
             System.err.println("Exception during Code Generation");
             System.err.println(e.getClass().getName() + ": " + e.getMessage());

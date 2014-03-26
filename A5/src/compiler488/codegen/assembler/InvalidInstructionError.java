@@ -15,7 +15,7 @@ public class InvalidInstructionError extends Exception {
     
     // The error message 
     @Override
-    public String toString() {
+    public String getMessage() {
         return line + ": " + instruction + " ; " + message;
     }
     

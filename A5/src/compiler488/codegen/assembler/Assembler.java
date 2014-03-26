@@ -27,7 +27,7 @@ import compiler488.compiler.Main;
  * 
  * @author Daniel Bloemendal
  */
-class Assembler {
+public class Assembler {
     //
     // Configuration
     //
@@ -39,14 +39,14 @@ class Assembler {
     // Assemble from command line
     //
     
-    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException, FileNotFoundException, InvalidInstructionError {
+    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException, FileNotFoundException, InvalidInstructionError, LabelNotResolvedError {
         // Check arguments
         if(argv.length <= 0) { System.err.println("Usage: <filename>"); return; }
         
         // Start the machine
         Main.traceStream = System.out;
         Machine.powerOn();
-        
+
         // Assemble the file
         Assembler assembler = new Assembler();
         InputStream stream = new FileInputStream(argv[0]);
@@ -64,7 +64,7 @@ class Assembler {
     //
     
     // Instantiate an assembler
-    Assembler() {
+    public Assembler() {
         // Instantiate internals
         instructionMap     = new HashMap<String, Method>();
         instructionSpec    = new HashMap<String, Processor>();
@@ -81,7 +81,7 @@ class Assembler {
     }
    
     // Assemble an IR program
-    public Boolean Assemble(InputStream input) throws InvalidInstructionError {
+    public Boolean Assemble(InputStream input) throws InvalidInstructionError, LabelNotResolvedError {
         // Reset internal state
         codeSection = null;
         codeSectionList.clear();
@@ -91,7 +91,7 @@ class Assembler {
         codeEmitter.setEmitter(emitter);
         // Instantiate the text reader
         reader = new TextReader(input);
-                
+        
         // REGEX matcher
         Matcher m = null;
         
@@ -164,7 +164,7 @@ class Assembler {
     // Instruction parsing
     //
     
-    void processInstruction(Instruction instruction) {
+    void processInstruction(Instruction instruction) throws LabelNotResolvedError {
         // Get instruction method
         String name = instruction.getName().toUpperCase();
         Method m = instructionMap.get(name); 
