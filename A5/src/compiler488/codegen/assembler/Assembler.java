@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import compiler488.runtime.ExecutionException;
 import compiler488.runtime.Machine;
 import compiler488.runtime.TextReader;
+import compiler488.codegen.assembler.Operand.OperandType;
 import compiler488.codegen.assembler.ir.AssemblerIREmitter;
 import compiler488.codegen.assembler.ir.Emitter;
 import compiler488.compiler.Main;
@@ -38,7 +39,7 @@ class Assembler {
     // Assemble from command line
     //
     
-    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException, FileNotFoundException {
+    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException, FileNotFoundException, InvalidInstructionError {
         // Check arguments
         if(argv.length <= 0) { System.err.println("Usage: <filename>"); return; }
         
@@ -67,7 +68,7 @@ class Assembler {
         // Instantiate internals
         instructionMap     = new HashMap<String, Method>();
         instructionSpec    = new HashMap<String, Processor>();
-        codeSections       = new LinkedList<Section>();
+        codeSectionList    = new LinkedList<Section>();
         // Regular expressions
         patternInstruction = Pattern.compile("\\s*(?:(\\w+):)?\\s*(?:(\\w+)(?:\\s+(.*))?)?");
         patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)\\s*", Pattern.CASE_INSENSITIVE);
@@ -80,39 +81,41 @@ class Assembler {
     }
    
     // Assemble an IR program
-    public Boolean Assemble(InputStream input) {
+    public Boolean Assemble(InputStream input) throws InvalidInstructionError {
         // Reset internal state
+        codeSection = null;
+        codeSectionList.clear();
+        codeLine = 0;
+        codeInstruction = new String();        
         Emitter emitter = new Emitter();
-        codeCurrent = null;
-        codeSections.clear();
-        codeEmitter.setEmitter(emitter);        
+        codeEmitter.setEmitter(emitter);
         // Instantiate the text reader
         reader = new TextReader(input);
-        
+                
         // REGEX matcher
         Matcher m = null;
         
         // Pass 1: instantiate list of instructions
-        for(;;) {
-            String line; // Input line
-            try { line = reader.readLine(); }
+        for(codeLine = 1;; codeLine++) {
+            // Read single line from stream
+            try { codeInstruction = reader.readLine(); }
             // RuntimeException at EOF
             catch(RuntimeException e) { break; }
             
             // Remove any comments
-            int comment = line.indexOf(COMMENT_CHAR);
-            if(comment >= 0) line = line.substring(0, comment);
+            int comment = codeInstruction.indexOf(COMMENT_CHAR);
+            if(comment >= 0) codeInstruction = codeInstruction.substring(0, comment);
                        
             // Try parsing it as a section
-            m = patternSection.matcher(line);
+            m = patternSection.matcher(codeInstruction);
             if(m.matches()) { enterSection(m.group(1)); continue; }
             
             // Try parsing it as an instruction
-            m = patternInstruction.matcher(line);
+            m = patternInstruction.matcher(codeInstruction);
             if(m.matches()) {
                 // If there is no section bail out
                 if(currentSection() == null)
-                    {System.err.println("Instruction or label outside of a section!"); continue;}
+                    invalidInstruction("Instruction and/or label outside of a section!");
                 
                 // See if there is a label
                 if(m.group(1) != null) addLabel(m.group(1));
@@ -127,13 +130,13 @@ class Assembler {
         
         // Pass 2: layout sections
         short baseAddress = 0;
-        for(Section section : codeSections) {
+        for(Section section : codeSectionList) {
             section.setAddress(baseAddress);
             baseAddress += section.getSize();
         }
         
         // Pass 3: resolve label operands
-        for(Section section : codeSections)
+        for(Section section : codeSectionList)
             for(Instruction instr : section.getInstructions())
                 for(Operand op : instr.getOperands())
                     if(op instanceof LabelOperand) {
@@ -143,7 +146,7 @@ class Assembler {
                     }
         
         // Pass 4: generate machine code
-        for(Section section : codeSections)
+        for(Section section : codeSectionList)
             for(Instruction instr : section.getInstructions())
                 processInstruction(instr);
         
@@ -218,14 +221,14 @@ class Assembler {
     //
             
     Section currentSection() {
-        return codeCurrent; 
+        return codeSection; 
     }    
     
     Section enterSection(String name) {
         Section sec = new Section(name);
-        codeCurrent = sec;
-        if(name.equals(SECTION_CODE)) codeSections.add(0, sec);
-        else codeSections.add(sec);
+        codeSection = sec;
+        if(name.equals(SECTION_CODE)) codeSectionList.add(0, sec);
+        else codeSectionList.add(sec);
         return sec;
     }
     
@@ -234,41 +237,44 @@ class Assembler {
     }
     
     Short getLabel(String name) {
-        for(Section sec : codeSections) {
+        for(Section sec : codeSectionList) {
             Short addr = sec.getLabel(name);
             if(addr != null) return addr;
         } return null;
     }
     
-    void addInstruction(String name, List<Operand> operands) {
+    void invalidInstruction(String message) throws InvalidInstructionError {
+        throw new InvalidInstructionError(message, codeInstruction, codeLine);
+    }
+    
+    void addInstruction(String name, List<Operand> operands) throws InvalidInstructionError {
         // Get instruction specification
         name = name.toUpperCase();
         Processor s = instructionSpec.get(name);
-        if(s == null) { System.err.println("Instruction '" + name + "' not implemented!"); return; }
+        if(s == null) invalidInstruction("Instruction unknown!");
         
         // Check number of arguments
         if(operands.size() != s.operands().length)
-        	{System.err.print("Instruction '" + s.target() + "' should have " + s.operands().length + " operands, but has " + operands.size() + "! "); return;}
+            invalidInstruction(s.operands().length + " operands are required, but " + operands.size() + " were provided! "); 
         
         // Check argument types
         for(int i = 0; i < operands.size(); i++)
             if(operands.get(i).getType() != s.operands()[i])
-                {System.err.println("Invalid argument type for instruction '" + s.target() + "'"); return;}
+                invalidInstruction("Operand " + (i + 1) + " must be "
+                        + (s.operands()[i].equals(OperandType.OPERAND_INTEGER) ?
+                        "an integer literal or label!" : "a string!"));
         
         // Instantiate and add the instruction
         currentSection().addInstruction(new Instruction(name, operands, s.size()));
-    }    
+    }
    
     //
     // Members
     //
     
     // Instruction maps
-    private Map<String, Method> instructionMap;
+    private Map<String, Method>    instructionMap;
     private Map<String, Processor> instructionSpec;
-    
-    // Input stream reader
-    private TextReader reader;
     
     // Regular expression patterns
     private Pattern patternInstruction;   
@@ -276,12 +282,15 @@ class Assembler {
     private Pattern patternOpString;
     private Pattern patternOpLabel;
     
-    // Instantiated sections & instructions
-    private List<Section> codeSections;
-    private Section codeCurrent;
+    // Input stream reader
+    private TextReader reader;    
     
-    // Machine code emitter
-    AssemblerIREmitter codeEmitter;
+    // Assembler state
+    private Section       codeSection;
+    private List<Section> codeSectionList;
+    private String        codeInstruction;
+    private int           codeLine;
+    AssemblerIREmitter    codeEmitter;
 }
 
 //
