@@ -171,9 +171,15 @@ public class Assembler {
         
         // Invoke the processor on  instruction
         try { m.invoke(getProcessorManager(), instruction); }
-        catch (IllegalAccessException e)    { e.printStackTrace(); }
-        catch (IllegalArgumentException e)  { e.printStackTrace(); }
-        catch (InvocationTargetException e) { e.printStackTrace(); }
+        catch (IllegalAccessException e)    { throw new RuntimeException(e); }
+        catch (IllegalArgumentException e)  { throw new RuntimeException(e); }
+        catch (InvocationTargetException e) {
+            // If it is a label error
+            if(e.getCause() instanceof LabelNotResolvedError)
+                throw (LabelNotResolvedError) e.getCause();
+            // Otherwise it was something much more serious
+            else throw new RuntimeException(e);
+        }
     }
     
     void populateProcessors() {
