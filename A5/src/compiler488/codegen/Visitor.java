@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import compiler488.ast.AST;
+import compiler488.ast.ASTList;
 
 /**
  * Helper for traversing the AST
@@ -39,15 +40,28 @@ public class Visitor {
         populateMappings();
     }
 
-    /*
-     * Manual visitation of AST nodes
+    /**
+     * Manual visitation of an AST node
+     * 
+     * @param node the AST node to visit
      */
-    public void visit(AST root) {
-        invokeProcessor(root, processorsMap);
+    public void visit(AST node) {
+        invokeProcessor(node, processorsMap);
     }
 
-    /*
-     * Automatically traverse entire AST
+    /**
+     * Manual visitation of all AST nodes in a list
+     * 
+     * @param list the list of AST nodes to visit
+     */
+    public void visit(List<AST> list) {
+        for(AST node : list) visit(node);
+    }  
+
+    /**
+     * Traverse an AST starting from a specified root node
+     * 
+     * @param root the root of the AST
      */
     public void traverse(AST root) {
         // Add the initial element to the stack
@@ -89,6 +103,11 @@ public class Visitor {
         visitorExcluded.clear();
     }
 
+    /**
+     * Exclude an AST node from automatic traversal 
+     *
+     * @param node the node to exclude
+     */
     public void exclude(AST node) {
         visitorExcluded.add(node);
     }
@@ -96,7 +115,16 @@ public class Visitor {
     public int errors() {
         return visitorErrors;
     }
-
+    
+    //
+    // Default manual visitors
+    //
+    
+    @Processor(target="ASTList")
+    void processAstList(ASTList<? extends AST> list) {
+        for(AST node : list.getList()) visit(node);
+    }
+    
     //
     // Processor management
     //

@@ -54,17 +54,41 @@ public class CodeGen extends Visitor
     @Processor(target="Scope")
     void processScope(Scope scope) {
         // Skip minor scopes
-        if(!(scope.getParent() instanceof RoutineDecl) &&
-           !(scope instanceof Program)) return;
+        boolean isRoutine = (scope.getParent() instanceof RoutineDecl);
+        boolean isProgram = (scope instanceof Program); 
+        if(!isRoutine && !isProgram) return;
+        
+        // The routine
+        RoutineDecl routine = null;
+        
+        // Emit comment for start of scope
+        if(isRoutine) {
+            routine = (RoutineDecl) scope.getParent();
+            emit("; Start of " + routine.getName());
+        } else emit("; Start of program");
 
         // Generate code for scope
         enterFrame(scope);                                     // Enter a new stack frame
+        labelFrame(false);                                     // Starting label
         emit("SAVECTX", 0);                                    // Scope prolog
-        visit(scope.getStatements());                          // Visit all statements
+        visit(scope.getStatements());                          // Visit statements in scope
         emit("RESTORECTX", currentFrame().getLevel(),          // Scope epilog
                            currentFrame().getArgumentsSize()); // ...
         if(!currentFrame().isRoutine()) emit("HALT");          // Program epilog
+        labelFrame(true);                                      // Ending label
         exitFrame();                                           // Exit the stack frame
+        
+        // Emit comment for end of scope
+        if(isRoutine) { emit("; End of " + routine.getName()); }
+        else emit("; End of program");
+        
+        // Generate code for declared routins
+        visit(scope.getDeclarations());        
+    }
+    
+    @Processor(target="RoutineDecl")
+    void processRoutineDecl(RoutineDecl routine) {
+        visit(routine.getBody());
     }
 
     //
@@ -115,6 +139,14 @@ public class CodeGen extends Visitor
     short currentLexicalLevel() {
         return (short) codegenFrames.size();
     }
+    
+    void labelFrame(boolean end) {
+        RoutineDecl routine = currentFrame().getRoutine();
+        if(routine == null) return;
+        String l = "_" + routine.getName() + "_LL" + currentLexicalLevel();
+        if(end) l += "_END";
+        label(l);
+    }
 
     // Code generator internals
     boolean      codegenDump;
@@ -148,6 +180,10 @@ public class CodeGen extends Visitor
 
     void section(String name) {
         assemblerPrintln("SECTION " + name);
+    }
+    
+    void label(String name) {
+        assemblerPrintln(name + ":");
     }
 
     void put(String string) {
