@@ -11,6 +11,7 @@ import os
 import re
 import sys
 import subprocess
+import tempfile
 
 # Test directories
 PATHS = {'passing': 'testing/pass',
@@ -27,6 +28,8 @@ def test(path, failing = False):
     patSuccess    = re.compile(r'^End of Semantic Analysis$')
     patFailure    = re.compile(r'^Ended Semantic Analysis with failures$')
     patAction     = re.compile(r'(S\d+)')
+    patOutputLine = re.compile(r'%@output=(.*)')
+    patStartOutput = re.compile(r'Start Execution')
 
     # Parse error type
     action = None
@@ -35,6 +38,9 @@ def test(path, failing = False):
 
     # Lines where errors are expected
     expected = []
+    
+    # Lines of correct output:
+    correctOutput = []
 
     # If failing parse file for lines
     if failing:
@@ -47,16 +53,36 @@ def test(path, failing = False):
                 match = patMultiLine.match(l)
                 if match: expected += [int(x) for x in match.groups()[0].split(',')]
         testfile.close()
-
+    else: # if passing, parse file for correct output lines
+        testfile = open(path)
+        for x in testfile:
+            match = patOutputLine.search(x)
+            if match: 
+                correctOutput.append(match.groups()[0])
     # Execute the test
-    output = subprocess.check_output(['java', '-jar', COMPILER, '-X', path], stderr=subprocess.STDOUT)
+    output = subprocess.check_output(['java', '-jar', COMPILER, path], stderr=subprocess.STDOUT)
     lines  = output.decode('utf8').replace('\r', '').split('\n')
-
+    
     # Successful case
     if not failing:
+        success = False
         for x in lines:
-            if patSuccess.match(x): return True
-        return False
+            if patSuccess.match(x): success = True
+        # check output if specified
+        if correctOutput != []:
+            i = 0
+            comparingOutput = False
+            for x in lines:
+                if comparingOutput == True:
+                    if i >= 0 and i < len(correctOutput) and x != correctOutput[i]:
+                        print("\nWrong output. Expected: ",correctOutput[i])
+                        print("But instead got: ",x)
+                        success = False
+                    i = i + 1
+                if patStartOutput.match(x):
+                    comparingOutput = True 
+                    i = -1
+        return success
     # Failing case
     else:
         errors  = {}

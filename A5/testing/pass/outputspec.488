@@ -1,0 +1,6 @@
+% Tests the output in a simple proof of concept
+{
+    put "Coca-Cola", newline
+    %@output=Coca-Cola
+}
+
