@@ -113,9 +113,9 @@ public class Frame extends Visitor {
         // Add arguments
         addArguments(root);
         // Traverse the AST
-        visit(root);
+        traverse(root);
     }
-    
+        
     public Short getOffset(Scope scope, String identifier) {
         // Try the scope first
         MinorFrame frame = frameMap.get(scope);
@@ -124,7 +124,7 @@ public class Frame extends Visitor {
         if(offset != null) return offset;
         
         // Otherwise try the arguments
-        if(frameRoutine == null) return null;
+        if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
         Integer arg = frameArgs.get(identifier);
         if(arg == null) return null;
         offset = (short) (int) arg;
@@ -133,12 +133,12 @@ public class Frame extends Visitor {
     }
     
     public Short getOffsetReturn(Scope scope) {
-        if(frameRoutine == null) return null;
+        if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
         return (short)(frameArgs.size() - 2); // ON = -N - 2 return address
     }
     
     public Short getOffsetResult(Scope scope) {
-        if(frameRoutine == null) return null;
+        if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
         return (short)(frameArgs.size() - 3); // ON = -N - 3 return value (always present, but ignored if procedure)
     }
     
@@ -149,6 +149,14 @@ public class Frame extends Visitor {
     public short getSize() {
         return (frameRoot != null) ? frameRoot.getSize() : 0; 
     }
+    
+    public short getArgumentsSize() {
+        return (short) frameArgs.size();
+    }    
+        
+    public boolean isRoutine() {
+        return frameRoutine != null;
+    }    
     
     // Internal members
     private RoutineDecl          frameRoutine;

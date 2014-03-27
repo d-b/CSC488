@@ -29,6 +29,7 @@ public class Visitor {
     
     public Visitor() {
         // Instantiate internals
+        processorsMap     = new HashMap<String, Method>();
         preProcessorsMap  = new HashMap<String, Method>();
         postProcessorsMap = new HashMap<String, Method>();
         visitorGrey       = new HashSet<AST>();
@@ -38,7 +39,17 @@ public class Visitor {
         populateMappings();
     }
     
+    /*
+     * Manual visitation of AST nodes
+     */
     public void visit(AST root) {
+        invokeProcessor(root, processorsMap);
+    }
+    
+    /*
+     * Automatically traverse entire AST
+     */
+    public void traverse(AST root) {
         // Add the initial element to the stack
         visitorStack.add(root);
 
@@ -98,9 +109,11 @@ public class Visitor {
         while(!classes.isEmpty()) {  
             Class<?> cls = classes.pop();
             for(Method method : cls.getDeclaredMethods()) {
-                PreProcessor  preProcInfo  = method.getAnnotation(PreProcessor.class);
+                Processor procInfo = method.getAnnotation(Processor.class);
+                PreProcessor preProcInfo = method.getAnnotation(PreProcessor.class);
                 PostProcessor postProcInfo = method.getAnnotation(PostProcessor.class);
-                if(preProcInfo  != null) preProcessorsMap.put(preProcInfo.target(), method);
+                if(procInfo != null) processorsMap.put(procInfo.target(), method);
+                if(preProcInfo != null) preProcessorsMap.put(preProcInfo.target(), method);
                 if(postProcInfo != null) postProcessorsMap.put(postProcInfo.target(), method);
             }
         }
@@ -139,6 +152,7 @@ public class Visitor {
     }    
     
     // Processor maps
+    private Map<String, Method> processorsMap;
     private Map<String, Method> preProcessorsMap;
     private Map<String, Method> postProcessorsMap;
     
@@ -162,5 +176,11 @@ public class Visitor {
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @interface PostProcessor {
+ String target();
+}
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Processor {
  String target();
 }
