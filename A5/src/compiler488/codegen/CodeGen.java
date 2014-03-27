@@ -72,13 +72,13 @@ public class CodeGen extends Visitor
 
         // Generate code for scope
         enterFrame(scope);                                     // Enter a new stack frame
-        label(getLabelRoutine(routine));                       // Starting label
+        if(isRoutine) label(getLabelRoutine(routine));         // Starting label
         emit("SAVECTX", 0);                                    // Scope prolog
         visit(scope.getStatements());                          // Visit statements in scope
         emit("RESTORECTX", currentFrame().getLevel(),          // Scope epilog
                            currentFrame().getArgumentsSize()); // ...
         if(!currentFrame().isRoutine()) emit("HALT");          // Program epilog
-        label(getLabelRoutine(routine, true));                 // Ending label
+        if(isRoutine) label(getLabelRoutine(routine, true));   // Ending label
         exitFrame();                                           // Exit the stack frame
         
         // Emit comment for end of scope
