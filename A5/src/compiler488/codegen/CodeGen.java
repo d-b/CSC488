@@ -74,11 +74,13 @@ public class CodeGen extends Visitor
         enterFrame(scope);                                     // Enter a new stack frame
         if(isRoutine) label(getLabelRoutine(routine));         // Starting label
         emit("SAVECTX", 0);                                    // Scope prolog
+        reserve(currentFrame().getSize());                     // Reserve memory for locals
         visit(scope.getStatements());                          // Visit statements in scope
+        if(isRoutine) label(getLabelRoutine(routine, true));   // Ending label
+        free(currentFrame().getSize());                        // Free locals memory
         emit("RESTORECTX", currentFrame().getLevel(),          // Scope epilog
                            currentFrame().getArgumentsSize()); // ...
         if(!currentFrame().isRoutine()) emit("HALT");          // Program epilog
-        if(isRoutine) label(getLabelRoutine(routine, true));   // Ending label
         exitFrame();                                           // Exit the stack frame
         
         // Emit comment for end of scope
@@ -220,6 +222,17 @@ public class CodeGen extends Visitor
         for(Object op : operands)
             command += " " + op.toString();
         assemblerPrintln(command);
+    }
+    
+    void reserve(short words) {
+        if(words == 0) return;
+        emit("RESERVE", words);
+    }
+    
+    void free(short words) {
+        if(words == 0) return;
+        emit("PUSH", words);
+        emit("POPN");
     }
 
     // Assembler internals
