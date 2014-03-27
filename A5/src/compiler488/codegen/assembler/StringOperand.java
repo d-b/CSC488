@@ -1,8 +1,8 @@
 package compiler488.codegen.assembler;
 
 /**
- * String operand for an IR assembly instruction 
- * 
+ * String operand for an IR assembly instruction
+ *
  * @author Daniel Bloemendal
  */
 public class StringOperand implements Operand {

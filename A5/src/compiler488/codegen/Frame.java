@@ -156,7 +156,7 @@ public class Frame extends Visitor {
     public short getArgumentsSize() {
         return (short) frameArgs.size();
     }
-    
+
     public RoutineDecl getRoutine() {
         return frameRoutine;
     }

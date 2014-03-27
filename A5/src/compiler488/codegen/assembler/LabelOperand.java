@@ -2,7 +2,7 @@ package compiler488.codegen.assembler;
 
 /**
  * Label operand for an IR assembly instruction
- * 
+ *
  * @author Daniel Bloemendal
  */
 public class LabelOperand extends IntegerOperand {

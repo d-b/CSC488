@@ -72,7 +72,7 @@ public class Assembler {
         // Regular expressions
         patternInstruction = Pattern.compile("\\s*(?:(\\w+):)?\\s*(?:(\\w+)(?:\\s+(.*))?)?");
         patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)\\s*", Pattern.CASE_INSENSITIVE);
-        patternOpBoolean   = Pattern.compile("\\$true|\\$false", Pattern.CASE_INSENSITIVE)
+        patternOpBoolean   = Pattern.compile("\\$true|\\$false", Pattern.CASE_INSENSITIVE);
         patternOpString    = Pattern.compile("\"[^\"]*\"");
         patternOpLabel     = Pattern.compile("[a-zA-Z_]\\w*");
         // Instantiate the code emitter
@@ -212,12 +212,16 @@ public class Assembler {
         List<Operand> result = new LinkedList<Operand>();
         if(operands == null) return result;
         for(String part : operands.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
-            // If it is a string
-            if(patternOpString.matcher(part).matches())
-                result.add(new StringOperand(part.substring(1, part.length() - 1)));
             // If it is a label
-            else if(patternOpLabel.matcher(part).matches())
+            if(patternOpLabel.matcher(part).matches())
                 result.add(new LabelOperand(part));
+            // If it is a string
+            else if(patternOpString.matcher(part).matches())
+                result.add(new StringOperand(part.substring(1, part.length() - 1)));
+            // If it is a boolean
+            else if(patternOpBoolean.matcher(part).matches())
+                result.add(new IntegerOperand(part.toLowerCase().equals("$true")
+                        ? Machine.MACHINE_TRUE : Machine.MACHINE_FALSE));
             // If it is a number
             else try { result.add(new IntegerOperand((short)Integer.parseInt(part))); }
             catch(NumberFormatException e) {}

@@ -10,8 +10,8 @@ import compiler488.ast.AST;
 import compiler488.ast.Printable;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.expn.ArithExpn;
+import compiler488.ast.expn.BoolConstExpn;
 import compiler488.ast.expn.CompareExpn;
-import compiler488.ast.expn.ConditionalExpn;
 import compiler488.ast.expn.EqualsExpn;
 import compiler488.ast.expn.Expn;
 import compiler488.ast.expn.IntConstExpn;
@@ -70,16 +70,16 @@ public class CodeGen extends Visitor
 
     @Processor(target="Scope")
     void processScope(Scope scope) {
-    	// Set the current scope
-    	codegenScope = scope;
+        // Set the current scope
+        codegenScope = scope;
         // Skip minor scopes
         boolean isRoutine = (scope.getParent() instanceof RoutineDecl);
-        boolean isProgram = (scope instanceof Program); 
+        boolean isProgram = (scope instanceof Program);
         if(!isRoutine && !isProgram) return;
-        
+
         // The routine
         RoutineDecl routine = null;
-        
+
         // Emit comment for start of scope
         if(isRoutine) {
             routine = (RoutineDecl) scope.getParent();
@@ -98,107 +98,106 @@ public class CodeGen extends Visitor
                            currentFrame().getArgumentsSize()); // ...
         if(!currentFrame().isRoutine()) emit("HALT");          // Program epilog
         exitFrame();                                           // Exit the stack frame
-        
+
         // Emit comment for end of scope
         if(isRoutine) { comment("End of " + routine.getName()); }
         else comment("End of program");
-        
+
         // Generate code for declared routines
-        visit(scope.getDeclarations());        
+        visit(scope.getDeclarations());
     }
-    
+
     @Processor(target="RoutineDecl")
     void processRoutineDecl(RoutineDecl routine) {
         visit(routine.getBody());
     }
-    
+
     @Processor(target="ArithExpn")
     void processArithExpn(ArithExpn arithExpn) {
-    	visit(arithExpn.getLeft());  // Evaluate left side
-    	visit(arithExpn.getRight()); // Evaluate right side
-    	switch(arithExpn.getOpSymbol().charAt(0)) {
-    	case '+': emit("ADD"); break;
-    	case '-': emit("SUB"); break;
-    	case '*': emit("MUL"); break;
-    	case '/': emit("DIV"); break;
-    	}
+        visit(arithExpn.getLeft());  // Evaluate left side
+        visit(arithExpn.getRight()); // Evaluate right side
+        switch(arithExpn.getOpSymbol().charAt(0)) {
+        case '+': emit("ADD"); break;
+        case '-': emit("SUB"); break;
+        case '*': emit("MUL"); break;
+        case '/': emit("DIV"); break;
+        }
     }
-    
+
     @Processor(target="CompareExpn")
     void processCompareExpn(CompareExpn compareExpn) {
-    	visit(compareExpn.getLeft());  // Evaluate left side
-    	visit(compareExpn.getRight()); // Evaluate right side
-    	if(compareExpn.getOpSymbol().equals(CompareExpn.OP_LESS)){
-    		emit("LT");
-    	}
-    	else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_LESS_EQUAL)) {
-    		emit("SWAP"); emit ("LT"); emit("NOT");
-    	}
-    	else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_GREATER)) {
-    		emit("SWAP"); emit("LT");
-    	}
-    	else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_GREATER_EQUAL)) {
-    		emit("LT"); emit("NOT");
-    	}
+        visit(compareExpn.getLeft());  // Evaluate left side
+        visit(compareExpn.getRight()); // Evaluate right side
+        if(compareExpn.getOpSymbol().equals(CompareExpn.OP_LESS))
+            { emit("LT"); }
+        else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_LESS_EQUAL))
+            { emit("SWAP"); emit ("LT"); emit("NOT"); }
+        else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_GREATER))
+            { emit("SWAP"); emit("LT"); }
+        else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_GREATER_EQUAL))
+            { emit("LT"); emit("NOT"); }
     }
-    
+
     @Processor(target="EqualsExpn")
     void processEqualsExpn(EqualsExpn equalsExpn) {
-    	visit(equalsExpn.getLeft());  // Evaluate left side
-    	visit(equalsExpn.getRight()); // Evaluate right side
-    	if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_EQUAL)) {
-    		emit("EQ");
-    	}
-    	else if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_NOT_EQUAL)) {
-    		emit("EQ"); emit("NOT");
-    	}
+        visit(equalsExpn.getLeft());  // Evaluate left side
+        visit(equalsExpn.getRight()); // Evaluate right side
+        if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_EQUAL))
+            { emit("EQ"); }
+        else if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_NOT_EQUAL))
+            { emit("EQ"); emit("NOT"); }
     }
-    
+
     @Processor(target="AssignStmt")
     void processAssignStmt(AssignStmt assignStmt) {
-    	short leftOffset = currentFrame().getOffset(currentScope(), assignStmt.getLval().getIdent().getId());
-    	emit("ADDR", currentFrame().getLevel(), leftOffset); // Emit address of target variable
-    	visit(assignStmt.getRval()); 						 // Evaluate the right side expression
-    	emit("STORE"); 				 						 // Store the value of the expression in the left side variable
+        short leftOffset = currentFrame().getOffset(currentScope(), assignStmt.getLval().getIdent().getId());
+        emit("ADDR", currentFrame().getLevel(), leftOffset); // Emit address of target variable
+        visit(assignStmt.getRval());                         // Evaluate the right side expression
+        emit("STORE");                                       // Store the value of the expression in the left side variable
     }
-    
+
     @Processor(target="IntConstExpn")
     void processIntConstExpn(IntConstExpn intConstExpn) {
-    	emit("PUSH", intConstExpn.getValue()); // Push the constant literal
+        emit("PUSH", intConstExpn.getValue()); // Push the constant literal
     }
- 
+
     @Processor(target="BoolConstExpn")
     void processIntConstExpn(BoolConstExpn boolConstExpn) {
-    	emit("PUSH", boolConstExpn.getValue()); // Push the constant literal
+        emit("PUSH", boolConstExpn.getValue()); // Push the constant literal
     }
-    
+
     @Processor(target="PutStmt")
     void processPutStmt(PutStmt putStmt) {
-    	for(Printable p : putStmt.getOutputs().getList())
-    		if(p instanceof Expn)
-    			{ visit((Expn) p); emit("PRINTI"); } // Expression printable
-    		else if(p instanceof TextConstExpn)
-    			put(((TextConstExpn) p).getValue()); // String printable
-    		else if(p instanceof NewlineConstExpn)
-    			put("\n");							 // Newline printable
+        for(Printable p : putStmt.getOutputs().getList())
+            if(p instanceof TextConstExpn)
+                put(((TextConstExpn) p).getValue()); // String printable
+            else if(p instanceof NewlineConstExpn)
+                put("\n");                           // Newline printable
+            else if(p instanceof Expn)
+                { visit((Expn) p); emit("PRINTI"); } // Expression printable
+            else throw new RuntimeException("unknown printable");
     }
-    
+
     @Processor(target="IfStmt")
     void processIfStmt(IfStmt ifStmt) {
-    	String _else = getLabelGenerated();
-    	String _end = getLabelGenerated();
-    	visit(ifStmt.getCondition());
-    	emit("PUSH", _else);
-    	emit("BF");
-    	visit(ifStmt.getWhenTrue());
-    	emit("JMP", _end);
-    	label(_else);
-    	if(ifStmt.getWhenFalse() != null)
-    		visit(ifStmt.getWhenFalse());
-    	label(_end);    	
+        // Generate unique labels for branch targets
+        String _else = getLabelGenerated();
+        String _end = getLabelGenerated();
+        // Evaluate condition of the if statement
+        visit(ifStmt.getCondition());
+        // Branch to else statement if false
+        emit("PUSH", _else);
+        emit("BF");
+        // Execute ``when true'' statements
+        visit(ifStmt.getWhenTrue());
+        // Jump to the end of the if statement
+        emit("JMP", _end);
+        label(_else);
+        // If a ``when false'' clause exists, execute the statements
+        if(ifStmt.getWhenFalse() != null)
+            visit(ifStmt.getWhenFalse());
+        label(_end);
     }
-    
-    //@Processor(target=)
 
     //
     // Code generator life cycle
@@ -229,26 +228,26 @@ public class CodeGen extends Visitor
         Machine.setMLP((short) (Machine.memorySize - 1));
         return true;
     }
-    
+
     //
     // Labels
     //
-    
+
     String getLabelGenerated() {
         return "_L" + codegenLabels++;
     }
-    
+
     String getLabelRoutine(RoutineDecl routine) {
         return getLabelRoutine(routine, false);
     }
-    
+
     String getLabelRoutine(RoutineDecl routine, boolean end) {
         Frame frame = codegenRoutines.get(routine);
         if(frame == null) return null;
         String label = routine.getName() + "_LL" + frame.getLevel();
         if(end) label += "_END";
         return label;
-    }    
+    }
 
     //
     // Helpers
@@ -271,13 +270,13 @@ public class CodeGen extends Visitor
     short currentLexicalLevel() {
         return (short) codegenFrames.size();
     }
-    
+
     Scope currentScope() {
-    	return codegenScope;
+        return codegenScope;
     }
-    
+
     // Code generator internals
-    Scope		    codegenScope;
+    Scope           codegenScope;
     Deque<Frame>    codegenFrames;
     Map<AST, Frame> codegenRoutines;
     int             codegenLabels;
@@ -312,11 +311,11 @@ public class CodeGen extends Visitor
     void comment(String comment) {
         assemblerPrintln("; " + comment);
     }
-    
+
     void section(String name) {
         assemblerPrintln("SECTION " + name);
     }
-    
+
     void label(String name) {
         assemblerPrintln(name + ":");
     }
@@ -332,16 +331,17 @@ public class CodeGen extends Visitor
 
     void emit(String instruction, Object... operands) {
         String command = instruction;
-        for(Object op : operands)
-            command += " " + op.toString();
-        assemblerPrintln(command);
+        for(Object op : operands) {
+            if(!(op instanceof Boolean)) command += " " + op.toString();
+            else command += " " + (((Boolean) op) ? "$true" : "$false");
+        } assemblerPrintln(command);
     }
-    
+
     void reserve(short words) {
         if(words == 0) return;
         emit("RESERVE", words);
     }
-    
+
     void free(short words) {
         if(words == 0) return;
         emit("PUSH", words);

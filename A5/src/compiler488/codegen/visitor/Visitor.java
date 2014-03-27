@@ -38,7 +38,7 @@ public class Visitor {
 
     /**
      * Manual visitation of an AST node
-     * 
+     *
      * @param node the AST node to visit
      */
     public void visit(AST node) {
@@ -47,16 +47,16 @@ public class Visitor {
 
     /**
      * Manual visitation of all AST nodes in a list
-     * 
+     *
      * @param list the list of AST nodes to visit
      */
     public void visit(List<AST> list) {
         for(AST node : list) visit(node);
-    }  
+    }
 
     /**
      * Traverse an AST starting from a specified root node
-     * 
+     *
      * @param root the root of the AST
      */
     public void traverse(AST root) {
@@ -100,7 +100,7 @@ public class Visitor {
     }
 
     /**
-     * Exclude an AST node from automatic traversal 
+     * Exclude an AST node from automatic traversal
      *
      * @param node the node to exclude
      */
@@ -111,16 +111,16 @@ public class Visitor {
     public int errors() {
         return visitorErrors;
     }
-    
+
     //
     // Default manual visitors
     //
-    
+
     @Processor(target="ASTList")
     void processAstList(ASTList<? extends AST> list) {
         for(AST node : list.getList()) visit(node);
     }
-    
+
     //
     // Processor management
     //
