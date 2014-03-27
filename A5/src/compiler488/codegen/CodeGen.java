@@ -2,8 +2,11 @@ package compiler488.codegen;
 
 import java.io.*;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
+import compiler488.ast.AST;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
@@ -69,20 +72,20 @@ public class CodeGen extends Visitor
 
         // Generate code for scope
         enterFrame(scope);                                     // Enter a new stack frame
-        labelFrame(false);                                     // Starting label
+        label(getLabelRoutine(routine));                       // Starting label
         emit("SAVECTX", 0);                                    // Scope prolog
         visit(scope.getStatements());                          // Visit statements in scope
         emit("RESTORECTX", currentFrame().getLevel(),          // Scope epilog
                            currentFrame().getArgumentsSize()); // ...
         if(!currentFrame().isRoutine()) emit("HALT");          // Program epilog
-        labelFrame(true);                                      // Ending label
+        label(getLabelRoutine(routine, true));                 // Ending label
         exitFrame();                                           // Exit the stack frame
         
         // Emit comment for end of scope
         if(isRoutine) { emit("; End of " + routine.getName()); }
         else emit("; End of program");
         
-        // Generate code for declared routins
+        // Generate code for declared routines
         visit(scope.getDeclarations());        
     }
     
@@ -97,8 +100,10 @@ public class CodeGen extends Visitor
 
     public void Initialize() {
         // Instantiate internals
-        codegenDump = Main.dumpCode;
         codegenFrames = new LinkedList<Frame>();
+        codegenRoutines = new HashMap<AST, Frame>();
+        codegenLabels = 0;
+        codegenDump = Main.dumpCode;
         // Start the assembler
         assemblerStart();
     }
@@ -118,6 +123,26 @@ public class CodeGen extends Visitor
         Machine.setMLP((short) (Machine.memorySize - 1));
         return true;
     }
+    
+    //
+    // Labels
+    //
+    
+    String getLabelGenerated() {
+        return "_L" + codegenLabels++;
+    }
+    
+    String getLabelRoutine(RoutineDecl routine) {
+        return getLabelRoutine(routine, false);
+    }
+    
+    String getLabelRoutine(RoutineDecl routine, boolean end) {
+        Frame frame = codegenRoutines.get(routine);
+        if(frame == null) return null;
+        String label = routine.getName() + "_LL" + frame.getLevel();
+        if(end) label += "_END";
+        return label;
+    }    
 
     //
     // Helpers
@@ -125,6 +150,7 @@ public class CodeGen extends Visitor
 
     void enterFrame(Scope scope) {
         Frame frame = new Frame(scope, currentLexicalLevel());
+        if(frame.isRoutine()) codegenRoutines.put(frame.getRoutine(), frame);
         codegenFrames.push(frame);
     }
 
@@ -140,17 +166,11 @@ public class CodeGen extends Visitor
         return (short) codegenFrames.size();
     }
     
-    void labelFrame(boolean end) {
-        RoutineDecl routine = currentFrame().getRoutine();
-        if(routine == null) return;
-        String l = "_" + routine.getName() + "_LL" + currentLexicalLevel();
-        if(end) l += "_END";
-        label(l);
-    }
-
     // Code generator internals
-    boolean      codegenDump;
-    Deque<Frame> codegenFrames;
+    Deque<Frame>    codegenFrames;
+    Map<AST, Frame> codegenRoutines;
+    int             codegenLabels;
+    boolean         codegenDump;
 
     //
     // Assembler
