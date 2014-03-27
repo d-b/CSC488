@@ -67,8 +67,8 @@ public class CodeGen extends Visitor
         // Emit comment for start of scope
         if(isRoutine) {
             routine = (RoutineDecl) scope.getParent();
-            emit("; Start of " + routine.getName());
-        } else emit("; Start of program");
+            comment("Start of " + routine.getName());
+        } else comment("Start of program");
 
         // Generate code for scope
         enterFrame(scope);                                     // Enter a new stack frame
@@ -84,8 +84,8 @@ public class CodeGen extends Visitor
         exitFrame();                                           // Exit the stack frame
         
         // Emit comment for end of scope
-        if(isRoutine) { emit("; End of " + routine.getName()); }
-        else emit("; End of program");
+        if(isRoutine) { comment("End of " + routine.getName()); }
+        else comment("End of program");
         
         // Generate code for declared routines
         visit(scope.getDeclarations());        
@@ -200,6 +200,10 @@ public class CodeGen extends Visitor
         }
     }
 
+    void comment(String comment) {
+        assemblerPrintln("; " + comment);
+    }
+    
     void section(String name) {
         assemblerPrintln("SECTION " + name);
     }
