@@ -15,9 +15,9 @@ import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.Scope;
-import compiler488.codegen.visitor.PostProcessor;
 import compiler488.codegen.visitor.Visitor;
 import compiler488.codegen.visitor.PreProcessor;
+import compiler488.codegen.visitor.PostProcessor;
 
 /**
  * Stack frame for major scopes

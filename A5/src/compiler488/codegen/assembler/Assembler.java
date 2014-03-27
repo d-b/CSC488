@@ -293,9 +293,9 @@ public class Assembler {
     private TextReader reader;
 
     // Assembler state
-    private Section       codeSection;
-    private List<Section> codeSectionList;
-    private String        codeInstruction;
-    private int           codeLine;
-    AssemblerIREmitter    codeEmitter;
+    private Section            codeSection;
+    private List<Section>      codeSectionList;
+    private String             codeInstruction;
+    private int                codeLine;
+    private AssemblerIREmitter codeEmitter;
 }
