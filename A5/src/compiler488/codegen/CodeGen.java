@@ -11,11 +11,14 @@ import compiler488.ast.Printable;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.expn.ArithExpn;
 import compiler488.ast.expn.BoolConstExpn;
+import compiler488.ast.expn.BoolExpn;
 import compiler488.ast.expn.CompareExpn;
+import compiler488.ast.expn.ConditionalExpn;
 import compiler488.ast.expn.EqualsExpn;
 import compiler488.ast.expn.Expn;
 import compiler488.ast.expn.IntConstExpn;
 import compiler488.ast.expn.NewlineConstExpn;
+import compiler488.ast.expn.NotExpn;
 import compiler488.ast.expn.TextConstExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.IfStmt;
@@ -28,44 +31,15 @@ import compiler488.codegen.visitor.Visitor;
 import compiler488.codegen.visitor.Processor;
 import compiler488.codegen.Frame;
 
-/**      CodeGenerator.java
- *<pre>
- *  Code Generation Conventions
+/**
+ * Code generator for compiler 488
  *
- *  To simplify the course project, this code generator is
- *  designed to compile directly to pseudo machine memory
- *  which is available as the private array memory[]
- *
- *  It is assumed that the code generator places instructions
- *  in memory in locations
- *
- *      memory[ 0 .. startMSP - 1 ]
- *
- *  The code generator may also place instructions and/or
- *  constants in high memory at locations (though this may
- *  not be necessary)
- *      memory[ startMLP .. Machine.memorySize - 1 ]
- *
- *  During program exection the memory area
- *      memory[ startMSP .. startMLP - 1 ]
- *  is used as a dynamic stack for storing activation records
- *  and temporaries used during expression evaluation.
- *  A hardware exception (stack overflow) occurs if the pointer
- *  for this stack reaches the memory limit register (mlp).
- *
- *  The code generator is responsible for setting the global
- *  variables:
- *      startPC         initial value for program counter
- *      startMSP        initial value for msp
- *      startMLP        initial value for mlp
- * </pre>
  * @author Daniel Bloemendal
  */
-
 public class CodeGen extends Visitor
 {
     //
-    // Processors
+    // Scope processing
     //
 
     @Processor(target="Scope")
@@ -112,6 +86,10 @@ public class CodeGen extends Visitor
         visit(routine.getBody());
     }
 
+    //
+    // Expression processing
+    //
+
     @Processor(target="ArithExpn")
     void processArithExpn(ArithExpn arithExpn) {
         visit(arithExpn.getLeft());  // Evaluate left side
@@ -122,6 +100,19 @@ public class CodeGen extends Visitor
         case '*': emit("MUL"); break;
         case '/': emit("DIV"); break;
         }
+    }
+
+    @Processor(target="BoolConstExpn")
+    void processBoolConstExpn(BoolConstExpn boolConstExpn) {
+        emit("PUSH", boolConstExpn.getValue()); // Push the constant literal
+    }
+
+    @Processor(target="BoolExpn")
+    void processBoolExpn(BoolExpn boolExpn) {
+        if(boolExpn.getOpSymbol().equals(BoolExpn.OP_OR))
+            processBoolOrExpn(boolExpn);
+        else if(boolExpn.getOpSymbol().equals(BoolExpn.OP_AND))
+            processBoolAndExpn(boolExpn);
     }
 
     @Processor(target="CompareExpn")
@@ -138,6 +129,10 @@ public class CodeGen extends Visitor
             { emit("LT"); emit("NOT"); }
     }
 
+    @Processor(target="ConditionalExpn")
+    void processConditionalExpn(ConditionalExpn conditionalExpn) {
+    }
+
     @Processor(target="EqualsExpn")
     void processEqualsExpn(EqualsExpn equalsExpn) {
         visit(equalsExpn.getLeft());  // Evaluate left side
@@ -148,6 +143,63 @@ public class CodeGen extends Visitor
             { emit("EQ"); emit("NOT"); }
     }
 
+    @Processor(target="IntConstExpn")
+    void processIntConstExpn(IntConstExpn intConstExpn) {
+        emit("PUSH", intConstExpn.getValue()); // Push the constant literal
+    }
+
+    @Processor(target="NotExpn")
+    void processNotExpn(NotExpn notExpn) {
+        visit(notExpn.getOperand()); // Evaluate expression
+        emit("PUSH", "$false");      // Negate value by comparing with ``false''
+        emit("EQ");                  // ...
+    }
+
+    //
+    // Short circuited boolean expressions
+    //
+
+    void processBoolOrExpn(BoolExpn boolExpn) {
+        // Generate unique labels for branch targets
+        String _checkRHS = getLabelGenerated();
+        String _end      = getLabelGenerated();
+
+        // Left side check
+        visit(boolExpn.getLeft());  // Evaluate left hand side
+        emit("DUP");                // Duplicate result, required for return value
+        emit("BFALSE", _checkRHS);  // If false try the right hand side
+        emit("JMP", _end);          // Otherwise, since it is true short circuit to end
+
+        // Right side check
+        label(_checkRHS);
+        emit("POP");                // Get rid of duplicated result from left hand side
+        visit(boolExpn.getRight()); // Evaluate right hand side
+
+        // End of block
+        label(_end);
+    }
+
+    void processBoolAndExpn(BoolExpn boolExpn) {
+        // Generate unique labels for branch targets
+        String _end = getLabelGenerated();
+
+        // Left side check
+        visit(boolExpn.getLeft());  // Evaluate left hand side
+        emit("DUP");                // Duplicate result, required for return value
+        emit("BFALSE", _end);       // If false short circuit to the end
+
+        // Right side check
+        emit("POP");                // Get rid of duplicated result from left hand side
+        visit(boolExpn.getRight()); // Evaluate right hand side
+
+        // End of block
+        label(_end);
+    }
+
+    //
+    // Statement processing
+    //
+
     @Processor(target="AssignStmt")
     void processAssignStmt(AssignStmt assignStmt) {
         short leftOffset = currentFrame().getOffset(currentScope(), assignStmt.getLval().getIdent().getId());
@@ -156,14 +208,26 @@ public class CodeGen extends Visitor
         emit("STORE");                                       // Store the value of the expression in the left side variable
     }
 
-    @Processor(target="IntConstExpn")
-    void processIntConstExpn(IntConstExpn intConstExpn) {
-        emit("PUSH", intConstExpn.getValue()); // Push the constant literal
-    }
+    @Processor(target="IfStmt")
+    void processIfStmt(IfStmt ifStmt) {
+        // Generate unique labels for branch targets
+        String _else = getLabelGenerated();
+        String _end  = getLabelGenerated();
 
-    @Processor(target="BoolConstExpn")
-    void processIntConstExpn(BoolConstExpn boolConstExpn) {
-        emit("PUSH", boolConstExpn.getValue()); // Push the constant literal
+        // If then clause
+        visit(ifStmt.getCondition()); // Evaluate condition of the if statement
+        emit("BFALSE", _else);        // Branch to else statement if false
+        visit(ifStmt.getWhenTrue());  // Execute ``when true'' statements
+        emit("JMP", _end);            // Jump to the end of the if statement
+
+        // Else clause
+        label(_else);
+        // If a ``when false'' clause exists, execute the statements
+        if(ifStmt.getWhenFalse() != null)
+            visit(ifStmt.getWhenFalse());
+
+        // End of block
+        label(_end);
     }
 
     @Processor(target="PutStmt")
@@ -176,27 +240,6 @@ public class CodeGen extends Visitor
             else if(p instanceof Expn)
                 { visit((Expn) p); emit("PRINTI"); } // Expression printable
             else throw new RuntimeException("unknown printable");
-    }
-
-    @Processor(target="IfStmt")
-    void processIfStmt(IfStmt ifStmt) {
-        // Generate unique labels for branch targets
-        String _else = getLabelGenerated();
-        String _end = getLabelGenerated();
-        // Evaluate condition of the if statement
-        visit(ifStmt.getCondition());
-        // Branch to else statement if false
-        emit("PUSH", _else);
-        emit("BF");
-        // Execute ``when true'' statements
-        visit(ifStmt.getWhenTrue());
-        // Jump to the end of the if statement
-        emit("JMP", _end);
-        label(_else);
-        // If a ``when false'' clause exists, execute the statements
-        if(ifStmt.getWhenFalse() != null)
-            visit(ifStmt.getWhenFalse());
-        label(_end);
     }
 
     //
