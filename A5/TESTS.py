@@ -4,6 +4,16 @@
 #
 # Daniel Bloemendal
 #
+#
+#   Documentation of test annotations in .488 files.  
+#  --------------------------------------------------
+# %@line=1,2,3
+# Specifies that errors should occur on the line number(s) given.
+# %@output=Rest of line
+# The text given in each annotation must be outputted in the order
+# that the annotations appear in the file.
+#
+
 
 from __future__ import print_function
 
@@ -11,7 +21,6 @@ import os
 import re
 import sys
 import subprocess
-import tempfile
 
 # Test directories
 PATHS = {'passing': 'testing/pass',
