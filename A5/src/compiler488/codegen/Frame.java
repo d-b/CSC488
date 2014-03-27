@@ -1,8 +1,6 @@
 package compiler488.codegen;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,8 +92,8 @@ public class Frame extends Visitor {
     
     void addArguments(Scope scope) {
         if(!(scope.getParent() instanceof RoutineDecl)) return;
-        RoutineDecl routine = (RoutineDecl) scope.getParent();
-        List<ScalarDecl> parameterList = routine.getParameters().getList();
+        frameRoutine = (RoutineDecl) scope.getParent();
+        List<ScalarDecl> parameterList = frameRoutine.getParameters().getList();
         for(int i = 0; i < parameterList.size(); i++)
             frameArgs.put(parameterList.get(i).getIdent().getId(), i);
     }
@@ -106,7 +104,10 @@ public class Frame extends Visitor {
         
     public Frame(Scope root, short lexicalLevel) {
         // Initialize members
+        frameRoutine = null;
+        frameArgs = new HashMap<String, Integer>();
         frameMap = new HashMap<AST, MinorFrame>();
+        frameRoot = null;
         frameCurrent = null;
         frameLevel = lexicalLevel;
         // Add arguments
@@ -123,6 +124,7 @@ public class Frame extends Visitor {
         if(offset != null) return offset;
         
         // Otherwise try the arguments
+        if(frameRoutine == null) return null;
         Integer arg = frameArgs.get(identifier);
         if(arg == null) return null;
         offset = (short) (int) arg;
@@ -131,10 +133,12 @@ public class Frame extends Visitor {
     }
     
     public Short getOffsetReturn(Scope scope) {
+        if(frameRoutine == null) return null;
         return (short)(frameArgs.size() - 2); // ON = -N - 2 return address
     }
     
     public Short getOffsetResult(Scope scope) {
+        if(frameRoutine == null) return null;
         return (short)(frameArgs.size() - 3); // ON = -N - 3 return value (always present, but ignored if procedure)
     }
     
@@ -147,6 +151,7 @@ public class Frame extends Visitor {
     }
     
     // Internal members
+    private RoutineDecl          frameRoutine;
     private Map<String, Integer> frameArgs;    
     private Map<AST, MinorFrame> frameMap;
     private MinorFrame           frameRoot;
