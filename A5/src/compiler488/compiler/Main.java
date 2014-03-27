@@ -552,7 +552,7 @@ public class Main {
             System.out.println("Begin Code Generation");
             CodeGen codegen = new CodeGen();
             codegen.Initialize();
-            codegen.Generate();
+            codegen.Generate(programAST);
             if(codegen.Finalize())
                 System.out.println("End of Code Generation");
             else {

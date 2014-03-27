@@ -2,6 +2,7 @@ package compiler488.codegen;
 
 import java.io.*;
 
+import compiler488.ast.stmt.Program;
 import compiler488.runtime.Machine;
 
 /**      CodeGenerator.java 
@@ -38,7 +39,7 @@ import compiler488.runtime.Machine;
  * @author Daniel Bloemendal
  */
 
-public class CodeGen
+public class CodeGen extends Visitor
 {   
     //
     // Code generator life cycle
@@ -49,7 +50,8 @@ public class CodeGen
         assemblerStart();
     }
     
-    public void Generate() {
+    public void Generate(Program program) {
+        new Frame(program, (short) 0);
         section(".code");
         put("Hello world!");
         emit("HALT");
