@@ -7,8 +7,20 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import compiler488.ast.AST;
+import compiler488.ast.Printable;
 import compiler488.ast.decl.RoutineDecl;
+import compiler488.ast.expn.ArithExpn;
+import compiler488.ast.expn.CompareExpn;
+import compiler488.ast.expn.ConditionalExpn;
+import compiler488.ast.expn.EqualsExpn;
+import compiler488.ast.expn.Expn;
+import compiler488.ast.expn.IntConstExpn;
+import compiler488.ast.expn.NewlineConstExpn;
+import compiler488.ast.expn.TextConstExpn;
+import compiler488.ast.stmt.AssignStmt;
+import compiler488.ast.stmt.IfStmt;
 import compiler488.ast.stmt.Program;
+import compiler488.ast.stmt.PutStmt;
 import compiler488.ast.stmt.Scope;
 import compiler488.runtime.Machine;
 import compiler488.compiler.Main;
@@ -58,6 +70,8 @@ public class CodeGen extends Visitor
 
     @Processor(target="Scope")
     void processScope(Scope scope) {
+    	// Set the current scope
+    	codegenScope = scope;
         // Skip minor scopes
         boolean isRoutine = (scope.getParent() instanceof RoutineDecl);
         boolean isProgram = (scope instanceof Program); 
@@ -97,6 +111,94 @@ public class CodeGen extends Visitor
     void processRoutineDecl(RoutineDecl routine) {
         visit(routine.getBody());
     }
+    
+    @Processor(target="ArithExpn")
+    void processArithExpn(ArithExpn arithExpn) {
+    	visit(arithExpn.getLeft());  // Evaluate left side
+    	visit(arithExpn.getRight()); // Evaluate right side
+    	switch(arithExpn.getOpSymbol().charAt(0)) {
+    	case '+': emit("ADD"); break;
+    	case '-': emit("SUB"); break;
+    	case '*': emit("MUL"); break;
+    	case '/': emit("DIV"); break;
+    	}
+    }
+    
+    @Processor(target="CompareExpn")
+    void processCompareExpn(CompareExpn compareExpn) {
+    	visit(compareExpn.getLeft());  // Evaluate left side
+    	visit(compareExpn.getRight()); // Evaluate right side
+    	if(compareExpn.getOpSymbol().equals(CompareExpn.OP_LESS)){
+    		emit("LT");
+    	}
+    	else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_LESS_EQUAL)) {
+    		emit("SWAP"); emit ("LT"); emit("NOT");
+    	}
+    	else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_GREATER)) {
+    		emit("SWAP"); emit("LT");
+    	}
+    	else if(compareExpn.getOpSymbol().equals(CompareExpn.OP_GREATER_EQUAL)) {
+    		emit("LT"); emit("NOT");
+    	}
+    }
+    
+    @Processor(target="EqualsExpn")
+    void processEqualsExpn(EqualsExpn equalsExpn) {
+    	visit(equalsExpn.getLeft());  // Evaluate left side
+    	visit(equalsExpn.getRight()); // Evaluate right side
+    	if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_EQUAL)) {
+    		emit("EQ");
+    	}
+    	else if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_NOT_EQUAL)) {
+    		emit("EQ"); emit("NOT");
+    	}
+    }
+    
+    @Processor(target="AssignStmt")
+    void processAssignStmt(AssignStmt assignStmt) {
+    	short leftOffset = currentFrame().getOffset(currentScope(), assignStmt.getLval().getIdent().getId());
+    	emit("ADDR", currentFrame().getLevel(), leftOffset); // Emit address of target variable
+    	visit(assignStmt.getRval()); 						 // Evaluate the right side expression
+    	emit("STORE"); 				 						 // Store the value of the expression in the left side variable
+    }
+    
+    @Processor(target="IntConstExpn")
+    void processIntConstExpn(IntConstExpn intConstExpn) {
+    	emit("PUSH", intConstExpn.getValue()); // Push the constant literal
+    }
+ 
+    @Processor(target="BoolConstExpn")
+    void processIntConstExpn(BoolConstExpn boolConstExpn) {
+    	emit("PUSH", boolConstExpn.getValue()); // Push the constant literal
+    }
+    
+    @Processor(target="PutStmt")
+    void processPutStmt(PutStmt putStmt) {
+    	for(Printable p : putStmt.getOutputs().getList())
+    		if(p instanceof Expn)
+    			{ visit((Expn) p); emit("PRINTI"); } // Expression printable
+    		else if(p instanceof TextConstExpn)
+    			put(((TextConstExpn) p).getValue()); // String printable
+    		else if(p instanceof NewlineConstExpn)
+    			put("\n");							 // Newline printable
+    }
+    
+    @Processor(target="IfStmt")
+    void processIfStmt(IfStmt ifStmt) {
+    	String _else = getLabelGenerated();
+    	String _end = getLabelGenerated();
+    	visit(ifStmt.getCondition());
+    	emit("PUSH", _else);
+    	emit("BF");
+    	visit(ifStmt.getWhenTrue());
+    	emit("JMP", _end);
+    	label(_else);
+    	if(ifStmt.getWhenFalse() != null)
+    		visit(ifStmt.getWhenFalse());
+    	label(_end);    	
+    }
+    
+    //@Processor(target=)
 
     //
     // Code generator life cycle
@@ -170,7 +272,12 @@ public class CodeGen extends Visitor
         return (short) codegenFrames.size();
     }
     
+    Scope currentScope() {
+    	return codegenScope;
+    }
+    
     // Code generator internals
+    Scope		    codegenScope;
     Deque<Frame>    codegenFrames;
     Map<AST, Frame> codegenRoutines;
     int             codegenLabels;

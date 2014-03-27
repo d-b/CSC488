@@ -72,6 +72,7 @@ public class Assembler {
         // Regular expressions
         patternInstruction = Pattern.compile("\\s*(?:(\\w+):)?\\s*(?:(\\w+)(?:\\s+(.*))?)?");
         patternSection     = Pattern.compile("\\s*SECTION\\s+(\\.\\w+)\\s*", Pattern.CASE_INSENSITIVE);
+        patternOpBoolean   = Pattern.compile("\\$true|\\$false", Pattern.CASE_INSENSITIVE)
         patternOpString    = Pattern.compile("\"[^\"]*\"");
         patternOpLabel     = Pattern.compile("[a-zA-Z_]\\w*");
         // Instantiate the code emitter
@@ -286,6 +287,7 @@ public class Assembler {
     // Regular expression patterns
     private Pattern patternInstruction;
     private Pattern patternSection;
+    private Pattern patternOpBoolean;
     private Pattern patternOpString;
     private Pattern patternOpLabel;
 
