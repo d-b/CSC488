@@ -20,16 +20,21 @@ import compiler488.ast.stmt.Scope;
 
 /**
  * Stack frame for major scopes
- * 
+ *
+ * Offsets returned by Frame correspond to the code template design for stack frames.
+ *
+ * ON = -N - 3 return value (always present, but ignored if procedure)
+ * ON = -N - 2 return address
+ * ON = -N - 1 argument 1
+ * ... ... 
+ * ON = -2     argument N
+ * ON = -1     saved value of previous ADDR <LL> 0 (offset 0 of display at level <LL>)
+ * ON =  0     1st word of local variable memory in activation frame
+ * ... ...
+ *
  * @author Daniel Bloemendal
  */
-public class Frame extends Visitor {
-    //
-    // Static configuration
-    //
-    
-    public final static Short MACHINE_WORD_SIZE = 1;
-    
+public class Frame extends Visitor {   
     //
     // Processors
     //
@@ -118,7 +123,19 @@ public class Frame extends Visitor {
         if(offset != null) return offset;
         
         // Otherwise try the arguments
-        return null;
+        Integer arg = frameArgs.get(identifier);
+        if(arg == null) return null;
+        offset = (short) (int) arg;
+        return (short)(offset - frameArgs.size() - 1); // ON = -N - 1 argument 1
+        
+    }
+    
+    public Short getOffsetReturn(Scope scope) {
+        return (short)(frameArgs.size() - 2); // ON = -N - 2 return address
+    }
+    
+    public Short getOffsetResult(Scope scope) {
+        return (short)(frameArgs.size() - 3); // ON = -N - 3 return value (always present, but ignored if procedure)
     }
     
     public short getLevel() {
@@ -172,14 +189,14 @@ class MinorFrame implements Comparable<MinorFrame> {
         String ident = scalarDecl.getIdent().getId();
         nodeMap.put(ident, scalarDecl);
         offsetMap.put(ident, frameSize);
-        frameSize += Frame.MACHINE_WORD_SIZE;
+        frameSize += 1;
     }
     
     public void addVariable(ArrayDeclPart arrayDecl) {
         String ident = arrayDecl.getIdent().getId();
         nodeMap.put(ident, arrayDecl);
         offsetMap.put(ident, frameSize);
-        frameSize += arrayDecl.getSize() * Frame.MACHINE_WORD_SIZE;
+        frameSize += arrayDecl.getSize();
     }
         
     // Getters/setters
