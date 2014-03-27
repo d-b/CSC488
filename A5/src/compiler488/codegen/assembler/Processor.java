@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Instruction processor annotation
- * 
+ *
  * @author Daniel Bloemendal
  */
 @Target(ElementType.METHOD)

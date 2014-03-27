@@ -2,7 +2,7 @@ package compiler488.codegen.assembler;
 
 /**
  * Assembly instruction operand
- * 
+ *
  * @author Daniel Bloemendal
  */
 public interface Operand {

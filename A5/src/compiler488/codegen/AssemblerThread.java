@@ -10,7 +10,7 @@ import compiler488.codegen.assembler.LabelNotResolvedError;
 
 /**
  * Assembler thread with pipe
- * 
+ *
  * @author Daniel Bloemendal
  */
 public class AssemblerThread extends Thread {
@@ -22,7 +22,7 @@ public class AssemblerThread extends Thread {
             assemblerSuccess = false;
         } catch (IOException e) {}
     }
-    
+
     @Override
     public void run() {
         try {
@@ -34,15 +34,15 @@ public class AssemblerThread extends Thread {
             System.err.println(e.getMessage());
         }
     }
-    
+
     public PipedOutputStream getPipe() {
         return assemblerOut;
     }
-    
+
     public int getResult() {
         return assemblerSuccess ? assembler.getSize() : -1;
     }
-            
+
     // Assembler & pipes
     private Assembler         assembler;
     private PipedInputStream  assemblerIn;

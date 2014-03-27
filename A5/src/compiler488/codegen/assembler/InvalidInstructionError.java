@@ -2,7 +2,7 @@ package compiler488.codegen.assembler;
 
 /**
  * Thrown when an invalid instruction is encountered
- * 
+ *
  * @author Daniel Bloemendal
  */
 public class InvalidInstructionError extends Exception {
@@ -12,13 +12,13 @@ public class InvalidInstructionError extends Exception {
         this.instruction = instruction;
         this.line = line;
     }
-    
-    // The error message 
+
+    // The error message
     @Override
     public String getMessage() {
         return line + ": " + instruction + " ; " + message;
     }
-    
+
     // Internal members
     String message;
     String instruction;

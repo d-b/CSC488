@@ -11,7 +11,7 @@ import compiler488.runtime.Machine;
 import compiler488.codegen.Frame;
 import compiler488.compiler.Main;
 
-/**      CodeGenerator.java 
+/**      CodeGenerator.java
  *<pre>
  *  Code Generation Conventions
  *
@@ -50,23 +50,23 @@ public class CodeGen extends Visitor
     //
     // Processors
     //
-    
+
     @Processor(target="Scope")
     void processScope(Scope scope) {
         // Skip minor scopes
         if(!(scope.getParent() instanceof RoutineDecl) &&
            !(scope instanceof Program)) return;
-        
+
         // Generate code for scope
         enterFrame(scope);                                     // Enter a new stack frame
-        emit("SAVECTX", 0);                                    // Scope prolog        
+        emit("SAVECTX", 0);                                    // Scope prolog
         visit(scope.getStatements());                          // Visit all statements
         emit("RESTORECTX", currentFrame().getLevel(),          // Scope epilog
                            currentFrame().getArgumentsSize()); // ...
         if(!currentFrame().isRoutine()) emit("HALT");          // Program epilog
         exitFrame();                                           // Exit the stack frame
     }
-    
+
     //
     // Code generator life cycle
     //
@@ -78,12 +78,12 @@ public class CodeGen extends Visitor
         // Start the assembler
         assemblerStart();
     }
-    
+
     public void Generate(Program program) {
         emit("SECTION", ".code"); // Start the code section
         visit(program);           // Traverse the AST
     }
-    
+
     public Boolean Finalize() {
         // Finish assembling code
         int result = assemblerEnd();
@@ -91,46 +91,46 @@ public class CodeGen extends Visitor
         // Set initial machine state
         Machine.setPC((short) 0);
         Machine.setMSP((short) result);
-        Machine.setMLP((short) (Machine.memorySize - 1)); 
+        Machine.setMLP((short) (Machine.memorySize - 1));
         return true;
     }
-    
+
     //
     // Helpers
     //
-    
+
     void enterFrame(Scope scope) {
         Frame frame = new Frame(scope, currentLexicalLevel());
         codegenFrames.push(frame);
     }
-    
+
     void exitFrame() {
         codegenFrames.pop();
-    }    
-    
+    }
+
     Frame currentFrame() {
         return codegenFrames.peek();
-    }    
-    
+    }
+
     short currentLexicalLevel() {
         return (short) codegenFrames.size();
-    }    
-    
+    }
+
     // Code generator internals
     boolean      codegenDump;
     Deque<Frame> codegenFrames;
-    
+
     //
     // Assembler
     //
-    
+
     Boolean assemblerStart() {
-        assemblerThread = new AssemblerThread();        
+        assemblerThread = new AssemblerThread();
         assemblerStream = new PrintStream(assemblerThread.getPipe());
         assemblerThread.start();
         return true;
     }
-    
+
     void assemblerPrintln(String x) {
         assemblerStream.println(x);
         if(codegenDump) System.out.println(x);
@@ -145,27 +145,27 @@ public class CodeGen extends Visitor
             return -1;
         }
     }
-    
+
     void section(String name) {
         assemblerPrintln("SECTION " + name);
     }
-    
+
     void put(String string) {
         boolean firstLine = true;
         for(String line : string.split("\\r?\\n")) {
             if(!firstLine) assemblerPrintln("PUTNEWLINE");
-            else firstLine = false; 
+            else firstLine = false;
             assemblerPrintln("PUTSTR \"" + line + "\"");
         }
     }
-    
+
     void emit(String instruction, Object... operands) {
         String command = instruction;
         for(Object op : operands)
             command += " " + op.toString();
         assemblerPrintln(command);
     }
-    
+
     // Assembler internals
     PrintStream     assemblerStream;
     AssemblerThread assemblerThread;

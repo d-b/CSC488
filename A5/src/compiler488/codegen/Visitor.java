@@ -19,14 +19,14 @@ import compiler488.ast.AST;
 
 /**
  * Helper for traversing the AST
- * 
+ *
  * @author Daniel Bloemendal
  */
-public class Visitor {   
+public class Visitor {
     //
     // Visitor interface
     //
-    
+
     public Visitor() {
         // Instantiate internals
         processorsMap     = new HashMap<String, Method>();
@@ -38,14 +38,14 @@ public class Visitor {
         // Populate the processors
         populateMappings();
     }
-    
+
     /*
      * Manual visitation of AST nodes
      */
     public void visit(AST root) {
         invokeProcessor(root, processorsMap);
     }
-    
+
     /*
      * Automatically traverse entire AST
      */
@@ -57,7 +57,7 @@ public class Visitor {
         while(!visitorStack.isEmpty()) {
             // Fetch top of the analysis stack
             AST top = visitorStack.peek();
-            
+
             // Skip excluded nodes
             if(visitorExcluded.contains(top)) {
                 visitorStack.pop(); continue;
@@ -83,30 +83,30 @@ public class Visitor {
                 visitorStack.pop();
             }
         }
-        
+
         // Reset state
         visitorGrey.clear();
-        visitorExcluded.clear();        
+        visitorExcluded.clear();
     }
-    
+
     public void exclude(AST node) {
         visitorExcluded.add(node);
     }
-    
+
     public int errors() {
         return visitorErrors;
     }
-    
+
     //
     // Processor management
     //
-    
+
     void populateMappings() {
         Deque<Class<?>> classes = new LinkedList<Class<?>>();
         for(Class<?> cls = this.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass())
             classes.push(cls);
         // Loop over classes
-        while(!classes.isEmpty()) {  
+        while(!classes.isEmpty()) {
             Class<?> cls = classes.pop();
             for(Method method : cls.getDeclaredMethods()) {
                 Processor procInfo = method.getAnnotation(Processor.class);
@@ -149,17 +149,17 @@ public class Visitor {
                 exception.printStackTrace(); visitorErrors += 1;
             }
         }
-    }    
-    
+    }
+
     // Processor maps
     private Map<String, Method> processorsMap;
     private Map<String, Method> preProcessorsMap;
     private Map<String, Method> postProcessorsMap;
-    
+
     // Visitor state
     private Set<AST>   visitorGrey;     // AST nodes which have been seen
     private Set<AST>   visitorExcluded; // AST nodes which have been excluded
-    private Deque<AST> visitorStack;    // AST node stack    
+    private Deque<AST> visitorStack;    // AST node stack
     private int        visitorErrors;   // Error count
 }
 

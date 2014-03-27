@@ -2,7 +2,7 @@ package compiler488.codegen.assembler;
 
 /**
  * Thrown when the value of an unresolved label is queried
- * 
+ *
  * @author Daniel Bloemendal
  */
 public class LabelNotResolvedError extends Exception {
