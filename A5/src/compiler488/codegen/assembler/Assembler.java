@@ -168,6 +168,7 @@ public class Assembler {
         // Get instruction method
         String name = instruction.getName().toUpperCase();
         Method m = instructionMap.get(name);
+        m.setAccessible(true);
 
         // Invoke the processor on  instruction
         try { m.invoke(getProcessorManager(), instruction); }
@@ -297,43 +298,4 @@ public class Assembler {
     private String        codeInstruction;
     private int           codeLine;
     AssemblerIREmitter    codeEmitter;
-}
-
-//
-// Instruction operand classes
-//
-
-class IntegerOperand implements Operand  {
-    IntegerOperand(short value) { this.value = value; }
-    public short getValue()  throws LabelNotResolvedError { return value; }
-    public OperandType getType() { return OperandType.OPERAND_INTEGER; }
-
-    // Internal members
-    private short value;
-}
-
-class LabelOperand extends IntegerOperand {
-    LabelOperand(String label) {super((short) 0); this.label = label;}
-    public void setAddress(short address) { resolved = true; value = address; }
-    public String getLabel() { return label; }
-
-    // Get resolved value
-    public short getValue() throws LabelNotResolvedError {
-        if(!resolved) throw new LabelNotResolvedError("label '" + label + "' has not been resolved" );
-        return value;
-    }
-
-    // Internal members
-    private boolean resolved;
-    private String label;
-    private short value;
-}
-
-class StringOperand implements Operand {
-    StringOperand(String value) { this.value = value; }
-    public String getValue() { return value; }
-    public OperandType getType() { return OperandType.OPERAND_STRING; }
-
-    // Internal members
-    private String value;
 }

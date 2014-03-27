@@ -15,6 +15,9 @@ import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.Scope;
+import compiler488.codegen.visitor.PostProcessor;
+import compiler488.codegen.visitor.Visitor;
+import compiler488.codegen.visitor.PreProcessor;
 
 /**
  * Stack frame for major scopes
@@ -223,7 +226,7 @@ class MinorFrame implements Comparable<MinorFrame> {
     public void setSize(short size) { frameSize = size; }
 
     // Compare support
-    public int compareTo(MinorFrame other) { return Short.compare(this.frameSize, other.frameSize); }
+    public int compareTo(MinorFrame other) { return this.frameSize - other.frameSize; }
 
     //
     // Internal routines & members

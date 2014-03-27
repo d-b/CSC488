@@ -1,4 +1,4 @@
-package compiler488.codegen;
+package compiler488.codegen.visitor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -165,6 +165,7 @@ public class Visitor {
             Class<?> cls = classes.pop();
             Method m = map.get(cls.getSimpleName());
             if(m == null) continue;
+            m.setAccessible(true);
 
             // Invoke the processor on object
             Exception exception = null;
@@ -189,26 +190,4 @@ public class Visitor {
     private Set<AST>   visitorExcluded; // AST nodes which have been excluded
     private Deque<AST> visitorStack;    // AST node stack
     private int        visitorErrors;   // Error count
-}
-
-//
-// Processor annotations
-//
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface PreProcessor {
- String target();
-}
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface PostProcessor {
- String target();
-}
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface Processor {
- String target();
 }

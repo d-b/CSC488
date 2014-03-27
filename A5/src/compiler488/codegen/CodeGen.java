@@ -11,8 +11,10 @@ import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
 import compiler488.runtime.Machine;
-import compiler488.codegen.Frame;
 import compiler488.compiler.Main;
+import compiler488.codegen.Frame;
+import compiler488.codegen.visitor.Processor;
+import compiler488.codegen.visitor.Visitor;
 
 /**      CodeGenerator.java
  *<pre>
