@@ -44,20 +44,18 @@ public class CodeGen
     // Code generator life cycle
     //
 
-    public void Initialize()
-	{
+    public void Initialize() {
         // Start the assembler
         assemblerStart();
-	}
-    
-    public void Generate() {
-        assemblerStream.println("SECTION .code");
-        assemblerStream.println("PUTSTR \"Hello world!\"");
-        assemblerStream.println("HALT");        
     }
     
-    public Boolean Finalize()
-	{
+    public void Generate() {
+        section(".code");
+        put("Hello world!");
+        emit("HALT");
+    }
+    
+    public Boolean Finalize() {
         // Finish assembling code
         int result = assemblerEnd();
         if(result < 0) return false;
@@ -66,7 +64,7 @@ public class CodeGen
         Machine.setMSP((short) result);
         Machine.setMLP((short) (Machine.memorySize - 1)); 
         return true;
-	}
+    }
     
     //
     // Assembler
@@ -87,7 +85,27 @@ public class CodeGen
         } catch (InterruptedException e) {
             return -1;
         }
-    }    
+    }
+    
+    void section(String name) {
+        assemblerStream.println("SECTION " + name);
+    }
+    
+    void put(String string) {
+        boolean firstLine = true;
+        for(String line : string.split("\\r?\\n")) {
+            if(!firstLine) assemblerStream.println("PUTNEWLINE");
+            else firstLine = false; 
+            assemblerStream.println("PUTSTR \"" + line + "\"");
+        }
+    }
+    
+    void emit(String instruction, Object... operands) {
+        String command = instruction;
+        for(Object op : operands)
+            command += " " + op.toString();
+        assemblerStream.println(command);
+    }
     
     // Assembler internals
     PrintStream     assemblerStream;
