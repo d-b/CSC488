@@ -132,16 +132,16 @@ public class Frame extends Visitor {
 
     public Short getOffset(Scope scope, String identifier) {
         // Try the scope first
-        MinorFrame frame = frameMap.get(scope);
-        if(frame == null) return null;
-        Short offset = frame.getOffset(identifier);
-        if(offset != null) return offset;
+        for(MinorFrame frame = frameMap.get(scope); frame != null; frame = frame.getParent()) {
+            Short offset = frame.getOffset(identifier);
+            if(offset != null) return offset;
+        }
 
         // Otherwise try the arguments
         if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
         Integer arg = frameArgs.get(identifier);
         if(arg == null) return null;
-        offset = (short) (int) arg;
+        short offset = (short) (int) arg;
         return (short)(offset - frameArgs.size() - 1); // ON = -N - 1 argument 1
     }
 
@@ -215,10 +215,8 @@ class MinorFrame implements Comparable<MinorFrame> {
     }
 
     public Short getOffset(String identifier) {
-        for(MinorFrame minor = this; minor != null; minor = minor.frameParent) {
-            Short offset = minor.offsetMap.get(identifier);
-            if(offset != null) return (short)(minor.frameBase + offset);
-        } return null;
+        Short offset = offsetMap.get(identifier);
+        return (offset != null) ? ((short)(frameBase + offset)) : null;
     }
 
     public void addVariable(DeclarationPart decl) {
