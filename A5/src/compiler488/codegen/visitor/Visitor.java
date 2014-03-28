@@ -15,7 +15,7 @@ import compiler488.ast.AST;
 import compiler488.ast.ASTList;
 
 /**
- * Helper for traversing the AST
+ * Helper for traversing an AST automatically and manually
  *
  * @author Daniel Bloemendal
  */

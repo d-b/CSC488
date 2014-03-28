@@ -16,10 +16,13 @@ import compiler488.ast.expn.CompareExpn;
 import compiler488.ast.expn.ConditionalExpn;
 import compiler488.ast.expn.EqualsExpn;
 import compiler488.ast.expn.Expn;
+import compiler488.ast.expn.FunctionCallExpn;
+import compiler488.ast.expn.IdentExpn;
 import compiler488.ast.expn.IntConstExpn;
 import compiler488.ast.expn.NewlineConstExpn;
 import compiler488.ast.expn.NotExpn;
 import compiler488.ast.expn.TextConstExpn;
+import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.IfStmt;
 import compiler488.ast.stmt.Program;
@@ -41,16 +44,13 @@ public class CodeGen extends Visitor
     //
     // Scope processing
     //
-
-    @Processor(target="Scope")
-    void processScope(Scope scope) {
-        // Set the current scope
-        codegenScope = scope;
-        // Skip minor scopes
+    
+    boolean processMajor(Scope scope) {        
+        // Bail out if it is not a major scope
         boolean isRoutine = (scope.getParent() instanceof RoutineDecl);
         boolean isProgram = (scope instanceof Program);
-        if(!isRoutine && !isProgram) return;
-
+        if(!isRoutine && !isProgram) return false;
+        
         // The routine
         RoutineDecl routine = null;
 
@@ -76,14 +76,33 @@ public class CodeGen extends Visitor
         // Emit comment for end of scope
         if(isRoutine) { comment("End of " + routine.getName()); }
         else comment("End of program");
+        
+        // Scope was a major scope
+        return true;
+    }
+    
 
-        // Generate code for declared routines
-        visit(scope.getDeclarations());
+    @Processor(target="Scope")
+    void processScope(Scope scope) {
+        enterScope(scope);                         // Enter scope        
+        codegenCounter = 0;                        // Reset the counter
+        boolean isMajor = processMajor(scope);     // Process major scopes
+        if(!isMajor) visit(scope.getStatements()); // Add statements for minor scopes
+
+        // Process declarations
+        if(codegenCounter > 0) {
+            String _end = getLabelGenerated();
+            emit("JMP", _end);
+            visit(scope.getDeclarations());
+            label(_end);
+        }
     }
 
+    // TODO: The counter is a bit of a hack.
+    // Consider adding routine information to Frame
     @Processor(target="RoutineDecl")
     void processRoutineDecl(RoutineDecl routine) {
-        visit(routine.getBody());
+        visit(routine.getBody()); codegenCounter += 1;
     }
 
     //
@@ -131,6 +150,22 @@ public class CodeGen extends Visitor
 
     @Processor(target="ConditionalExpn")
     void processConditionalExpn(ConditionalExpn conditionalExpn) {
+        // Generate unique labels for branch targets
+        String _false = getLabelGenerated();
+        String _end   = getLabelGenerated();
+        
+        // Condition
+        visit(conditionalExpn.getCondition()); // Evaluate condition
+        emit("BFALSE", _false);                // If false jump to false expression
+        visit(conditionalExpn.getTrueValue()); // Otherwise evaluate true expression
+        emit("JMP", _end);                     // Jump to end of block
+        
+        // False expression
+        label(_false);
+        conditionalExpn.getFalseValue();       // Evaluate ``falseValue'' expression
+        
+        // End of block
+        label(_end);
     }
 
     @Processor(target="EqualsExpn")
@@ -142,6 +177,20 @@ public class CodeGen extends Visitor
         else if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_NOT_EQUAL))
             { emit("EQ"); emit("NOT"); }
     }
+    
+    @Processor(target="FunctionCallExpn")
+    void processFunctionCallExpn(FunctionCallExpn functionCallExpn) {
+        //findFrame(functionCallExpn);
+        //emit("SETUPCALL", )
+        //functionCallExpn.getArguments()
+    }
+    
+    @Processor(target="IdentExpn")
+    void processIdentExpn(IdentExpn identExpn) {
+        short offset = currentFrame().getOffset(currentScope(), identExpn.getIdent().getId());
+        emit("ADDR", currentLexicalLevel(), offset);
+        emit("LOAD");
+    }      
 
     @Processor(target="IntConstExpn")
     void processIntConstExpn(IntConstExpn intConstExpn) {
@@ -154,7 +203,13 @@ public class CodeGen extends Visitor
         emit("PUSH", "$false");      // Negate value by comparing with ``false''
         emit("EQ");                  // ...
     }
-
+    
+    @Processor(target="UnaryMinusExpn")
+    void processUnaryMinusExpn(UnaryMinusExpn unaryMinusExpn) {
+        visit(unaryMinusExpn.getOperand()); // Evaluate expression
+        emit("NEG");                        // Negate the value
+    }
+    
     //
     // Short circuited boolean expressions
     //
@@ -248,8 +303,10 @@ public class CodeGen extends Visitor
 
     public void Initialize() {
         // Instantiate internals
+        codegenLevel = 0;
         codegenFrames = new LinkedList<Frame>();
         codegenRoutines = new HashMap<AST, Frame>();
+        codegenCounter = 0;
         codegenLabels = 0;
         codegenDump = Main.dumpCode;
         // Start the assembler
@@ -309,9 +366,21 @@ public class CodeGen extends Visitor
     Frame currentFrame() {
         return codegenFrames.peek();
     }
+    
+    Frame findFrame(RoutineDecl routineDecl){
+        return codegenRoutines.get(routineDecl);
+    }
 
     short currentLexicalLevel() {
-        return (short) codegenFrames.size();
+        return (short) Math.max(codegenFrames.size() - 1, 0);
+    }
+    
+    void enterScope(Scope scope) {
+        codegenScope = scope;
+    }
+    
+    void exitScope() {
+        codegenScope = null;
     }
 
     Scope currentScope() {
@@ -319,9 +388,11 @@ public class CodeGen extends Visitor
     }
 
     // Code generator internals
+    int             codegenLevel;
     Scope           codegenScope;
     Deque<Frame>    codegenFrames;
     Map<AST, Frame> codegenRoutines;
+    int             codegenCounter;
     int             codegenLabels;
     boolean         codegenDump;
 
