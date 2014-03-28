@@ -159,7 +159,7 @@ public class Frame extends Visitor {
         return frameLevel;
     }
 
-    public short getSize() {
+    public short getLocalsSize() {
         return (frameRoot != null) ? frameRoot.getSize() : 0;
     }
 

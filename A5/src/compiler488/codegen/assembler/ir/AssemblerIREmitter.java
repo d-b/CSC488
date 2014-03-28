@@ -11,28 +11,10 @@ import compiler488.runtime.MemoryAddressException;
  * @author Mike
  */
 public class AssemblerIREmitter extends AssemblerMachineEmitter {
-    @Processor(target="PUTSTR", operands={OperandType.OPERAND_STRING}, size=23)
+    @Processor(target="PUSHSTR", operands={OperandType.OPERAND_STRING}, size=2)
     void emitPutString(Instruction ins) throws MemoryAddressException {
-        // strings are in Pascal Convention
-        String arg = ins.str(0);
-        short strAddr = emitter.addConstant(arg);
-        emitter.emit(Machine.PUSH, (short) 0);
-        short topLabel = emitter.emit(Machine.DUP);
+        short strAddr = emitter.addConstant(ins.str(0));
         emitter.emit(Machine.PUSH, strAddr);
-        emitter.emit(Machine.LOAD);
-        emitter.emit(Machine.LT);
-        emitter.emit(Machine.PUSH, (short) (topLabel + 20));
-        emitter.emit(Machine.BF);
-        emitter.emit(Machine.DUP);
-        emitter.emit(Machine.PUSH, (short) (strAddr + 1));
-        emitter.emit(Machine.ADD);
-        emitter.emit(Machine.LOAD);
-        emitter.emit(Machine.PRINTC);
-        emitter.emit(Machine.PUSH, (short) 1);
-        emitter.emit(Machine.ADD);
-        emitter.emit(Machine.PUSH, (short) topLabel);
-        emitter.emit(Machine.BR);
-        emitter.emit(Machine.POP);
     }
 
     @Processor(target="PUTNEWLINE", operands={}, size=3)

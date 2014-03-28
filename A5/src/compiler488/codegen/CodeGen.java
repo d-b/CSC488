@@ -16,6 +16,7 @@ import compiler488.ast.expn.IdentExpn;
 import compiler488.ast.expn.IntConstExpn;
 import compiler488.ast.expn.NewlineConstExpn;
 import compiler488.ast.expn.NotExpn;
+import compiler488.ast.expn.SubsExpn;
 import compiler488.ast.expn.TextConstExpn;
 import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.stmt.AssignStmt;
@@ -24,6 +25,7 @@ import compiler488.ast.stmt.ProcedureCallStmt;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.PutStmt;
 import compiler488.ast.stmt.ResultStmt;
+import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
 import compiler488.runtime.Machine;
 import compiler488.compiler.Main;
@@ -160,14 +162,14 @@ public class CodeGen extends Visitor
         String _end   = table.getLabel();
 
         // Condition
-        visit(conditionalExpn.getCondition()); // Evaluate condition
-        emit("BFALSE", _false);                // If false jump to false expression
-        visit(conditionalExpn.getTrueValue()); // Otherwise evaluate true expression
-        emit("JMP", _end);                     // Jump to end of block
+        visit(conditionalExpn.getCondition());  // Evaluate condition
+        emit("BFALSE", _false);                 // If false jump to false expression
+        visit(conditionalExpn.getTrueValue());  // Otherwise evaluate true expression
+        emit("JMP", _end);                      // Jump to end of block
 
         // False expression
         label(_false);
-        conditionalExpn.getFalseValue();       // Evaluate ``falseValue'' expression
+        visit(conditionalExpn.getFalseValue()); // Evaluate ``falseValue'' expression
 
         // End of block
         label(_end);
@@ -215,6 +217,10 @@ public class CodeGen extends Visitor
         visit(notExpn.getOperand()); // Evaluate expression
         emit("PUSH", "$false");      // Negate value by comparing with ``false''
         emit("EQ");                  // ...
+    }
+
+    @Processor(target="SubsExpn")
+    void processSubsExpn(SubsExpn subsExpn) {
     }
 
     @Processor(target="UnaryMinusExpn")
@@ -330,10 +336,20 @@ public class CodeGen extends Visitor
 
     @Processor(target="ResultStmt")
     void processResultStmt(ResultStmt resultStmt) {
+        // Get routine end label
+        String _end = table.getLabel(table.getRoutine().getName(), true);
         // Get the address of the result
-        emit("ADDR", table.getLevel(), table.currentFrame().getOffsetResult());
+        emit("ADDR", table.getLevel(), table.getOffsetResult());
         visit(resultStmt.getValue()); // Evaluate result
         emit("STORE");                // Store the result
+        emit("JMP", _end);            // Jump to the end of the function
+    }
+
+    @Processor(target="ReturnStmt")
+    void processReturnStmt(ReturnStmt returnStmt) {
+        // Get routine end label
+        String _end = table.getLabel(table.getRoutine().getName(), true);
+        emit("JMP", _end); // Jump to the end of the function
     }
 
     //
@@ -348,6 +364,11 @@ public class CodeGen extends Visitor
     }
 
     public void Generate(Program program) {
+        // Load the library
+        emit("SECTION", Library.section);
+        assemblerPrint(Library.code);
+
+        // Generate the code
         emit("SECTION", ".code"); // Start the code section
         visit(program);           // Traverse the AST
     }
@@ -377,6 +398,11 @@ public class CodeGen extends Visitor
         return true;
     }
 
+    void assemblerPrint(String x) {
+        assemblerStream.print(x);
+        if(Main.dumpCode) System.out.print(x);
+    }
+
     void assemblerPrintln(String x) {
         assemblerStream.println(x);
         if(Main.dumpCode) System.out.println(x);
@@ -404,12 +430,21 @@ public class CodeGen extends Visitor
         assemblerPrintln(name + ":");
     }
 
+    void print(String line) {
+        String _ret = table.getLabel();
+        emit("SETUPCALL", _ret);
+        emit("PUSHSTR", "\"" + line + "\"");
+        emit("JMP", "print");
+        label(_ret);
+        emit("POP");
+    }
+
     void put(String string) {
         boolean firstLine = true;
         for(String line : string.split("\\r?\\n")) {
             if(!firstLine) assemblerPrintln("PUTNEWLINE");
             else firstLine = false;
-            assemblerPrintln("PUTSTR \"" + line + "\"");
+            print(line);
         }
     }
 

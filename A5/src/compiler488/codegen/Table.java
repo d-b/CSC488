@@ -73,10 +73,11 @@ public class Table {
     }
 
     public String getLabel(String routine, boolean end) {
+        String prefix = "_R_";
         String postfix = end ? "_END" : "";
         for(Minor m : minorStack) {
             String label = m.getLabel(routine);
-            if(label != null) return label + postfix;
+            if(label != null) return prefix + label + postfix;
         } return null;
     }
 
@@ -89,14 +90,6 @@ public class Table {
         } return null;
     }
 
-    public short getLocalsSize() {
-        return currentFrame().getSize();
-    }
-
-    public short getArgumentsSize() {
-        return currentFrame().getArgumentsSize();
-    }
-
     public boolean inMajorScope() {
         Scope scope = currentScope();
         if(scope == null) return false;
@@ -106,6 +99,13 @@ public class Table {
     public int getRoutineCount() {
         return routineCount;
     }
+
+    // Frame access convenience functions
+    public RoutineDecl getRoutine() { return currentFrame().getRoutine(); }
+    public short getLocalsSize() { return currentFrame().getLocalsSize(); }
+    public short getArgumentsSize() { return currentFrame().getArgumentsSize(); }
+    public short getOffsetReturn() { return currentFrame().getOffsetReturn(); }
+    public short getOffsetResult() { return currentFrame().getOffsetResult(); }
 
     // Generate a label
     String generateLabel(String routine) {
