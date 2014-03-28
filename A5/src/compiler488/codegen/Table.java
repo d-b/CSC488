@@ -25,12 +25,13 @@ public class Table {
 
     public void enterScope(Scope scope) {
         // Construct a minor scope
+        Scope previous = currentScope();
         Minor minor = new Minor(scope);
         minorStack.push(minor);
         // If the new scope is a major scope construct a frame
         if(inMajorScope()) {
             RoutineDecl routine = (RoutineDecl) scope.getParent();
-            majorStack.push(new Frame(scope, currentScope(), ++majorLevel));
+            majorStack.push(new Frame(scope, previous, ++majorLevel));
             if(routine != null) minor.setLabel(routine.getName(), generateLabel(routine.getName()));
         }
         // Add routine labels for minor scope
@@ -81,11 +82,12 @@ public class Table {
         } return null;
     }
 
-    public Short getOffset(String variable) {
+    public Variable getVaraible(String variable) {
         Scope scope = currentScope();
         for(Frame frame : majorStack) {
             Short offset = frame.getOffset(scope, variable);
-            if(offset != null) return offset;
+            if(offset != null)
+                return new Variable(frame.getLevel(), offset);
             scope = frame.getParent();
         } return null;
     }

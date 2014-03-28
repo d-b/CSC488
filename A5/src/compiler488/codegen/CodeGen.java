@@ -209,7 +209,8 @@ public class CodeGen extends Visitor
 
     @Processor(target="IdentExpn")
     void processIdentExpn(IdentExpn identExpn) {
-        emit("ADDR", table.getLevel(), table.getOffset(identExpn.getIdent().getId()));
+        Variable var = table.getVaraible(identExpn.getIdent().getId());
+        emit("ADDR", var.getLevel(), var.getOffset());
         emit("LOAD");
     }
 
@@ -282,10 +283,10 @@ public class CodeGen extends Visitor
 
     @Processor(target="AssignStmt")
     void processAssignStmt(AssignStmt assignStmt) {
-        short leftOffset = table.getOffset(assignStmt.getLval().getIdent().getId());
-        emit("ADDR", table.getLevel(), leftOffset); // Emit address of target variable
-        visit(assignStmt.getRval());                // Evaluate the right side expression
-        emit("STORE");                              // Store the value of the expression in the left side variable
+        Variable leftVar = table.getVaraible(assignStmt.getLval().getIdent().getId());
+        emit("ADDR", leftVar.getLevel(), leftVar.getOffset()); // Emit address of target variable
+        visit(assignStmt.getRval());                           // Evaluate the right side expression
+        emit("STORE");                                         // Store the value of the expression in the left side variable
     }
 
     @Processor(target="ExitStmt")
