@@ -2,6 +2,7 @@ package compiler488.codegen;
 
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -24,16 +25,13 @@ public class Table {
     }
 
     public void enterScope(Scope scope) {
-        // Construct a minor scope
+        // Construct a new minor
         Scope previous = currentScope();
         Minor minor = new Minor(scope);
         minorStack.push(minor);
         // If the new scope is a major scope construct a frame
-        if(inMajorScope()) {
-            RoutineDecl routine = (RoutineDecl) scope.getParent();
+        if(inMajorScope())
             majorStack.push(new Frame(scope, previous, ++majorLevel));
-            if(routine != null) minor.setLabel(routine.getName(), generateLabel(routine.getName()));
-        }
         // Add routine labels for minor scope
         routineCount = 0; // Reset the routine count
         minorLevel += 1;  // Increment the minor level
@@ -70,16 +68,11 @@ public class Table {
     }
 
     public String getLabel(String routine) {
-        return getLabel(routine, false);
+        return getLabel(0, routine, false);
     }
 
     public String getLabel(String routine, boolean end) {
-        String prefix = "_R_";
-        String postfix = end ? "_END" : "";
-        for(Minor m : minorStack) {
-            String label = m.getLabel(routine);
-            if(label != null) return prefix + label + postfix;
-        } return null;
+        return getLabel(0, routine, end);
     }
 
     public Variable getVaraible(String variable) {
@@ -98,6 +91,10 @@ public class Table {
         return Frame.scopeIsMajor(scope);
     }
 
+    public String getRoutineLabel(boolean end) {
+        return getLabel(1, getRoutine().getName(), end);
+    }
+
     public int getRoutineCount() {
         return routineCount;
     }
@@ -108,6 +105,19 @@ public class Table {
     public short getArgumentsSize() { return currentFrame().getArgumentsSize(); }
     public short getOffsetReturn() { return currentFrame().getOffsetReturn(); }
     public short getOffsetResult() { return currentFrame().getOffsetResult(); }
+
+    // Get a label
+    String getLabel(int level, String routine, boolean end) {
+        String prefix = "_R_";
+        String postfix = end ? "_END" : "";
+        Iterator<Minor> iter = minorStack.iterator();
+        for(int i = 0; i < level; i++)
+            if(iter.hasNext()) iter.next();
+        while(iter.hasNext()) {
+            String label = iter.next().getLabel(routine);
+            if(label != null) return prefix + label + postfix;
+        } return null;
+    }
 
     // Generate a label
     String generateLabel(String routine) {
