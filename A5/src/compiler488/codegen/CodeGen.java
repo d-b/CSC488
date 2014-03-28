@@ -21,7 +21,9 @@ import compiler488.ast.expn.TextConstExpn;
 import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.IfStmt;
+import compiler488.ast.stmt.ExitStmt;
 import compiler488.ast.stmt.WhileDoStmt;
+import compiler488.ast.stmt.RepeatUntilStmt;
 import compiler488.ast.stmt.ProcedureCallStmt;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.PutStmt;
@@ -286,8 +288,9 @@ public class CodeGen extends Visitor
     @Processor(target="WhileDoStmt")
     void processWhileDoStmt(WhileDoStmt whileDoStmt) {
         // Generate unique labels for branch targets
+        String _prevExitLabel = _exitLabel;
         String _start = table.getLabel();
-        String _end  = table.getLabel();
+        String _end = _exitLabel = table.getLabel();
         // If then clause
         label(_start);
         visit(whileDoStmt.getExpn()); // Evaluate condition of the while statement
@@ -295,6 +298,22 @@ public class CodeGen extends Visitor
         visit(whileDoStmt.getBody());
         emit("JMP", _start);            // Jump to the start again
         label(_end);
+        _exitLabel = _prevExitLabel;
+    }
+
+    @Processor(target="RepeatUntilStmt")
+    void processRepeatUntilStmt(RepeatUntilStmt repeatUntilStmt) {
+        // Generate unique labels for branch targets
+        String _prevExitLabel = _exitLabel;
+        String _start = table.getLabel();
+        _exitLabel = table.getLabel();
+        // If then clause
+        label(_start);
+        visit(repeatUntilStmt.getBody());
+        visit(repeatUntilStmt.getExpn()); // Evaluate condition of the while statement
+        emit("BFALSE", _start);        // Branch to end if false
+        label(_exitLabel);
+        _exitLabel = _prevExitLabel;
     }
 
 
@@ -365,6 +384,18 @@ public class CodeGen extends Visitor
         // Get routine end label
         String _end = table.getLabel(table.getRoutine().getName(), true);
         emit("JMP", _end); // Jump to the end of the function
+    }
+
+    @Processor(target="ExitStmt")
+    void processExitStmt(ExitStmt exitStmt) {
+        // Get routine end label
+        if(exitStmt.getCondition() != null){
+            visit(exitStmt.getCondition());
+            emit("NOT");
+            emit("BFALSE", _exitLabel);
+        }else{
+            emit("JMP", _exitLabel); // Jump to the end of the loop
+        }
     }
 
     //
@@ -481,6 +512,9 @@ public class CodeGen extends Visitor
         emit("PUSH", words);
         emit("POPN");
     }
+
+    // Exit label saved and restored by loops.
+    String _exitLabel;
 
     // Assembler internals
     PrintStream     assemblerStream;
