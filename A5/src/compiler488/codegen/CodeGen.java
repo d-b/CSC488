@@ -1,12 +1,7 @@
 package compiler488.codegen;
 
 import java.io.*;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 
-import compiler488.ast.AST;
 import compiler488.ast.Printable;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.expn.ArithExpn;
@@ -25,14 +20,15 @@ import compiler488.ast.expn.TextConstExpn;
 import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.IfStmt;
+import compiler488.ast.stmt.ProcedureCallStmt;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.PutStmt;
+import compiler488.ast.stmt.ResultStmt;
 import compiler488.ast.stmt.Scope;
 import compiler488.runtime.Machine;
 import compiler488.compiler.Main;
 import compiler488.codegen.visitor.Visitor;
 import compiler488.codegen.visitor.Processor;
-import compiler488.codegen.Frame;
 
 /**
  * Code generator for compiler 488
@@ -44,65 +40,74 @@ public class CodeGen extends Visitor
     //
     // Scope processing
     //
-    
-    boolean processMajor(Scope scope) {        
-        // Bail out if it is not a major scope
-        boolean isRoutine = (scope.getParent() instanceof RoutineDecl);
-        boolean isProgram = (scope instanceof Program);
-        if(!isRoutine && !isProgram) return false;
-        
-        // The routine
+
+    void majorProlog() {
+        // Prepare information about scope
         RoutineDecl routine = null;
+        Scope scope = table.currentScope();
+        boolean isProgram = (scope instanceof Program);
+        if(!isProgram) routine = (RoutineDecl) scope.getParent();
 
         // Emit comment for start of scope
-        if(isRoutine) {
-            routine = (RoutineDecl) scope.getParent();
-            comment("Start of " + routine.getName());
-        } else comment("Start of program");
+        if(isProgram) comment("Start of program");
+        else comment("Start of " + routine.getName());
 
-        // Generate code for scope
-        enterFrame(scope);                                     // Enter a new stack frame
-        if(isRoutine) label(getLabelRoutine(routine));         // Starting label
-        emit("SAVECTX", 0);                                    // Scope prolog
-        reserve(currentFrame().getSize());                     // Reserve memory for locals
-        visit(scope.getStatements());                          // Visit statements in scope
-        if(isRoutine) label(getLabelRoutine(routine, true));   // Ending label
-        free(currentFrame().getSize());                        // Free locals memory
-        emit("RESTORECTX", currentFrame().getLevel(),          // Scope epilog
-                           currentFrame().getArgumentsSize()); // ...
-        if(!currentFrame().isRoutine()) emit("HALT");          // Program epilog
-        exitFrame();                                           // Exit the stack frame
+        if(!isProgram)
+            label(table.getLabel(routine.getName()));       // Starting label
+        emit("SAVECTX", table.getLevel());                  // Scope prolog
+        reserve(table.getLocalsSize());                     // Reserve memory for locals
+    }
+
+    void majorEpilog() {
+        // Prepare information about scope
+        RoutineDecl routine = null;
+        Scope scope = table.currentScope();
+        boolean isProgram = (scope instanceof Program);
+        if(!isProgram) routine = (RoutineDecl) scope.getParent();
+
+        if(!isProgram)
+            label(table.getLabel(routine.getName(), true)); // Ending label
+        free(table.getLocalsSize());                        // Free locals memory
+        emit("RESTORECTX", table.getLevel(),                // Restore context
+                           table.getArgumentsSize());       // ...
+        if(isProgram) emit("HALT");                         // Program epilog
+        else          emit("BR");                           // Routine epilog
 
         // Emit comment for end of scope
-        if(isRoutine) { comment("End of " + routine.getName()); }
-        else comment("End of program");
-        
-        // Scope was a major scope
-        return true;
+        if(isProgram) comment("End of program");
+        else comment("End of " + routine.getName());
     }
-    
+
 
     @Processor(target="Scope")
     void processScope(Scope scope) {
-        enterScope(scope);                         // Enter scope        
-        codegenCounter = 0;                        // Reset the counter
-        boolean isMajor = processMajor(scope);     // Process major scopes
-        if(!isMajor) visit(scope.getStatements()); // Add statements for minor scopes
+        // Enter the scope
+        table.enterScope(scope);
 
-        // Process declarations
-        if(codegenCounter > 0) {
-            String _end = getLabelGenerated();
+        // Major prolog
+        if(table.inMajorScope()) majorProlog();
+
+        // Visit statements in scope
+        visit(scope.getStatements());
+
+        // Process routine declarations
+        if(table.getRoutineCount() > 0 ) {
+            String _end = table.getLabel();
             emit("JMP", _end);
             visit(scope.getDeclarations());
             label(_end);
         }
+
+        // Major epilog
+        if(table.inMajorScope()) majorEpilog();
+
+        // Exit the scope
+        table.exitScope();
     }
 
-    // TODO: The counter is a bit of a hack.
-    // Consider adding routine information to Frame
     @Processor(target="RoutineDecl")
-    void processRoutineDecl(RoutineDecl routine) {
-        visit(routine.getBody()); codegenCounter += 1;
+    void processRoutineDecl(RoutineDecl routineDecl) {
+        visit(routineDecl.getBody()); // Visit routine body
     }
 
     //
@@ -151,19 +156,19 @@ public class CodeGen extends Visitor
     @Processor(target="ConditionalExpn")
     void processConditionalExpn(ConditionalExpn conditionalExpn) {
         // Generate unique labels for branch targets
-        String _false = getLabelGenerated();
-        String _end   = getLabelGenerated();
-        
+        String _false = table.getLabel();
+        String _end   = table.getLabel();
+
         // Condition
         visit(conditionalExpn.getCondition()); // Evaluate condition
         emit("BFALSE", _false);                // If false jump to false expression
         visit(conditionalExpn.getTrueValue()); // Otherwise evaluate true expression
         emit("JMP", _end);                     // Jump to end of block
-        
+
         // False expression
         label(_false);
         conditionalExpn.getFalseValue();       // Evaluate ``falseValue'' expression
-        
+
         // End of block
         label(_end);
     }
@@ -177,20 +182,28 @@ public class CodeGen extends Visitor
         else if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_NOT_EQUAL))
             { emit("EQ"); emit("NOT"); }
     }
-    
+
     @Processor(target="FunctionCallExpn")
     void processFunctionCallExpn(FunctionCallExpn functionCallExpn) {
-        //findFrame(functionCallExpn);
-        //emit("SETUPCALL", )
-        //functionCallExpn.getArguments()
+        // Generate labels required for call
+        String _func = table.getLabel(functionCallExpn.getIdent().getId());
+        String _end  = table.getLabel();
+
+        // Setup the call
+        emit("SETUPCALL", _end);
+        // Evaluate each argument
+        for(Expn expn : functionCallExpn.getArguments().getList())
+            visit(expn);
+        // Call the function
+        emit("JMP", _func);
+        label(_end);
     }
-    
+
     @Processor(target="IdentExpn")
     void processIdentExpn(IdentExpn identExpn) {
-        short offset = currentFrame().getOffset(currentScope(), identExpn.getIdent().getId());
-        emit("ADDR", currentLexicalLevel(), offset);
+        emit("ADDR", table.getLevel(), table.getOffset(identExpn.getIdent().getId()));
         emit("LOAD");
-    }      
+    }
 
     @Processor(target="IntConstExpn")
     void processIntConstExpn(IntConstExpn intConstExpn) {
@@ -203,21 +216,21 @@ public class CodeGen extends Visitor
         emit("PUSH", "$false");      // Negate value by comparing with ``false''
         emit("EQ");                  // ...
     }
-    
+
     @Processor(target="UnaryMinusExpn")
     void processUnaryMinusExpn(UnaryMinusExpn unaryMinusExpn) {
         visit(unaryMinusExpn.getOperand()); // Evaluate expression
         emit("NEG");                        // Negate the value
     }
-    
+
     //
     // Short circuited boolean expressions
     //
 
     void processBoolOrExpn(BoolExpn boolExpn) {
         // Generate unique labels for branch targets
-        String _checkRHS = getLabelGenerated();
-        String _end      = getLabelGenerated();
+        String _checkRHS = table.getLabel();
+        String _end      = table.getLabel();
 
         // Left side check
         visit(boolExpn.getLeft());  // Evaluate left hand side
@@ -236,7 +249,7 @@ public class CodeGen extends Visitor
 
     void processBoolAndExpn(BoolExpn boolExpn) {
         // Generate unique labels for branch targets
-        String _end = getLabelGenerated();
+        String _end = table.getLabel();
 
         // Left side check
         visit(boolExpn.getLeft());  // Evaluate left hand side
@@ -257,17 +270,17 @@ public class CodeGen extends Visitor
 
     @Processor(target="AssignStmt")
     void processAssignStmt(AssignStmt assignStmt) {
-        short leftOffset = currentFrame().getOffset(currentScope(), assignStmt.getLval().getIdent().getId());
-        emit("ADDR", currentFrame().getLevel(), leftOffset); // Emit address of target variable
-        visit(assignStmt.getRval());                         // Evaluate the right side expression
-        emit("STORE");                                       // Store the value of the expression in the left side variable
+        short leftOffset = table.getOffset(assignStmt.getLval().getIdent().getId());
+        emit("ADDR", table.getLevel(), leftOffset); // Emit address of target variable
+        visit(assignStmt.getRval());                // Evaluate the right side expression
+        emit("STORE");                              // Store the value of the expression in the left side variable
     }
 
     @Processor(target="IfStmt")
     void processIfStmt(IfStmt ifStmt) {
         // Generate unique labels for branch targets
-        String _else = getLabelGenerated();
-        String _end  = getLabelGenerated();
+        String _else = table.getLabel();
+        String _end  = table.getLabel();
 
         // If then clause
         visit(ifStmt.getCondition()); // Evaluate condition of the if statement
@@ -285,16 +298,42 @@ public class CodeGen extends Visitor
         label(_end);
     }
 
+    @Processor(target="ProcedureCallStmt")
+    void processProcedureCallStmt(ProcedureCallStmt procedureCallStmt) {
+        // Generate labels required for call
+        String _proc = table.getLabel(procedureCallStmt.getIdent().getId());
+        String _end  = table.getLabel();
+
+        // Setup the call
+        emit("SETUPCALL", _end);
+        // Evaluate each argument
+        for(Expn expn : procedureCallStmt.getArguments().getList())
+            visit(expn);
+        // Call the procedure
+        emit("JMP", _proc);
+        label(_end);
+        // Pop off the unused result
+        emit("POP");
+    }
+
     @Processor(target="PutStmt")
     void processPutStmt(PutStmt putStmt) {
         for(Printable p : putStmt.getOutputs().getList())
             if(p instanceof TextConstExpn)
                 put(((TextConstExpn) p).getValue()); // String printable
             else if(p instanceof NewlineConstExpn)
-                put("\n");                           // Newline printable
+                emit("PUTNEWLINE");                  // Newline printable
             else if(p instanceof Expn)
                 { visit((Expn) p); emit("PRINTI"); } // Expression printable
             else throw new RuntimeException("unknown printable");
+    }
+
+    @Processor(target="ResultStmt")
+    void processResultStmt(ResultStmt resultStmt) {
+        // Get the address of the result
+        emit("ADDR", table.getLevel(), table.currentFrame().getOffsetResult());
+        visit(resultStmt.getValue()); // Evaluate result
+        emit("STORE");                // Store the result
     }
 
     //
@@ -303,12 +342,7 @@ public class CodeGen extends Visitor
 
     public void Initialize() {
         // Instantiate internals
-        codegenLevel = 0;
-        codegenFrames = new LinkedList<Frame>();
-        codegenRoutines = new HashMap<AST, Frame>();
-        codegenCounter = 0;
-        codegenLabels = 0;
-        codegenDump = Main.dumpCode;
+        table = new Table();
         // Start the assembler
         assemblerStart();
     }
@@ -329,72 +363,8 @@ public class CodeGen extends Visitor
         return true;
     }
 
-    //
-    // Labels
-    //
-
-    String getLabelGenerated() {
-        return "_L" + codegenLabels++;
-    }
-
-    String getLabelRoutine(RoutineDecl routine) {
-        return getLabelRoutine(routine, false);
-    }
-
-    String getLabelRoutine(RoutineDecl routine, boolean end) {
-        Frame frame = codegenRoutines.get(routine);
-        if(frame == null) return null;
-        String label = routine.getName() + "_LL" + frame.getLevel();
-        if(end) label += "_END";
-        return label;
-    }
-
-    //
-    // Helpers
-    //
-
-    void enterFrame(Scope scope) {
-        Frame frame = new Frame(scope, currentLexicalLevel());
-        if(frame.isRoutine()) codegenRoutines.put(frame.getRoutine(), frame);
-        codegenFrames.push(frame);
-    }
-
-    void exitFrame() {
-        codegenFrames.pop();
-    }
-
-    Frame currentFrame() {
-        return codegenFrames.peek();
-    }
-    
-    Frame findFrame(RoutineDecl routineDecl){
-        return codegenRoutines.get(routineDecl);
-    }
-
-    short currentLexicalLevel() {
-        return (short) Math.max(codegenFrames.size() - 1, 0);
-    }
-    
-    void enterScope(Scope scope) {
-        codegenScope = scope;
-    }
-    
-    void exitScope() {
-        codegenScope = null;
-    }
-
-    Scope currentScope() {
-        return codegenScope;
-    }
-
     // Code generator internals
-    int             codegenLevel;
-    Scope           codegenScope;
-    Deque<Frame>    codegenFrames;
-    Map<AST, Frame> codegenRoutines;
-    int             codegenCounter;
-    int             codegenLabels;
-    boolean         codegenDump;
+    Table table;
 
     //
     // Assembler
@@ -409,7 +379,7 @@ public class CodeGen extends Visitor
 
     void assemblerPrintln(String x) {
         assemblerStream.println(x);
-        if(codegenDump) System.out.println(x);
+        if(Main.dumpCode) System.out.println(x);
     }
 
     int assemblerEnd() {

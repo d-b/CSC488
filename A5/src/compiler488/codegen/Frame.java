@@ -14,6 +14,7 @@ import compiler488.ast.decl.MultiDeclarations;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ScalarDecl;
 import compiler488.ast.decl.ScalarDeclPart;
+import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
 import compiler488.codegen.visitor.Visitor;
 import compiler488.codegen.visitor.PreProcessor;
@@ -93,10 +94,10 @@ public class Frame extends Visitor {
     // Helpers
     //
 
-    void addArguments(Scope scope) {
-        if(!(scope.getParent() instanceof RoutineDecl)) return;
-        frameRoutine = (RoutineDecl) scope.getParent();
-        List<ScalarDecl> parameterList = frameRoutine.getParameters().getList();
+    void addArguments() {
+        RoutineDecl routine = getRoutine();
+        if(routine == null) return; // Scope does not belong to a routine
+        List<ScalarDecl> parameterList = routine.getParameters().getList();
         for(int i = 0; i < parameterList.size(); i++)
             frameArgs.put(parameterList.get(i).getIdent().getId(), i);
     }
@@ -105,18 +106,28 @@ public class Frame extends Visitor {
     // Frame interface
     //
 
-    public Frame(Scope root, short lexicalLevel) {
+    public Frame(Scope scope, Scope parent, short lexicalLevel) {
+        // Scope must be major
+        if(!scopeIsMajor(scope))
+            throw new RuntimeException("A frame can only be constructed for a major scope.");
         // Initialize members
-        frameRoutine = null;
+        frameScope = scope;
+        frameParent = parent;
         frameArgs = new HashMap<String, Integer>();
         frameMap = new HashMap<AST, MinorFrame>();
         frameRoot = null;
         frameCurrent = null;
         frameLevel = lexicalLevel;
         // Add arguments
-        addArguments(root);
+        addArguments();
         // Traverse the AST
-        traverse(root);
+        traverse(frameScope);
+    }
+
+    public static boolean scopeIsMajor(Scope scope) {
+        boolean isRoutine = (scope.getParent() instanceof RoutineDecl);
+        boolean isProgram = (scope instanceof Program);
+        return isRoutine || isProgram;
     }
 
     public Short getOffset(Scope scope, String identifier) {
@@ -132,17 +143,16 @@ public class Frame extends Visitor {
         if(arg == null) return null;
         offset = (short) (int) arg;
         return (short)(offset - frameArgs.size() - 1); // ON = -N - 1 argument 1
-
     }
 
-    public Short getOffsetReturn(Scope scope) {
+    public Short getOffsetReturn() {
         if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
-        return (short)(frameArgs.size() - 2); // ON = -N - 2 return address
+        return (short)(-frameArgs.size() - 2); // ON = -N - 2 return address
     }
 
-    public Short getOffsetResult(Scope scope) {
+    public Short getOffsetResult() {
         if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
-        return (short)(frameArgs.size() - 3); // ON = -N - 3 return value (always present, but ignored if procedure)
+        return (short)(-frameArgs.size() - 3); // ON = -N - 3 return value (always present, but ignored if procedure)
     }
 
     public short getLevel() {
@@ -157,16 +167,25 @@ public class Frame extends Visitor {
         return (short) frameArgs.size();
     }
 
+    public Scope getScope() {
+        return frameScope;
+    }
+
+    public Scope getParent() {
+        return frameParent;
+    }
+
     public RoutineDecl getRoutine() {
-        return frameRoutine;
+        return isRoutine() ? ((RoutineDecl) frameScope.getParent()) : null;
     }
 
     public boolean isRoutine() {
-        return frameRoutine != null;
+        return (frameScope.getParent() instanceof RoutineDecl);
     }
 
     // Internal members
-    private RoutineDecl          frameRoutine;
+    private Scope                frameParent;
+    private Scope                frameScope;
     private Map<String, Integer> frameArgs;
     private Map<AST, MinorFrame> frameMap;
     private MinorFrame           frameRoot;
@@ -184,6 +203,7 @@ class MinorFrame implements Comparable<MinorFrame> {
         nodeMap = new HashMap<String, AST>();
         offsetMap = new HashMap<String, Short>();
         frameChildren = new LinkedList<MinorFrame>();
+        frameBase = (parent != null) ? parent.frameSize : 0;
         frameParent = parent;
         frameSize = 0;
         // Add this frame to the parent
@@ -195,7 +215,10 @@ class MinorFrame implements Comparable<MinorFrame> {
     }
 
     public Short getOffset(String identifier) {
-        return offsetMap.get(identifier);
+        for(MinorFrame minor = this; minor != null; minor = minor.frameParent) {
+            Short offset = minor.offsetMap.get(identifier);
+            if(offset != null) return (short)(minor.frameBase + offset);
+        } return null;
     }
 
     public void addVariable(DeclarationPart decl) {
@@ -240,5 +263,6 @@ class MinorFrame implements Comparable<MinorFrame> {
     private Map<String, Short> offsetMap;
     private MinorFrame         frameParent;
     private List<MinorFrame>   frameChildren;
+    private short              frameBase;
     private short              frameSize;
 }
