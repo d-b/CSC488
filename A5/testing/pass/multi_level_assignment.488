@@ -1,0 +1,21 @@
+%
+%  Tests assignment to variables at different levels.
+%
+{
+    {
+    var b : integer
+    proc foo(){
+        var a : integer
+        a := 3
+        b := 4
+        put a,newline
+    }
+    b := 2
+    put b,newline
+    foo()
+    put b,newline
+    }
+}
+    %@output=2
+    %@output=3
+    %@output=4

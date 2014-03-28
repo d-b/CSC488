@@ -12,7 +12,9 @@
 # %@output=Rest of line
 # The text given in each annotation must be outputted in the order
 # that the annotations appear in the file.
-#
+# %@input=Rest of line
+# The text given is concatenated to the input to the program.
+# 
 
 
 from __future__ import print_function
@@ -21,6 +23,7 @@ import os
 import re
 import sys
 import subprocess
+import tempfile
 
 # Test directories
 PATHS = {'passing': 'testing/pass',
@@ -38,6 +41,7 @@ def test(path, failing = False):
     patFailure    = re.compile(r'^Ended Semantic Analysis with failures$')
     patAction     = re.compile(r'(S\d+)')
     patOutputLine = re.compile(r'%@output=(.*)')
+    patInputLine = re.compile(r'%@output=(.*)')
     patStartOutput = re.compile(r'Start Execution')
 
     # Parse error type
@@ -51,6 +55,9 @@ def test(path, failing = False):
     # Lines of correct output:
     correctOutput = []
 
+    # File for input lines:
+    inFile = tempfile.TemporaryFile()
+
     # If failing parse file for lines
     if failing:
         testfile = open(path)
@@ -62,14 +69,21 @@ def test(path, failing = False):
                 match = patMultiLine.match(l)
                 if match: expected += [int(x) for x in match.groups()[0].split(',')]
         testfile.close()
-    else: # if passing, parse file for correct output lines
+    else: # if passing, parse file for input lines and correct output lines
         testfile = open(path)
         for x in testfile:
             match = patOutputLine.search(x)
             if match: 
                 correctOutput.append(match.groups()[0])
+            else:
+                match = patInputLine.search(x)
+                if match:
+                    inFile.write(match.groups()[0] + "\n")
+    
+    inFile.seek(0)
+    
     # Execute the test
-    output = subprocess.check_output(['java', '-jar', COMPILER, path], stderr=subprocess.STDOUT)
+    output = subprocess.check_output(['java', '-jar', COMPILER, path], stdin=inFile, stderr=subprocess.STDOUT)
     lines  = output.decode('utf8').replace('\r', '').split('\n')
     
     # Successful case
