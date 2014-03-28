@@ -21,6 +21,7 @@ import compiler488.ast.expn.TextConstExpn;
 import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.IfStmt;
+import compiler488.ast.stmt.WhileDoStmt;
 import compiler488.ast.stmt.ProcedureCallStmt;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.PutStmt;
@@ -282,9 +283,23 @@ public class CodeGen extends Visitor
         emit("STORE");                              // Store the value of the expression in the left side variable
     }
 
+    @Processor(target="WhileDoStmt")
+    void processWhileDoStmt(WhileDoStmt whileDoStmt) {
+        // Generate unique labels for branch targets
+        String _start = table.getLabel();
+        String _end  = table.getLabel();
+        // If then clause
+        label(_start);
+        visit(whileDoStmt.getExpn()); // Evaluate condition of the while statement
+        emit("BFALSE", _end);        // Branch to end if false
+        visit(whileDoStmt.getBody());
+        emit("JMP", _start);            // Jump to the start again
+        label(_end);
+    }
+
+
     @Processor(target="IfStmt")
     void processIfStmt(IfStmt ifStmt) {
-        // Generate unique labels for branch targets
         String _else = table.getLabel();
         String _end  = table.getLabel();
 

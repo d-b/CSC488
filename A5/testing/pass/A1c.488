@@ -13,6 +13,8 @@
     while i < 10 do
         i := i + 1
     end
+    put i,newline
+    %@output=10
 
     % basic repeat loop construct
     i := 10
@@ -24,11 +26,13 @@
     i := 0
     while i = 0 do
         exit
+        i := 1
     end
 
     i := 0
     repeat
         exit
+        i := 1
     until i = 1
 
     % conditional loop exits
