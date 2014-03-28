@@ -55,7 +55,8 @@ public class CodeGen extends Visitor
         if(!isProgram) routine = (RoutineDecl) scope.getParent();
 
         // Emit comment for start of scope
-        if(isProgram) comment("Start of program");
+        if(isProgram) { comment("Start of program");
+                        comment("------------------------------------"); }
         else comment("Start of " + routine.getName());
 
         if(!isProgram)
@@ -80,8 +81,8 @@ public class CodeGen extends Visitor
         else          emit("BR");                           // Routine epilog
 
         // Emit comment for end of scope
-        if(isProgram) comment("End of program");
-        else comment("End of " + routine.getName());
+        if(isProgram) comment(" ---------- End of program ----------");
+        else { comment("End of " + routine.getName()); emit(""); }
     }
 
     @Processor(target="Scope")
@@ -97,8 +98,10 @@ public class CodeGen extends Visitor
 
         // Process routine declarations
         if(table.getRoutineCount() > 0 ) {
+            comment("Routine declarations");
+            comment("------------------------------------");
             String _end = table.getLabel();
-            emit("JMP", _end);
+            emit("JMP", _end); emit("");
             visit(scope.getDeclarations());
             label(_end);
         }
@@ -421,12 +424,12 @@ public class CodeGen extends Visitor
 
     public void Generate(Program program) {
         // Load the library
-        emit("SECTION", Library.section);
+        section(Library.section);
         assemblerPrint(Library.code);
 
         // Generate the code
-        emit("SECTION", ".code"); // Start the code section
-        visit(program);           // Traverse the AST
+        section(".code"); // Start the code section
+        visit(program);   // Traverse the AST
     }
 
     public Boolean Finalize() {
@@ -511,7 +514,7 @@ public class CodeGen extends Visitor
     }
 
     void emit(String instruction, Object... operands) {
-        String command = instruction;
+        String command = "    " + instruction;
         for(Object op : operands) {
             if(!(op instanceof Boolean)) command += " " + op.toString();
             else command += " " + (((Boolean) op) ? "$true" : "$false");
