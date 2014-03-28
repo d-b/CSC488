@@ -39,6 +39,7 @@ import compiler488.codegen.visitor.Processor;
  * Code generator for compiler 488
  *
  * @author Daniel Bloemendal
+ * @author Oren Watson
  */
 public class CodeGen extends Visitor
 {
@@ -82,7 +83,6 @@ public class CodeGen extends Visitor
         if(isProgram) comment("End of program");
         else comment("End of " + routine.getName());
     }
-
 
     @Processor(target="Scope")
     void processScope(Scope scope) {
@@ -162,7 +162,7 @@ public class CodeGen extends Visitor
     void processConditionalExpn(ConditionalExpn conditionalExpn) {
         // Generate unique labels for branch targets
         String _false = table.getLabel();
-        String _end   = table.getLabel();
+        String _end = table.getLabel();
 
         // Condition
         visit(conditionalExpn.getCondition());  // Evaluate condition
@@ -192,7 +192,7 @@ public class CodeGen extends Visitor
     void processFunctionCallExpn(FunctionCallExpn functionCallExpn) {
         // Generate labels required for call
         String _func = table.getLabel(functionCallExpn.getIdent().getId());
-        String _end  = table.getLabel();
+        String _end = table.getLabel();
 
         // Setup the call
         emit("SETUPCALL", _end);
@@ -239,7 +239,7 @@ public class CodeGen extends Visitor
     void processBoolOrExpn(BoolExpn boolExpn) {
         // Generate unique labels for branch targets
         String _checkRHS = table.getLabel();
-        String _end      = table.getLabel();
+        String _end = table.getLabel();
 
         // Left side check
         visit(boolExpn.getLeft());  // Evaluate left hand side
@@ -285,42 +285,22 @@ public class CodeGen extends Visitor
         emit("STORE");                              // Store the value of the expression in the left side variable
     }
 
-    @Processor(target="WhileDoStmt")
-    void processWhileDoStmt(WhileDoStmt whileDoStmt) {
-        // Generate unique labels for branch targets
-        String _prevExitLabel = _exitLabel;
-        String _start = table.getLabel();
-        String _end = _exitLabel = table.getLabel();
-        // If then clause
-        label(_start);
-        visit(whileDoStmt.getExpn()); // Evaluate condition of the while statement
-        emit("BFALSE", _end);        // Branch to end if false
-        visit(whileDoStmt.getBody());
-        emit("JMP", _start);            // Jump to the start again
-        label(_end);
-        _exitLabel = _prevExitLabel;
+    @Processor(target="ExitStmt")
+    void processExitStmt(ExitStmt exitStmt) {
+        if(exitStmt.getCondition() == null)
+            emit("JMP", loopExitLabel);
+        else {
+            visit(exitStmt.getCondition());
+            emit("NOT");
+            emit("BFALSE", loopExitLabel);
+        }
     }
-
-    @Processor(target="RepeatUntilStmt")
-    void processRepeatUntilStmt(RepeatUntilStmt repeatUntilStmt) {
-        // Generate unique labels for branch targets
-        String _prevExitLabel = _exitLabel;
-        String _start = table.getLabel();
-        _exitLabel = table.getLabel();
-        // If then clause
-        label(_start);
-        visit(repeatUntilStmt.getBody());
-        visit(repeatUntilStmt.getExpn()); // Evaluate condition of the while statement
-        emit("BFALSE", _start);        // Branch to end if false
-        label(_exitLabel);
-        _exitLabel = _prevExitLabel;
-    }
-
 
     @Processor(target="IfStmt")
     void processIfStmt(IfStmt ifStmt) {
+        // Generate unique labels for branch targets
         String _else = table.getLabel();
-        String _end  = table.getLabel();
+        String _end = table.getLabel();
 
         // If then clause
         visit(ifStmt.getCondition()); // Evaluate condition of the if statement
@@ -342,7 +322,7 @@ public class CodeGen extends Visitor
     void processProcedureCallStmt(ProcedureCallStmt procedureCallStmt) {
         // Generate labels required for call
         String _proc = table.getLabel(procedureCallStmt.getIdent().getId());
-        String _end  = table.getLabel();
+        String _end = table.getLabel();
 
         // Setup the call
         emit("SETUPCALL", _end);
@@ -362,10 +342,31 @@ public class CodeGen extends Visitor
             if(p instanceof TextConstExpn)
                 put(((TextConstExpn) p).getValue()); // String printable
             else if(p instanceof NewlineConstExpn)
-                emit("PUTNEWLINE");                  // Newline printable
+                newline();                           // Newline printable
             else if(p instanceof Expn)
                 { visit((Expn) p); emit("PRINTI"); } // Expression printable
             else throw new RuntimeException("unknown printable");
+    }
+
+    @Processor(target="RepeatUntilStmt")
+    void processRepeatUntilStmt(RepeatUntilStmt repeatUntilStmt) {
+        // Preserve the previous loop exit and generate a new one
+        String prevLoopExitLabel = loopExitLabel;
+        loopExitLabel = table.getLabel();
+
+        // Generate unique labels for branch targets
+        String _start = table.getLabel();
+        String _end = loopExitLabel;
+        // If then clause
+        label(_start);
+        visit(repeatUntilStmt.getBody());
+        visit(repeatUntilStmt.getExpn()); // Evaluate condition of the while statement
+        emit("BFALSE", _start);           // Branch to end if false
+        label(_end);
+
+
+        // Restore old loop exit label
+        loopExitLabel = prevLoopExitLabel;
     }
 
     @Processor(target="ResultStmt")
@@ -386,16 +387,25 @@ public class CodeGen extends Visitor
         emit("JMP", _end); // Jump to the end of the function
     }
 
-    @Processor(target="ExitStmt")
-    void processExitStmt(ExitStmt exitStmt) {
-        // Get routine end label
-        if(exitStmt.getCondition() != null){
-            visit(exitStmt.getCondition());
-            emit("NOT");
-            emit("BFALSE", _exitLabel);
-        }else{
-            emit("JMP", _exitLabel); // Jump to the end of the loop
-        }
+    @Processor(target="WhileDoStmt")
+    void processWhileDoStmt(WhileDoStmt whileDoStmt) {
+        // Preserve the previous loop exit and generate a new one
+        String prevLoopExitLabel = loopExitLabel;
+        loopExitLabel = table.getLabel();
+
+        // Generate unique labels for branch targets
+        String _start = table.getLabel();
+        String _end = loopExitLabel;
+        // If then clause
+        label(_start);
+        visit(whileDoStmt.getExpn()); // Evaluate condition of the while statement
+        emit("BFALSE", _end);         // Branch to end if false
+        visit(whileDoStmt.getBody());
+        emit("JMP", _start);          // Jump to the start again
+        label(_end);
+
+        // Restore old loop exit label
+        loopExitLabel = prevLoopExitLabel;
     }
 
     //
@@ -431,7 +441,8 @@ public class CodeGen extends Visitor
     }
 
     // Code generator internals
-    Table table;
+    private Table  table;         // Master table for code generator
+    private String loopExitLabel; // Loop exit label
 
     //
     // Assembler
@@ -485,10 +496,15 @@ public class CodeGen extends Visitor
         emit("POP");
     }
 
+    void newline() {
+        emit("PUSH", (short) '\n');
+        emit("PRINTC");
+    }
+
     void put(String string) {
         boolean firstLine = true;
         for(String line : string.split("\\r?\\n")) {
-            if(!firstLine) assemblerPrintln("PUTNEWLINE");
+            if(!firstLine) newline();
             else firstLine = false;
             print(line);
         }
@@ -513,10 +529,7 @@ public class CodeGen extends Visitor
         emit("POPN");
     }
 
-    // Exit label saved and restored by loops.
-    String _exitLabel;
-
     // Assembler internals
-    PrintStream     assemblerStream;
-    AssemblerThread assemblerThread;
+    private PrintStream     assemblerStream;
+    private AssemblerThread assemblerThread;
 }

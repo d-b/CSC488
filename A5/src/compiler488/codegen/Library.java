@@ -1,5 +1,11 @@
 package compiler488.codegen;
 
+/**
+ * Code generator library
+ *
+ * @author Mike
+ * @author Daniel Bloemendal
+ */
 public final class Library {
     public static final String section = ".library";
     public static final String code
@@ -19,7 +25,7 @@ public final class Library {
               + "DUP\n"
               + "ADDR 0 -2\n"
               + "LOAD\n"
-              + "PUSH 1\n"              
+              + "PUSH 1\n"
               + "ADD\n"
               + "ADD\n"
               + "LOAD\n"
