@@ -21,7 +21,7 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
         emitter.emit(Machine.PUSH, strAddr);
         emitter.emit(Machine.LOAD);
         emitter.emit(Machine.LT);
-        emitter.emit(Machine.PUSH, (short) (topLabel + 21));
+        emitter.emit(Machine.PUSH, (short) (topLabel + 20));
         emitter.emit(Machine.BF);
         emitter.emit(Machine.DUP);
         emitter.emit(Machine.PUSH, (short) (strAddr + 1));
