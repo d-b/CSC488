@@ -74,9 +74,8 @@ public class Table {
     public Variable getVaraible(String variable) {
         Scope scope = currentScope();
         for(Frame frame : majorStack) {
-            Short offset = frame.getOffset(scope, variable);
-            if(offset != null)
-                return new Variable(frame.getLevel(), offset);
+            Variable var = frame.getVariable(scope, variable);
+            if(var != null) return var;
             scope = frame.getParent();
         } return null;
     }

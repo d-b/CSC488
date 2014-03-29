@@ -2,6 +2,7 @@ package compiler488.codegen;
 
 import java.io.*;
 
+import compiler488.ast.Readable;
 import compiler488.ast.Printable;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.expn.ArithExpn;
@@ -20,6 +21,7 @@ import compiler488.ast.expn.SubsExpn;
 import compiler488.ast.expn.TextConstExpn;
 import compiler488.ast.expn.UnaryMinusExpn;
 import compiler488.ast.stmt.AssignStmt;
+import compiler488.ast.stmt.GetStmt;
 import compiler488.ast.stmt.IfStmt;
 import compiler488.ast.stmt.ExitStmt;
 import compiler488.ast.stmt.WhileDoStmt;
@@ -205,11 +207,15 @@ public class CodeGen extends Visitor
         label(_end);
     }
 
-    @Processor(target="IdentExpn")
-    void processIdentExpn(IdentExpn identExpn) {
+    void processIdentExpn(IdentExpn identExpn, boolean address) {
         Variable var = table.getVaraible(identExpn.getIdent().getId());
         emit("ADDR", var.getLevel(), var.getOffset());
-        emit("LOAD");
+        if(!address) emit("LOAD");
+    }
+
+    @Processor(target="IdentExpn")
+    void processIdentExpn(IdentExpn identExpn) {
+        processIdentExpn(identExpn, false);
     }
 
     @Processor(target="IntConstExpn")
@@ -296,6 +302,11 @@ public class CodeGen extends Visitor
             emit("NOT");
             emit("BFALSE", loopExitLabel);
         }
+    }
+
+    @Processor(target="GetStmt")
+    void processGetStmt(GetStmt getStmt) {
+        // FIXME: finish dealing with type information in Table/Frame
     }
 
     @Processor(target="IfStmt")

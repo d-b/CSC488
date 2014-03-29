@@ -13,7 +13,6 @@ import compiler488.ast.decl.DeclarationPart;
 import compiler488.ast.decl.MultiDeclarations;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.decl.ScalarDecl;
-import compiler488.ast.decl.ScalarDeclPart;
 import compiler488.ast.stmt.Program;
 import compiler488.ast.stmt.Scope;
 import compiler488.codegen.visitor.Visitor;
@@ -58,7 +57,7 @@ public class Frame extends Visitor {
     @PreProcessor(target="MultiDeclarations")
     void preMultiDeclarations(MultiDeclarations multiDeclarations) {
         for(DeclarationPart part : multiDeclarations.getElements().getList())
-            currentFrame().addVariable(part);
+            currentFrame().addVariable(part, multiDeclarations);
     }
 
     //
@@ -70,7 +69,7 @@ public class Frame extends Visitor {
     }
 
     void enterFrame(Scope scope) {
-        MinorFrame frameNew = new MinorFrame(frameCurrent);
+        MinorFrame frameNew = new MinorFrame(this, frameCurrent);
         if(frameRoot == null) frameRoot = frameNew;
         frameMap.put(scope, frameNew);
         frameCurrent = frameNew;
@@ -98,8 +97,10 @@ public class Frame extends Visitor {
         RoutineDecl routine = getRoutine();
         if(routine == null) return; // Scope does not belong to a routine
         List<ScalarDecl> parameterList = routine.getParameters().getList();
-        for(int i = 0; i < parameterList.size(); i++)
-            frameArgs.put(parameterList.get(i).getIdent().getId(), i);
+        for(int i = 0; i < parameterList.size(); i++) {
+            ScalarDecl decl = parameterList.get(i);
+            frameArgs.put(decl.getName(), new Variable(decl, frameLevel, (short) i));
+        }
     }
 
     //
@@ -113,7 +114,7 @@ public class Frame extends Visitor {
         // Initialize members
         frameScope = scope;
         frameParent = parent;
-        frameArgs = new HashMap<String, Integer>();
+        frameArgs = new HashMap<String, Variable>();
         frameMap = new HashMap<AST, MinorFrame>();
         frameRoot = null;
         frameCurrent = null;
@@ -130,19 +131,19 @@ public class Frame extends Visitor {
         return isRoutine || isProgram;
     }
 
-    public Short getOffset(Scope scope, String identifier) {
+    public Variable getVariable(Scope scope, String identifier) {
         // Try the scope first
         for(MinorFrame frame = frameMap.get(scope); frame != null; frame = frame.getParent()) {
-            Short offset = frame.getOffset(identifier);
-            if(offset != null) return offset;
+            Variable variable = frame.getVariable(identifier);
+            if(variable != null) return variable;
         }
 
         // Otherwise try the arguments
         if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
-        Integer arg = frameArgs.get(identifier);
-        if(arg == null) return null;
-        short offset = (short) (int) arg;
-        return (short)(offset - frameArgs.size() - 1); // ON = -N - 1 argument 1
+        Variable variable = frameArgs.get(identifier);
+        if(variable == null) return null;
+        return new Variable(variable, frameLevel,
+                (short)(variable.getOffset() - frameArgs.size() - 1)); // ON = -N - 1 + argument number
     }
 
     public Short getOffsetReturn() {
@@ -184,13 +185,13 @@ public class Frame extends Visitor {
     }
 
     // Internal members
-    private Scope                frameParent;
-    private Scope                frameScope;
-    private Map<String, Integer> frameArgs;
-    private Map<AST, MinorFrame> frameMap;
-    private MinorFrame           frameRoot;
-    private MinorFrame           frameCurrent;
-    private short                frameLevel;
+    private Scope                 frameParent;
+    private Scope                 frameScope;
+    private Map<String, Variable> frameArgs;
+    private Map<AST, MinorFrame>  frameMap;
+    private MinorFrame            frameRoot;
+    private MinorFrame            frameCurrent;
+    private short                 frameLevel;
 }
 
 //
@@ -198,46 +199,31 @@ public class Frame extends Visitor {
 //
 
 class MinorFrame implements Comparable<MinorFrame> {
-    MinorFrame(MinorFrame parent) {
+    MinorFrame(Frame major, MinorFrame parent) {
         // Instantiate internals
-        nodeMap = new HashMap<String, AST>();
-        offsetMap = new HashMap<String, Short>();
+        frameMajor = major; frameParent = parent;
         frameChildren = new LinkedList<MinorFrame>();
+        frameVariables = new HashMap<String, Variable>();
         frameBase = (parent != null) ? parent.frameSize : 0;
-        frameParent = parent;
         frameSize = 0;
         // Add this frame to the parent
         if(parent != null) parent.addChild(this);
     }
 
-    public AST getNode(String identifier) {
-        return nodeMap.get(identifier);
+    public Variable getVariable(String identifier) {
+        Variable variable = frameVariables.get(identifier);
+        if(variable == null) return null;
+        return new Variable(variable, frameMajor.getLevel(), (short)(frameBase + variable.getOffset()));
     }
 
-    public Short getOffset(String identifier) {
-        Short offset = offsetMap.get(identifier);
-        return (offset != null) ? ((short)(frameBase + offset)) : null;
-    }
-
-    public void addVariable(DeclarationPart decl) {
-        if(decl instanceof ScalarDeclPart)
-            addVariable((ScalarDeclPart) decl);
-        else if(decl instanceof ArrayDeclPart)
-            addVariable((ArrayDeclPart) decl);
-    }
-
-    public void addVariable(ScalarDeclPart scalarDecl) {
-        String ident = scalarDecl.getIdent().getId();
-        nodeMap.put(ident, scalarDecl);
-        offsetMap.put(ident, frameSize);
-        frameSize += 1;
-    }
-
-    public void addVariable(ArrayDeclPart arrayDecl) {
-        String ident = arrayDecl.getIdent().getId();
-        nodeMap.put(ident, arrayDecl);
-        offsetMap.put(ident, frameSize);
-        frameSize += arrayDecl.getSize();
+    public void addVariable(AST node, MultiDeclarations parent) {
+        Variable variable = new Variable(node, parent, frameMajor.getLevel(),  frameSize);
+        // For scalars, increment the frame size by one
+        if(!(node instanceof ArrayDeclPart)) frameSize += 1;
+        // If it is an array declaration increment it by the size of the array
+        else frameSize += ((ArrayDeclPart) node).getSize();
+        // Add it to the map of variables
+        frameVariables.put(variable.getName(), variable);
     }
 
     // Getters/setters
@@ -257,10 +243,10 @@ class MinorFrame implements Comparable<MinorFrame> {
         frameChildren.add(child);
     }
 
-    private Map<String, AST>   nodeMap;
-    private Map<String, Short> offsetMap;
-    private MinorFrame         frameParent;
-    private List<MinorFrame>   frameChildren;
-    private short              frameBase;
-    private short              frameSize;
+    private Frame                 frameMajor;
+    private MinorFrame            frameParent;
+    private List<MinorFrame>      frameChildren;
+    private Map<String, Variable> frameVariables;
+    private short                 frameBase;
+    private short                 frameSize;
 }
