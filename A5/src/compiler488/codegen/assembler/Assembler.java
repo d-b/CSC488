@@ -115,7 +115,7 @@ public class Assembler {
             m = patternInstruction.matcher(codeInstruction);
             if(m.matches()) {
                 // If there is no section bail out
-                if(currentSection() == null)
+                if(currentSection() == null && (m.group(1) != null || m.group(2) != null))
                     invalidInstruction("Instruction and/or label outside of a section!");
 
                 // See if there is a label

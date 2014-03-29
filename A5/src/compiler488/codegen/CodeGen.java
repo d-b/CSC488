@@ -50,39 +50,39 @@ public class CodeGen extends Visitor
     //
 
     void majorProlog() {
-        // Prepare information about scope
-        RoutineDecl routine = null;
-        Scope scope = table.currentScope();
-        boolean isProgram = (scope instanceof Program);
-        if(!isProgram) routine = (RoutineDecl) scope.getParent();
+        // Fetch enclosing routine
+        RoutineDecl routine = (RoutineDecl) table.currentScope().getParent();
 
-        // Emit comment for start of scope
-        if(isProgram) { comment("Start of program");
-                        comment("------------------------------------"); }
-        else comment("Start of " + routine.getName());
+        if(routine != null) {
+            comment("------------------------------------");
+            comment("Start of " + routine.getName());
+            comment("------------------------------------");
+            // Starting label for routine
+            label(table.getRoutineLabel(false));
+        }
 
-        if(!isProgram) label(table.getRoutineLabel(false)); // Starting label
-        emit("SAVECTX", table.getLevel());                  // Scope prolog
-        reserve(table.getLocalsSize());                     // Reserve memory for locals
+        emit("SAVECTX", table.getLevel()); // Scope prolog
+        reserve(table.getLocalsSize());    // Reserve memory for locals
     }
 
     void majorEpilog() {
-        // Prepare information about scope
-        RoutineDecl routine = null;
-        Scope scope = table.currentScope();
-        boolean isProgram = (scope instanceof Program);
-        if(!isProgram) routine = (RoutineDecl) scope.getParent();
+        // Fetch enclosing routine
+        RoutineDecl routine = (RoutineDecl) table.currentScope().getParent();
 
-        if(!isProgram) label(table.getRoutineLabel(true));  // Ending label
-        free(table.getLocalsSize());                        // Free locals memory
-        emit("RESTORECTX", table.getLevel(),                // Restore context
-                           table.getArgumentsSize());       // ...
-        if(isProgram) emit("HALT");                         // Program epilog
-        else          emit("BR");                           // Routine epilog
+        if(routine != null)                           // Routine ending label
+            label(table.getRoutineLabel(true));       // ...
+        free(table.getLocalsSize());                  // Free locals
+        emit("RESTORECTX", table.getLevel(),          // Restore context
+                           table.getArgumentsSize()); // ...
+        if(routine != null) emit("BR");               // Return from routine
+        else                emit("HALT");             // Halt machine
 
-        // Emit comment for end of scope
-        if(isProgram) comment("---------- End of program ----------");
-        else { comment("End of " + routine.getName()); emit(""); }
+        if(routine != null) {
+            comment("------------------------------------");
+            comment("End of " + routine.getName());
+            comment("------------------------------------");
+            assemblerPrintln("");
+        }
     }
 
     @Processor(target="Scope")
@@ -446,13 +446,19 @@ public class CodeGen extends Visitor
     }
 
     public void Generate(Program program) {
-        // Load the library
-        section(Library.section);
+        // Assemble the runtime library
         assemblerPrint(Library.code);
 
-        // Generate the code
+        comment("------------------------------------");
+        comment("Start of program"                    );
+        comment("------------------------------------");
+
         section(".code"); // Start the code section
         visit(program);   // Traverse the AST
+
+        comment("------------------------------------");
+        comment("End of program"                      );
+        comment("------------------------------------");
     }
 
     public Boolean Finalize() {

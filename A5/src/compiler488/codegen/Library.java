@@ -7,10 +7,11 @@ package compiler488.codegen;
  * @author Daniel Bloemendal
  */
 public final class Library {
-    public static final String section = ".library";
     public static final String code
-              = "; CSC488 Compiler - Library \n"
+              = "; ------------------------------------\n"
+              + "; Start of runtime library \n"
               + "; ------------------------------------\n"
+              + "    SECTION .library\n\n"
               + "print:\n"
               + "    SAVECTX 0\n"
               + "    PUSH 0\n"
@@ -37,5 +38,7 @@ public final class Library {
               + "__print_end: POP\n"
               + "    RESTORECTX 0 1\n"
               + "    BR\n"
-              + "; ---------- End of library ----------\n\n";
+              + "; ------------------------------------\n"
+              + "; End of runtime library\n"
+              + "; ------------------------------------\n\n";
 }
