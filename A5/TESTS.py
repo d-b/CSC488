@@ -83,8 +83,12 @@ def test(path, failing = False):
     inFile.seek(0)
 
     # Execute the test
-    output = subprocess.check_output(['java', '-jar', COMPILER, path], stdin=inFile, stderr=subprocess.STDOUT)
-    lines  = output.decode('utf8').replace('\r', '').split('\n')
+    try:
+        output = subprocess.check_output(['java', '-jar', COMPILER, path], stdin=inFile, stderr=subprocess.STDOUT)
+        lines  = output.decode('utf8').replace('\r', '').split('\n')
+    except:
+        # On exception consider the test a failure
+        return False
 
     # Successful case
     if not failing:
