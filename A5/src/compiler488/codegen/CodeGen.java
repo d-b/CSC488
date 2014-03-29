@@ -236,7 +236,7 @@ public class CodeGen extends Visitor
         if(intConstExpn.getValue() < Machine.MIN_INTEGER)
             throw new CodeGenException("integer constant below machine minimum of " + Machine.MIN_INTEGER);
         if(intConstExpn.getValue() > Machine.MAX_INTEGER)
-            throw new CodeGenException("integer constant below machine maximum of " + Machine.MAX_INTEGER);
+            throw new CodeGenException("integer constant above machine maximum of " + Machine.MAX_INTEGER);
         emit("PUSH", intConstExpn.getValue()); // Push the constant literal
     }
 
