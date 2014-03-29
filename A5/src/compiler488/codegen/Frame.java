@@ -99,7 +99,8 @@ public class Frame extends Visitor {
         List<ScalarDecl> parameterList = routine.getParameters().getList();
         for(int i = 0; i < parameterList.size(); i++) {
             ScalarDecl decl = parameterList.get(i);
-            frameArgs.put(decl.getName(), new Variable(decl, frameLevel, (short) i));
+            frameArgs.put(decl.getName(), new Variable(decl, frameLevel,
+                    (short)(-parameterList.size() - 1 + i))); // ON = -N - 1 + i argument i
         }
     }
 
@@ -132,18 +133,14 @@ public class Frame extends Visitor {
     }
 
     public Variable getVariable(Scope scope, String identifier) {
-        // Try the scope first
+        // Try the minor scopes first
         for(MinorFrame frame = frameMap.get(scope); frame != null; frame = frame.getParent()) {
             Variable variable = frame.getVariable(identifier);
             if(variable != null) return variable;
         }
 
         // Otherwise try the arguments
-        if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
-        Variable variable = frameArgs.get(identifier);
-        if(variable == null) return null;
-        return new Variable(variable, frameLevel,
-                (short)(variable.getOffset() - frameArgs.size() - 1)); // ON = -N - 1 + argument number
+        return frameArgs.get(identifier);
     }
 
     public Short getOffsetReturn() {
