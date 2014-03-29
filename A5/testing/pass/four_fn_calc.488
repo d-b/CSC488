@@ -9,7 +9,7 @@
     repeat
       put "select(0-4): "
       get i
-    until i <= 5 and i >= 1
+    until i <= 5 and i >= 0
     result i
   }
   func getnum() : integer {
