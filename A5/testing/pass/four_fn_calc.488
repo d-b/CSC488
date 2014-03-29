@@ -49,5 +49,7 @@
       doop(op,getnum())
     fi
   }end
-  put "bye!"
+  put "bye!",newline
 }
+%@output=value: 0
+%@input=0

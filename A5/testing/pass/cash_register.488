@@ -5,21 +5,21 @@
   var tot,pri,tax : integer    
   tot := 0
   put "Enter prices in cents, 0 to end.",newline
-  %output=Enter prices in cents, 0 to end.
-  %input=499
-  %input=399
-  %input=249
-  %input=0
-  %input=0
+  %@output=Enter prices in cents, 0 to end.
+  %@input=499
+  %@input=399
+  %@input=249
+  %@input=0
+  %@input=0
   repeat
     get pri
     tot := tot + pri
   until pri = 0
   put "subtotal:	",tot,newline
-  %output=subtotal:	1147
+  %@output=subtotal:	1147
   tax := tot * 3 / 20
   put "sales tax:	",tax,newline
-  %output=sales tax:	172
+  %@output=sales tax:	172
   put "total:	",tot+tax,newline
-  %output=total:	1319
+  %@output=total:	1319
 }
