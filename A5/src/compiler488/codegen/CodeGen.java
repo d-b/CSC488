@@ -333,6 +333,14 @@ public class CodeGen extends Visitor
         emit("NEG");                        // Negate the value
     }
 
+    void addressVarRefExpn(VarRefExpn varRefExpn) {
+        if(varRefExpn instanceof IdentExpn)
+            addressIdentExpn((IdentExpn) varRefExpn);
+        else if(varRefExpn instanceof SubsExpn)
+            addressSubsExpn((SubsExpn) varRefExpn);
+        else throw new RuntimeException("unknown variable reference type");
+    }
+
     //
     // Short circuited boolean expressions
     //
@@ -380,16 +388,9 @@ public class CodeGen extends Visitor
 
     @Processor(target="AssignStmt")
     void processAssignStmt(AssignStmt assignStmt) {
-        // Fetch address of left side
-        VarRefExpn lval = assignStmt.getLval();
-        if(lval instanceof IdentExpn)
-            addressIdentExpn((IdentExpn) lval);
-        else if(lval instanceof SubsExpn)
-            addressSubsExpn((SubsExpn) lval);
-        else throw new RuntimeException("unknown variable reference type");
-
-        visit(assignStmt.getRval()); // Evaluate the right side expression
-        emit("STORE");               // Store the value of the expression in the left side variable
+        addressVarRefExpn(assignStmt.getLval()); // Fetch address of left side
+        visit(assignStmt.getRval());             // Evaluate the right side expression
+        emit("STORE");                           // Store the value of the expression in the left side variable
     }
 
     @Processor(target="ExitStmt")
@@ -406,13 +407,11 @@ public class CodeGen extends Visitor
     @Processor(target="GetStmt")
     void processGetStmt(GetStmt getStmt) {
         for(Readable readable : getStmt.getInputs().getList()) {
-            // FIXME: add support for SubsExpn
-            // Skip everything but identifiers for now
-            if(!(readable instanceof IdentExpn)) continue;
+            // Skip any readable that is not a variable reference
+            if(!(readable instanceof VarRefExpn)) continue;
 
             // Push address of variable on to stack
-            IdentExpn identExpn = (IdentExpn) readable;
-            addressIdentExpn(identExpn);
+            addressVarRefExpn((VarRefExpn) readable);
 
             // Perform the read and store the result
             emit("READI");
