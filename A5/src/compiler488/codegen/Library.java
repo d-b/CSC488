@@ -37,7 +37,7 @@ public final class Library {
               + "    BR\n"
               + "__print_end: POP\n"
               + "    RESTORECTX 0 1\n"
-              + "    BR\n"
+              + "    BR\n\n"
               + "; ------------------------------------\n"
               + "; End of runtime library\n"
               + "; ------------------------------------\n\n";

@@ -4,6 +4,7 @@ import java.io.*;
 
 import compiler488.ast.Readable;
 import compiler488.ast.Printable;
+import compiler488.ast.decl.ArrayBound;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.expn.ArithExpn;
 import compiler488.ast.expn.BoolConstExpn;
@@ -20,6 +21,7 @@ import compiler488.ast.expn.NotExpn;
 import compiler488.ast.expn.SubsExpn;
 import compiler488.ast.expn.TextConstExpn;
 import compiler488.ast.expn.UnaryMinusExpn;
+import compiler488.ast.expn.VarRefExpn;
 import compiler488.ast.stmt.AssignStmt;
 import compiler488.ast.stmt.GetStmt;
 import compiler488.ast.stmt.IfStmt;
@@ -210,6 +212,7 @@ public class CodeGen extends Visitor
 
     void addressIdentExpn(IdentExpn identExpn) {
         Variable var = table.getVaraible(identExpn.getName());
+        if(var == null) throw new RuntimeException("identifier does not match any variable declaration");
         emit("ADDR", var.getLevel(), var.getOffset());
     }
 
@@ -231,8 +234,97 @@ public class CodeGen extends Visitor
         emit("EQ");                  // ...
     }
 
+    void addressSubsExpn(SubsExpn subsExpn) {
+        // Fetch address of the array
+        Variable var = table.getVaraible(subsExpn.getName());
+        if(var == null) throw new RuntimeException("identifier does not match any variable declaration");
+        emit("ADDR", var.getLevel(), var.getOffset());
+
+        // Fetch bounds and check sanity
+        ArrayBound bound1 = var.getBounds().size() > 0 ? var.getBounds().get(0) : null;
+        ArrayBound bound2 = var.getBounds().size() > 1 ? var.getBounds().get(1) : null;
+        if(bound1 == null && bound2 == null) throw new RuntimeException("array with no bounds");
+
+        // Generate labels
+        String _error = table.getLabel();
+        String _error_lower1 = _error;
+        String _error_upper1 = _error;
+        String _error_lower2 = _error;
+        String _error_upper2 = _error;
+        String _check_upper1 = table.getLabel();
+        String _check_upper2 = table.getLabel();
+        String _ready_sub1 = table.getLabel();
+        String _ready_sub2 = table.getLabel();
+        String _end = table.getLabel();
+
+        // Compute the stride of the array
+        short stride = (short)(bound1.getUpperboundValue() - bound1.getLowerboundValue());
+
+        visit(subsExpn.getSubscript1());               // Evaluate subscript_1
+        emit("DUP");                                   // Create duplicate, for bounds checking
+        emit("PUSH", bound1.getLowerboundValue());     // Lower bound on stack
+        emit("LT");                                    // Is subscript_1 less than the lower bound?
+        emit("BFALSE", _check_upper1);                 // No, then head to the next phase
+        emit("JMP", _error_lower1);                    // Yes, then jump to error handler
+
+        label(_check_upper1);
+        emit("DUP");                                   // Another duplicate of subscript_1
+        emit("PUSH", bound1.getUpperboundValue());     // Upper bound on stack
+        emit("SWAP");                                  // Is subscript_1 greater than the upper bound?
+        emit("LT");                                    // ...
+        emit("BFALSE", _ready_sub1);                   // No, then head to the next phase
+        emit("JMP", _error_upper1);                    // Yes, then jump to the error handler.
+
+        label(_ready_sub1);
+        emit("PUSH", bound1.getLowerboundValue());     // subscript_1 - lower_bound_1
+        emit("SUB");                                   // ...
+
+        // If array is 1D
+        if(bound2 == null) {
+            emit("ADD");                               // Add subscript to base address
+            emit("JMP", _end);                         // Jump to end
+        }
+        // If array is 2D
+        else {
+            emit("PUSH", stride);                      // Multiply by stride
+            emit("MUL");                               // ...
+            emit("ADD");                               // Add to base address
+
+            visit(subsExpn.getSubscript2());           // Evaluate subscript_2
+            emit("DUP");                               // Create duplicate, for bounds checking
+            emit("PUSH", bound2.getLowerboundValue()); // Lower bound on stack
+            emit("LT");                                // Is subscript_2 less than the lower bound?
+            emit("BFALSE", _check_upper2);             // No, then head to the next phase
+            emit("JMP", _error_lower2);                // Yes, then jump to error handler
+
+            label(_check_upper2);
+            emit("DUP");                               // Another duplicate of subscript_2
+            emit("PUSH", bound2.getUpperboundValue()); // Upper bound on stack
+            emit("SWAP");                              // Is subscript_1 greater than the upper bound?
+            emit("LT");                                // ...
+            emit("BFALSE", _ready_sub2);               // No, then head to the next phase
+            emit("JMP", _error_upper2);                // Yes, then jump to the error handler.
+
+            label(_ready_sub2);
+            emit("PUSH", bound2.getLowerboundValue()); // subscript_2 - lower_bound_2
+            emit("SUB");
+            emit("ADD");                               // Add computed array offset to base address
+            emit("JMP", _end);                         // Jump to end
+        }
+
+        // Error handlers
+        label(_error_lower1);
+        print(subsExpn.getLoc().toString() + ": out of bounds access to array " + var.getName()); newline();
+        emit("HALT");
+
+        // End of block
+        label(_end);
+    }
+
     @Processor(target="SubsExpn")
     void processSubsExpn(SubsExpn subsExpn) {
+        addressSubsExpn(subsExpn);
+        emit("LOAD");
     }
 
     @Processor(target="UnaryMinusExpn")
@@ -288,10 +380,16 @@ public class CodeGen extends Visitor
 
     @Processor(target="AssignStmt")
     void processAssignStmt(AssignStmt assignStmt) {
-        Variable leftVar = table.getVaraible(assignStmt.getLval().getName());
-        emit("ADDR", leftVar.getLevel(), leftVar.getOffset()); // Emit address of target variable
-        visit(assignStmt.getRval());                           // Evaluate the right side expression
-        emit("STORE");                                         // Store the value of the expression in the left side variable
+        // Fetch address of left side
+        VarRefExpn lval = assignStmt.getLval();
+        if(lval instanceof IdentExpn)
+            addressIdentExpn((IdentExpn) lval);
+        else if(lval instanceof SubsExpn)
+            addressSubsExpn((SubsExpn) lval);
+        else throw new RuntimeException("unknown variable reference type");
+
+        visit(assignStmt.getRval()); // Evaluate the right side expression
+        emit("STORE");               // Store the value of the expression in the left side variable
     }
 
     @Processor(target="ExitStmt")
@@ -512,7 +610,7 @@ public class CodeGen extends Visitor
     }
 
     void section(String name) {
-        assemblerPrintln("SECTION " + name);
+        assemblerPrintln("    SECTION " + name);
     }
 
     void label(String name) {
