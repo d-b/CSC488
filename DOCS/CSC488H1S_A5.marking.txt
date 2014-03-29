@@ -1,0 +1,39 @@
+Assignment 5 Marking Scheme 
+                                  
+Documentation                    20.00
+  How well was their code 
+  generation documented?
+
+Expressions                      13.00
+  arithmetic expressions         3.00
+  boolean expressions            4.00
+  comparisions                   4.00
+  conditional expression         2.00
+
+Statements                       13.00
+   assignment                    2.00
+   if                            3.00
+   while, repeat, exit           5.00
+   get, put                      3.00
+
+Functions/procedures             17.00
+    parameter passing            3.00
+    display & addressing         3.00
+    local storage                3.00
+    embedded scopes              2.00
+    call of function/procedure   3.00
+    return, result               3.00
+
+Student Testing                  20.00
+    How thoroughly and completely 
+    did the students test their 
+    code generation?
+
+Packaging                        2.00
+    Was the submission correctly 
+    packaged? Did it compile?
+
+Our Testing                      15.00
+
+                   TOTAL         100.00
+
