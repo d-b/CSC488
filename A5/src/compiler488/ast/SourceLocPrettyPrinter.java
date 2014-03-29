@@ -1,5 +1,6 @@
 package compiler488.ast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 
@@ -12,6 +13,13 @@ public class SourceLocPrettyPrinter {
         this.output = output;
         this.lines = lines;
         this.loc = loc;
+    }
+    
+    static public String printToString(List<String> lines, SourceLoc loc) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream stream = new PrintStream(baos);
+        SourceLocPrettyPrinter printer = new SourceLocPrettyPrinter(stream, lines, loc);
+        printer.print(); return baos.toString();
     }
 
     public void print() {

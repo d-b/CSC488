@@ -1,9 +1,11 @@
 package compiler488.codegen;
 
 import java.io.*;
+import java.util.List;
 
 import compiler488.ast.Readable;
 import compiler488.ast.Printable;
+import compiler488.ast.SourceLocPrettyPrinter;
 import compiler488.ast.decl.ArrayBound;
 import compiler488.ast.decl.RoutineDecl;
 import compiler488.ast.expn.ArithExpn;
@@ -246,11 +248,10 @@ public class CodeGen extends Visitor
         if(bound1 == null && bound2 == null) throw new RuntimeException("array with no bounds");
 
         // Generate labels
-        String _error = table.getLabel();
-        String _error_lower1 = _error;
-        String _error_upper1 = _error;
-        String _error_lower2 = _error;
-        String _error_upper2 = _error;
+        String _error_lower1 = table.getLabel();
+        String _error_upper1 = table.getLabel();
+        String _error_lower2 = table.getLabel();
+        String _error_upper2 = table.getLabel();
         String _check_upper1 = table.getLabel();
         String _check_upper2 = table.getLabel();
         String _ready_sub1 = table.getLabel();
@@ -312,9 +313,27 @@ public class CodeGen extends Visitor
             emit("JMP", _end);                         // Jump to end
         }
 
-        // Error handlers
+        //
+        // Error handling
+        //
+
+        // Pretty printed locations of error
+        String locSub1 = new String(), locSub2 = new String();
+        if(bound1 != null) locSub1 = SourceLocPrettyPrinter.printToString(source, subsExpn.getSubscript1()).replace('"', '\'');
+        if(bound2 != null) locSub2 = SourceLocPrettyPrinter.printToString(source, subsExpn.getSubscript2()).replace('"', '\'');
+
+        // Handler for subscript_1 < lowerbound_1 & subscript_1 > upperbound_1
         label(_error_lower1);
-        print(subsExpn.getLoc().toString() + ": out of bounds access to array " + var.getName()); newline();
+        label(_error_upper1);
+        put(subsExpn.getLoc().toString() + ": subscript out of range"); newline();
+        put(locSub1);
+        emit("HALT");
+
+        // Handler for subscript_2 < lowerbound_2 & subscript_2 > upperbound_2
+        label(_error_lower2);
+        label(_error_upper2);
+        put(subsExpn.getLoc().toString() + ": subscript out of range"); newline();
+        put(locSub2);
         emit("HALT");
 
         // End of block
@@ -542,7 +561,10 @@ public class CodeGen extends Visitor
         assemblerStart();
     }
 
-    public void Generate(Program program) {
+    public void Generate(Program program, List<String> source) {
+        // Setup source listing
+        this.source = source;
+
         // Assemble the runtime library
         assemblerPrint(Library.code);
 
@@ -570,7 +592,8 @@ public class CodeGen extends Visitor
     }
 
     // Code generator internals
-    private Table  table;         // Master table for code generator
+    private Table        table;   // Master table
+    private List<String> source;  // Source listing
     private String loopExitLabel; // Loop exit label
 
     //
