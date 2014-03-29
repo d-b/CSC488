@@ -300,7 +300,7 @@ public class CodeGen extends Visitor
             label(_check_upper2);
             emit("DUP");                               // Another duplicate of subscript_2
             emit("PUSH", bound2.getUpperboundValue()); // Upper bound on stack
-            emit("SWAP");                              // Is subscript_1 greater than the upper bound?
+            emit("SWAP");                              // Is subscript_2 greater than the upper bound?
             emit("LT");                                // ...
             emit("BFALSE", _ready_sub2);               // No, then head to the next phase
             emit("JMP", _error_upper2);                // Yes, then jump to the error handler.
