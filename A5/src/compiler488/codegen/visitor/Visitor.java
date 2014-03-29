@@ -13,6 +13,8 @@ import java.util.Set;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
+import compiler488.ast.SourceLocPrettyPrinter;
+import compiler488.codegen.CodeGenException;
 
 /**
  * Helper for traversing an AST automatically and manually
@@ -24,7 +26,8 @@ public class Visitor {
     // Visitor interface
     //
 
-    public Visitor() {
+    public Visitor() { this(null); }
+    public Visitor(List<String> source) {
         // Instantiate internals
         processorsMap     = new HashMap<String, Method>();
         preProcessorsMap  = new HashMap<String, Method>();
@@ -32,6 +35,7 @@ public class Visitor {
         visitorGrey       = new HashSet<AST>();
         visitorExcluded   = new HashSet<AST>();
         visitorStack      = new LinkedList<AST>();
+        visitorSource     = source;
         // Populate the processors
         populateMappings();
     }
@@ -108,6 +112,11 @@ public class Visitor {
         visitorExcluded.add(node);
     }
 
+    /**
+     * The number of errors that have occurred during visitation
+     *
+     * @return the number of errors
+     */
     public int errors() {
         return visitorErrors;
     }
@@ -170,8 +179,15 @@ public class Visitor {
             catch (IllegalArgumentException e)  { exception = e; }
             catch (InvocationTargetException e) { exception = e; }
             if(exception != null) {
-                System.err.println("Error while visiting '" + cls.getSimpleName() + "' node:");
-                exception.printStackTrace(); visitorErrors += 1;
+                // Print a stack trace if it is not an expected error
+                if(!(exception.getCause() instanceof CodeGenException))
+                    exception.printStackTrace();
+                // Pretty print the error location
+                AST errorLocation = node;
+                SourceLocPrettyPrinter printer
+                    = new SourceLocPrettyPrinter(System.err, visitorSource, errorLocation);
+                System.err.println(printer.getFileRef() + ": " + exception.getCause().getMessage());
+                printer.print(); visitorErrors += 1;
             }
         }
     }
@@ -182,8 +198,9 @@ public class Visitor {
     private Map<String, Method> postProcessorsMap;
 
     // Visitor state
-    private Set<AST>   visitorGrey;     // AST nodes which have been seen
-    private Set<AST>   visitorExcluded; // AST nodes which have been excluded
-    private Deque<AST> visitorStack;    // AST node stack
-    private int        visitorErrors;   // Error count
+    private Set<AST>     visitorGrey;     // AST nodes which have been seen
+    private Set<AST>     visitorExcluded; // AST nodes which have been excluded
+    private Deque<AST>   visitorStack;    // AST node stack
+    private int          visitorErrors;   // Error count
+    private List<String> visitorSource;   // Source listing
 }

@@ -19,8 +19,7 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
 
     @Processor(target="SETUPCALL", operands={OperandType.OPERAND_INTEGER}, size=4)
     void emitSetupCall(Instruction ins) throws MemoryAddressException, LabelNotResolvedError {
-        // assuming later arguments are pushed using push, plus a push address and BR instruction
-        emitter.emit(Machine.PUSH, (short) 0);
+        emitter.emit(Machine.PUSH, (short) Machine.UNDEFINED);
         emitter.emit(Machine.PUSH, (short) ins.val(0));
     }
 

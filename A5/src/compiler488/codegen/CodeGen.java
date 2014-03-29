@@ -13,6 +13,7 @@ import compiler488.ast.expn.BoolConstExpn;
 import compiler488.ast.expn.BoolExpn;
 import compiler488.ast.expn.CompareExpn;
 import compiler488.ast.expn.ConditionalExpn;
+import compiler488.ast.expn.ConstExpn;
 import compiler488.ast.expn.EqualsExpn;
 import compiler488.ast.expn.Expn;
 import compiler488.ast.expn.FunctionCallExpn;
@@ -49,6 +50,12 @@ import compiler488.codegen.visitor.Processor;
  */
 public class CodeGen extends Visitor
 {
+    //
+    // Configuration
+    //
+
+    public static final int LANGUAGE_MAX_STRING_LENGTH = 255;
+
     //
     // Scope processing
     //
@@ -225,7 +232,11 @@ public class CodeGen extends Visitor
     }
 
     @Processor(target="IntConstExpn")
-    void processIntConstExpn(IntConstExpn intConstExpn) {
+    void processIntConstExpn(IntConstExpn intConstExpn) throws CodeGenException {
+        if(intConstExpn.getValue() < Machine.MIN_INTEGER)
+            throw new CodeGenException("integer constant below machine minimum of " + Machine.MIN_INTEGER);
+        if(intConstExpn.getValue() > Machine.MAX_INTEGER)
+            throw new CodeGenException("integer constant below machine maximum of " + Machine.MAX_INTEGER);
         emit("PUSH", intConstExpn.getValue()); // Push the constant literal
     }
 
@@ -344,6 +355,12 @@ public class CodeGen extends Visitor
     void processSubsExpn(SubsExpn subsExpn) {
         addressSubsExpn(subsExpn);
         emit("LOAD");
+    }
+
+    @Processor(target="TextConstExpn")
+    void processTextConstExpn(TextConstExpn textConstExpn) throws CodeGenException {
+        if(textConstExpn.getValue().length() > LANGUAGE_MAX_STRING_LENGTH)
+            throw new CodeGenException("string exceeds maximum allowable length of " + LANGUAGE_MAX_STRING_LENGTH + " characters");
     }
 
     @Processor(target="UnaryMinusExpn")
@@ -480,7 +497,10 @@ public class CodeGen extends Visitor
 
     @Processor(target="PutStmt")
     void processPutStmt(PutStmt putStmt) {
-        for(Printable p : putStmt.getOutputs().getList())
+        for(Printable p : putStmt.getOutputs().getList()) {
+            // Visit the printable
+            if(p instanceof ConstExpn) visit((ConstExpn) p);
+            // Process the printable
             if(p instanceof TextConstExpn)
                 put(((TextConstExpn) p).getValue()); // String printable
             else if(p instanceof NewlineConstExpn)
@@ -488,6 +508,7 @@ public class CodeGen extends Visitor
             else if(p instanceof Expn)
                 { visit((Expn) p); emit("PRINTI"); } // Expression printable
             else throw new RuntimeException("unknown printable");
+        }
     }
 
     @Processor(target="RepeatUntilStmt")
@@ -554,6 +575,11 @@ public class CodeGen extends Visitor
     // Code generator life cycle
     //
 
+    public CodeGen(List<String> source) {
+        super(source);
+        this.source = source;
+    }
+
     public void Initialize() {
         // Instantiate internals
         table = new Table();
@@ -561,10 +587,7 @@ public class CodeGen extends Visitor
         assemblerStart();
     }
 
-    public void Generate(Program program, List<String> source) {
-        // Setup source listing
-        this.source = source;
-
+    public void Generate(Program program) {
         // Assemble the runtime library
         assemblerPrint(Library.code);
 
@@ -584,6 +607,8 @@ public class CodeGen extends Visitor
         // Finish assembling code
         int result = assemblerEnd();
         if(result < 0) return false;
+        // See if any errors have occurred
+        if(errors() > 0) return false;
         // Set initial machine state
         Machine.setPC((short) 0);
         Machine.setMSP((short) result);
@@ -592,9 +617,9 @@ public class CodeGen extends Visitor
     }
 
     // Code generator internals
-    private Table        table;   // Master table
-    private List<String> source;  // Source listing
-    private String loopExitLabel; // Loop exit label
+    private Table        table;         // Master table
+    private List<String> source;        // Source listing
+    private String       loopExitLabel; // Loop exit label
 
     //
     // Assembler
