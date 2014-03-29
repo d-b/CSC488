@@ -41,7 +41,7 @@ def test(path, failing = False):
     patFailure    = re.compile(r'^Ended Semantic Analysis with failures$')
     patAction     = re.compile(r'(S\d+)')
     patOutputLine = re.compile(r'%@output=(.*)')
-    patInputLine = re.compile(r'%@output=(.*)')
+    patInputLine = re.compile(r'%@input=(.*)')
     patStartOutput = re.compile(r'Start Execution')
 
     # Parse error type
@@ -78,7 +78,7 @@ def test(path, failing = False):
             else:
                 match = patInputLine.search(x)
                 if match:
-                    inFile.write(match.groups()[0] + "\n")
+                    inFile.write(bytes(match.groups()[0]+"\r\n",'utf8'))
     
     inFile.seek(0)
     
