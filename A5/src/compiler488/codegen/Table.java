@@ -20,7 +20,7 @@ public class Table {
     public Table() {
         majorStack = new LinkedList<Frame>();
         minorStack = new LinkedList<Minor>();
-        routineCount = labelCount = 0;
+        labelCount = 0;
     }
 
     public void enterScope(Scope scope) {
@@ -30,12 +30,10 @@ public class Table {
         // Construct minor scope and add labels
         Minor minor = new Minor(scope);
         minorStack.push(minor);
-        routineCount = 0; // Reset the routine count
         for(Declaration decl : scope.getDeclarations().getList()) {
             if(decl instanceof RoutineDecl) {
                 String routine = ((RoutineDecl) decl).getName();
                 minor.setLabel(routine, generateLabel(routine));
-                routineCount += 1;
             }
         }
     }
@@ -85,7 +83,8 @@ public class Table {
     }
 
     public int getRoutineCount() {
-        return routineCount;
+        Minor m = minorStack.peek();
+        return (m != null) ? m.getSize() : 0;
     }
 
     public boolean inMajorScope() {
@@ -124,7 +123,6 @@ public class Table {
     private Deque<Minor> minorStack;
 
     // Internal state
-    private int routineCount;
     private int labelCount;
 }
 
@@ -139,6 +137,7 @@ class Minor {
     void setLabel(String routine, String label) { labels.put(routine, label); }
     String getLabel(String routine) { return labels.get(routine); }
     Scope getScope() { return scope; }
+    int getSize() { return labels.size(); }
 
     // Internal members
     private Scope scope;
