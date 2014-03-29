@@ -214,7 +214,7 @@ class MinorFrame implements Comparable<MinorFrame> {
     }
 
     public void addVariable(AST node, MultiDeclarations parent) {
-        Variable variable = new Variable(node, parent, frameMajor.getLevel(),  frameSize);
+        Variable variable = new Variable(node, parent, frameMajor.getLevel(), frameSize);
         // For scalars, increment the frame size by one
         if(!(node instanceof ArrayDeclPart)) frameSize += 1;
         // If it is an array declaration increment it by the size of the array

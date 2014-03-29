@@ -5,7 +5,7 @@
 # Daniel Bloemendal
 #
 #
-#   Documentation of test annotations in .488 files.  
+#   Documentation of test annotations in .488 files.
 #  --------------------------------------------------
 # %@line=1,2,3
 # Specifies that errors should occur on the line number(s) given.
@@ -14,7 +14,7 @@
 # that the annotations appear in the file.
 # %@input=Rest of line
 # The text given is concatenated to the input to the program.
-# 
+#
 
 
 from __future__ import print_function
@@ -34,14 +34,14 @@ COMPILER = 'dist/compiler488.jar'
 
 def test(path, failing = False):
     # Regexp patterns
-    patSingleLine = re.compile(r'%@line=(\d+)')
-    patMultiLine  = re.compile(r'%@line=\[(\d+(,\d+)*)\]')
-    patError      = re.compile(r'(?P<file>[^:]*):(?P<line>[^:]*):(?P<column>[^:]*): (?P<action>S\d+):')
-    patSuccess    = re.compile(r'^End of Semantic Analysis$')
-    patFailure    = re.compile(r'^Ended Semantic Analysis with failures$')
-    patAction     = re.compile(r'(S\d+)')
-    patOutputLine = re.compile(r'%@output=(.*)')
-    patInputLine = re.compile(r'%@input=(.*)')
+    patSingleLine  = re.compile(r'%@line=(\d+)')
+    patMultiLine   = re.compile(r'%@line=\[(\d+(,\d+)*)\]')
+    patError       = re.compile(r'(?P<file>[^:]*):(?P<line>[^:]*):(?P<column>[^:]*): (?P<action>S\d+):')
+    patSuccess     = re.compile(r'^End of Semantic Analysis$')
+    patFailure     = re.compile(r'^Ended Semantic Analysis with failures$')
+    patAction      = re.compile(r'(S\d+)')
+    patOutputLine  = re.compile(r'.*%[\s%]*@output=(.*)')
+    patInputLine   = re.compile(r'.*%[\s%]*@input=(.*)')
     patStartOutput = re.compile(r'Start Execution')
 
     # Parse error type
@@ -51,7 +51,7 @@ def test(path, failing = False):
 
     # Lines where errors are expected
     expected = []
-    
+
     # Lines of correct output:
     correctOutput = []
 
@@ -73,19 +73,19 @@ def test(path, failing = False):
         testfile = open(path)
         for x in testfile:
             match = patOutputLine.search(x)
-            if match: 
+            if match:
                 correctOutput.append(match.groups()[0])
             else:
                 match = patInputLine.search(x)
                 if match:
                     inFile.write(bytes(match.groups()[0]+"\r\n",'utf8'))
-    
+
     inFile.seek(0)
-    
+
     # Execute the test
     output = subprocess.check_output(['java', '-jar', COMPILER, path], stdin=inFile, stderr=subprocess.STDOUT)
     lines  = output.decode('utf8').replace('\r', '').split('\n')
-    
+
     # Successful case
     if not failing:
         success = False
@@ -103,7 +103,7 @@ def test(path, failing = False):
                         success = False
                     i = i + 1
                 if patStartOutput.match(x):
-                    comparingOutput = True 
+                    comparingOutput = True
                     i = -1
         return success
     # Failing case
