@@ -49,11 +49,12 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
         emitter.emit(Machine.SETD, ins.val(0));
     }
 
-    @Processor(target="RESTORECTX", operands={OperandType.OPERAND_INTEGER, OperandType.OPERAND_INTEGER}, size=9)
+    @Processor(target="RESTORECTX", operands={OperandType.OPERAND_INTEGER, OperandType.OPERAND_INTEGER}, size=10)
     void emitRestoreCtx(Instruction ins) throws LabelNotResolvedError, MemoryAddressException {
         short LL = ins.val(0);
         short nargs = ins.val(1);
-        emitter.emit(Machine.ADDR, LL, (short) 0);
+        emitter.emit(Machine.ADDR, LL, (short) -1);
+        emitter.emit(Machine.LOAD);
         emitter.emit(Machine.SETD, LL);
         emitter.emit(Machine.POP);
         emitter.emit(Machine.PUSH, nargs);
