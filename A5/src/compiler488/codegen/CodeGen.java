@@ -194,7 +194,7 @@ public class CodeGen extends Visitor
     @Processor(target="FunctionCallExpn")
     void processFunctionCallExpn(FunctionCallExpn functionCallExpn) {
         // Generate labels required for call
-        String _func = table.getLabel(functionCallExpn.getIdent().getId());
+        String _func = table.getLabel(functionCallExpn.getName());
         String _end = table.getLabel();
 
         // Setup the call
@@ -208,7 +208,7 @@ public class CodeGen extends Visitor
     }
 
     void processIdentExpn(IdentExpn identExpn, boolean address) {
-        Variable var = table.getVaraible(identExpn.getIdent().getId());
+        Variable var = table.getVaraible(identExpn.getName());
         emit("ADDR", var.getLevel(), var.getOffset());
         if(!address) emit("LOAD");
     }
@@ -287,7 +287,7 @@ public class CodeGen extends Visitor
 
     @Processor(target="AssignStmt")
     void processAssignStmt(AssignStmt assignStmt) {
-        Variable leftVar = table.getVaraible(assignStmt.getLval().getIdent().getId());
+        Variable leftVar = table.getVaraible(assignStmt.getLval().getName());
         emit("ADDR", leftVar.getLevel(), leftVar.getOffset()); // Emit address of target variable
         visit(assignStmt.getRval());                           // Evaluate the right side expression
         emit("STORE");                                         // Store the value of the expression in the left side variable
@@ -306,7 +306,19 @@ public class CodeGen extends Visitor
 
     @Processor(target="GetStmt")
     void processGetStmt(GetStmt getStmt) {
-        // FIXME: finish dealing with type information in Table/Frame
+        for(Readable readable : getStmt.getInputs().getList()) {
+            // FIXME: add support for SubsExpn
+            // Skip everything but identifiers for now
+            if(!(readable instanceof IdentExpn)) continue;
+
+            // Push address of variable on to stack
+            IdentExpn identExpn = (IdentExpn) readable;
+            processIdentExpn(identExpn, true);
+
+            // Perform the read and store the result
+            emit("READI");
+            emit("STORE");
+        }
     }
 
     @Processor(target="IfStmt")
@@ -334,7 +346,7 @@ public class CodeGen extends Visitor
     @Processor(target="ProcedureCallStmt")
     void processProcedureCallStmt(ProcedureCallStmt procedureCallStmt) {
         // Generate labels required for call
-        String _proc = table.getLabel(procedureCallStmt.getIdent().getId());
+        String _proc = table.getLabel(procedureCallStmt.getName());
         String _end = table.getLabel();
 
         // Setup the call
