@@ -13,6 +13,12 @@
   }
   var n,m : integer
   put "enter two numbers", newline
+  %@output=enter two numbers
   get n, m
+  %@input=2
+  %@input=2
+  
   put "A(",n,",",m,")=",A(n,m)
+  %@output=A(2,2)=7
+  
 }
