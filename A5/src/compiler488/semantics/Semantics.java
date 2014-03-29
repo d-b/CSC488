@@ -46,6 +46,7 @@ import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
 import compiler488.ast.stmt.Stmt;
 import compiler488.ast.stmt.WhileDoStmt;
+import compiler488.compiler.Main;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -75,7 +76,7 @@ public class Semantics {
     //
     // Scope processing
     //
-        
+
     /*
      * program:
      *      S00 scope S01
@@ -87,7 +88,7 @@ public class Semantics {
     @PostProcessor(target = "Program")
     void postProgram(Program program) {
         checkForwards(program); // Check forward declarations.
-        semanticAction(1); // S01: End program scope. 
+        semanticAction(1); // S01: End program scope.
     }
 
     /*
@@ -107,7 +108,7 @@ public class Semantics {
         if(!(scope.getParent() instanceof RoutineDecl))
             semanticAction(7); // S07: End statement scope.
     }
-    
+
     /*
      * forward declaration checking
      */
@@ -119,7 +120,7 @@ public class Semantics {
                 semanticAction(56); // S56: Forward declared routine has no body.
             }
         }
-    }    
+    }
 
     //
     // Declaration processing
@@ -911,8 +912,8 @@ public class Semantics {
         Symbol symbol = symbolTable.find(routineDecl.getName());
         if(symbol == null || !symbol.isRoutine()) return true; // Ignore: handled by other action.
         return ((FunctionSymbol) symbol).hasBody();
-    }    
-    
+    }
+
     ////////////////////////////////////////////////////////////////////
     // Machinery
     ////////////////////////////////////////////////////////////////////
@@ -1068,7 +1069,7 @@ public class Semantics {
     // Semantic analysis life cycle
     //
 
-    public Semantics () {
+    public Semantics() {
         symbolTable       = new SymbolTable();
         preProcessorsMap  = new HashMap<String, Method>();
         postProcessorsMap = new HashMap<String, Method>();
@@ -1077,6 +1078,7 @@ public class Semantics {
         analysisStack     = new LinkedList<AST>();
         analysisWorking   = new LinkedList<Object>();
         analysisErrors    = 0;
+        verboseOutput     = Main.traceSemantics;
     }
 
     public void Initialize() {
