@@ -20,21 +20,17 @@ public class Table {
     public Table() {
         majorStack = new LinkedList<Frame>();
         minorStack = new LinkedList<Minor>();
-        majorLevel = minorLevel = -1;
         routineCount = labelCount = 0;
     }
 
     public void enterScope(Scope scope) {
-        // Construct a new minor
-        Scope previous = currentScope();
+        // If the new scope is a major scope construct a frame
+        if(Frame.scopeIsMajor(scope))
+            majorStack.push(new Frame(scope, currentScope(), (short)majorStack.size()));
+        // Construct minor scope and add labels
         Minor minor = new Minor(scope);
         minorStack.push(minor);
-        // If the new scope is a major scope construct a frame
-        if(inMajorScope())
-            majorStack.push(new Frame(scope, previous, ++majorLevel));
-        // Add routine labels for minor scope
         routineCount = 0; // Reset the routine count
-        minorLevel += 1;  // Increment the minor level
         for(Declaration decl : scope.getDeclarations().getList()) {
             if(decl instanceof RoutineDecl) {
                 String routine = ((RoutineDecl) decl).getName();
@@ -46,8 +42,8 @@ public class Table {
 
     public void exitScope() {
         if(minorStack.isEmpty()) return;
-        if(inMajorScope()) { majorStack.pop(); majorLevel--; }
-        minorStack.pop(); minorLevel--;
+        if(inMajorScope()) majorStack.pop();
+        minorStack.pop();
     }
 
     public Scope currentScope() {
@@ -60,7 +56,7 @@ public class Table {
     }
 
     public short getLevel() {
-        return majorLevel;
+        return (short)(majorStack.size() - 1);
     }
 
     public String getLabel() {
@@ -85,18 +81,18 @@ public class Table {
         } return null;
     }
 
-    public boolean inMajorScope() {
-        Scope scope = currentScope();
-        if(scope == null) return false;
-        return Frame.scopeIsMajor(scope);
-    }
-
     public String getRoutineLabel(boolean end) {
         return getLabel(1, getRoutine().getName(), end);
     }
 
     public int getRoutineCount() {
         return routineCount;
+    }
+
+    public boolean inMajorScope() {
+        Scope scope = currentScope();
+        if(scope == null) return false;
+        return Frame.scopeIsMajor(scope);
     }
 
     // Frame access convenience functions
@@ -121,7 +117,7 @@ public class Table {
 
     // Generate a label
     String generateLabel(String routine) {
-        return routine + "_LL" + minorLevel;
+        return routine + "_LL" + (minorStack.size() - 1);
     }
 
     // Major/minor frames
@@ -129,8 +125,6 @@ public class Table {
     private Deque<Minor> minorStack;
 
     // Internal state
-    private short majorLevel;
-    private short minorLevel;
     private int routineCount;
     private int labelCount;
 }

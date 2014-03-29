@@ -71,15 +71,15 @@ public class CodeGen extends Visitor
         boolean isProgram = (scope instanceof Program);
         if(!isProgram) routine = (RoutineDecl) scope.getParent();
 
-        if(!isProgram) label(table.getRoutineLabel(true)); // Ending label
-        free(table.getLocalsSize());                       // Free locals memory
-        emit("RESTORECTX", table.getLevel(),               // Restore context
-                           table.getArgumentsSize());      // ...
-        if(isProgram) emit("HALT");                        // Program epilog
-        else          emit("BR");                          // Routine epilog
+        if(!isProgram) label(table.getRoutineLabel(true));  // Ending label
+        free(table.getLocalsSize());                        // Free locals memory
+        emit("RESTORECTX", table.getLevel(),                // Restore context
+                           table.getArgumentsSize());       // ...
+        if(isProgram) emit("HALT");                         // Program epilog
+        else          emit("BR");                           // Routine epilog
 
         // Emit comment for end of scope
-        if(isProgram) comment(" ---------- End of program ----------");
+        if(isProgram) comment("---------- End of program ----------");
         else { comment("End of " + routine.getName()); emit(""); }
     }
 
