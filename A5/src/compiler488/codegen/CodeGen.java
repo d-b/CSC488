@@ -115,7 +115,8 @@ public class CodeGen extends Visitor
 
     @Processor(target="RoutineDecl")
     void processRoutineDecl(RoutineDecl routineDecl) {
-        visit(routineDecl.getBody()); // Visit routine body
+        if(!routineDecl.isForward())
+            visit(routineDecl.getBody()); // Visit routine body
     }
 
     //
@@ -207,15 +208,15 @@ public class CodeGen extends Visitor
         label(_end);
     }
 
-    void processIdentExpn(IdentExpn identExpn, boolean address) {
+    void addressIdentExpn(IdentExpn identExpn) {
         Variable var = table.getVaraible(identExpn.getName());
         emit("ADDR", var.getLevel(), var.getOffset());
-        if(!address) emit("LOAD");
     }
 
     @Processor(target="IdentExpn")
     void processIdentExpn(IdentExpn identExpn) {
-        processIdentExpn(identExpn, false);
+        addressIdentExpn(identExpn);
+        emit("LOAD");
     }
 
     @Processor(target="IntConstExpn")
@@ -313,7 +314,7 @@ public class CodeGen extends Visitor
 
             // Push address of variable on to stack
             IdentExpn identExpn = (IdentExpn) readable;
-            processIdentExpn(identExpn, true);
+            addressIdentExpn(identExpn);
 
             // Perform the read and store the result
             emit("READI");
