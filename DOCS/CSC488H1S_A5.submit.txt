@@ -1,0 +1,55 @@
+What to submit / What to submit for Assignment 5
+
+1) Submit  tar ball named  csc488h.A5.XY.tar  (where XY is your team number).
+   If more than one tar ball is submitted by a team we will use the most
+   recent one.
+
+The tar ball should contain:
+
+a) a complete compilable source tree for your Assignment 5 compiler.
+   We will compile your compiler from source and run it on our test cases.
+
+   We will build your compiler for our testing by doing
+
+   		ant distclean		# just to be sure
+		ant gettools
+		ant dist
+
+    and will use the compiler  dist/compiler488.jar   in our testing.
+
+  We don't need/want compiled files, so do  "ant distclean"  before
+  you tar your source tree.   
+
+  We do not need/want the javadoc for your compiler.  We can generate
+  it if required.  "ant distclean" will remove the javadoc
+
+  [The truly paranoid will verify that their compiler
+   can be recompiled from the directory tree in the tar ball.
+   Paranoia is recommended by many software engineers including the instructor.]
+
+b) all of your test cases.  Please put them in a top-level directory
+   named   testing .   Put all tests that you expect to pass in a subdirectory
+   testing/pass .  Put all tests that you expect to fail (i.e. detect an error)
+   in a subdirectory  testing/fail  .
+
+   Provide an index of your test cases,  called  testing/README.tests 
+   The index should give a *brief* summary of each test.
+   It should clearly state which language features the test  is testing and
+   whether it is expected to pass or fail.   It should indicate whether the
+   test is new since previous assignments.
+
+   Documentation of the testing that you did, i.e the testing process that your
+   team used.
+
+c) All of your documentation.  Put it in a top level directory named   doc
+   Your documentation should describe all of the code you added to create your A5 solution.  
+   An index of Java classes will make the marker happy.  Include:
+
+   Document the code generator you implemented
+   Your documentation should be independent of your Assignment 4 design document,
+   i.e. the marker shouldn't have to (re)read your A4 document to understand what
+   you've done for A5.  Emphasize what you've changed since A4.
+
+   The Who-did-What description
+
+
