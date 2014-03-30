@@ -110,8 +110,6 @@ public class CodeGen extends Visitor
 
         // Process routine declarations
         if(table.getRoutineCount() > 0 ) {
-            comment("Routine declarations");
-            comment("------------------------------------");
             String _end = table.getLabel();
             emit("JMP", _end); emit("");
             visit(scope.getDeclarations());
@@ -341,12 +339,14 @@ public class CodeGen extends Visitor
         put(locSub1);
         emit("HALT");
 
-        // Handler for subscript_2 < lowerbound_2 & subscript_2 > upperbound_2
-        label(_error_lower2);
-        label(_error_upper2);
-        put(subsExpn.getLoc().toString() + ": subscript out of range"); newline();
-        put(locSub2);
-        emit("HALT");
+        if(bound2 != null) {
+            // Handler for subscript_2 < lowerbound_2 & subscript_2 > upperbound_2
+            label(_error_lower2);
+            label(_error_upper2);
+            put(subsExpn.getLoc().toString() + ": subscript out of range"); newline();
+            put(locSub2);
+            emit("HALT");
+        }
 
         // End of block
         label(_end);
