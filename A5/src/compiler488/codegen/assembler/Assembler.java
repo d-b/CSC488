@@ -39,7 +39,7 @@ public class Assembler {
     // Assemble from command line
     //
 
-    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException, FileNotFoundException, InvalidInstructionError, LabelNotResolvedError {
+    public static void main(String argv[]) throws UnsupportedEncodingException, ExecutionException, FileNotFoundException {
         // Check arguments
         if(argv.length <= 0) { System.err.println("Usage: <filename>"); return; }
 
@@ -50,13 +50,11 @@ public class Assembler {
         // Assemble the file
         Assembler assembler = new Assembler();
         InputStream stream = new FileInputStream(argv[0]);
-        Exception exception = null;
         try { assembler.Assemble(stream); }
-        catch(InvalidInstructionError e) { exception = e; }
-        catch(LabelNotResolvedError e)   { exception = e; }
-        if(exception != null) {
-            System.err.println(exception.getMessage()); return;
-        }
+        catch(InvalidInstructionError e)
+            { System.err.println(e.getMessage()); return; }
+        catch(LabelNotResolvedError e)
+            { System.err.println(e.getMessage()); return; }
 
         // Run the code
         Machine.setPC((short) 0);

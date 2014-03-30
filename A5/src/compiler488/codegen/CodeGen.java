@@ -636,12 +636,14 @@ public class CodeGen extends Visitor
 
     void assemblerPrint(String x) {
         assemblerStream.print(x);
-        if(Main.dumpCode || Main.traceCodeGen) assemblerHighlighting.print(x);
+        if(Main.dumpCode || Main.traceCodeGen)
+            assemblerHighlighting.print(x);
     }
 
     void assemblerPrintln(String x) {
         assemblerStream.println(x);
-        if(Main.dumpCode || Main.traceCodeGen) assemblerHighlighting.println(x);
+        if(Main.dumpCode || Main.traceCodeGen)
+            assemblerHighlighting.println(x);
     }
 
     int assemblerEnd() {

@@ -8,6 +8,11 @@ import java.util.regex.Pattern;
 
 import compiler488.highlighting.Operand.OperandType;
 
+/**
+ * Syntax highlighting for IR assembly
+ *
+ * @author Daniel Bloemendal
+ */
 public class AssemblyHighlighting {
     public static final String ANSI_RESET  = "\u001B[0m";
     public static final String ANSI_BRIGHT = "\u001B[1m";
