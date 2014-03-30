@@ -135,6 +135,7 @@ public class Visitor {
     //
 
     void populateMappings() {
+        // Get class tree
         Deque<Class<?>> classes = new LinkedList<Class<?>>();
         for(Class<?> cls = this.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass())
             classes.push(cls);
@@ -179,15 +180,19 @@ public class Visitor {
             catch (IllegalArgumentException e)  { exception = e; }
             catch (InvocationTargetException e) { exception = e; }
             if(exception != null) {
+                // Increment error count
+                visitorErrors += 1;
                 // Print a stack trace if it is not an expected error
                 if(!(exception.getCause() instanceof CodeGenException))
                     exception.printStackTrace();
                 // Pretty print the error location
-                AST errorLocation = node;
-                SourceLocPrettyPrinter printer
-                    = new SourceLocPrettyPrinter(System.err, visitorSource, errorLocation);
-                System.err.println(printer.getFileRef() + ": " + exception.getCause().getMessage());
-                printer.print(); visitorErrors += 1;
+                if(visitorSource != null) {
+                    AST errorLocation = node;
+                    SourceLocPrettyPrinter printer
+                        = new SourceLocPrettyPrinter(System.err, visitorSource, errorLocation);
+                    System.err.println(printer.getFileRef() + ": " + exception.getCause().getMessage());
+                    printer.print();
+                }
             }
         }
     }
