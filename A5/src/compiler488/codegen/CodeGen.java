@@ -641,7 +641,7 @@ public class CodeGen extends Visitor
 
     void assemblerPrintln(String x) {
         assemblerStream.println(x);
-        if(Main.dumpCode  || Main.traceCodeGen) assemblerHighlighting.println(x);
+        if(Main.dumpCode || Main.traceCodeGen) assemblerHighlighting.println(x);
     }
 
     int assemblerEnd() {

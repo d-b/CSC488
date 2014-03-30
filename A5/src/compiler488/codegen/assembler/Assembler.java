@@ -50,7 +50,13 @@ public class Assembler {
         // Assemble the file
         Assembler assembler = new Assembler();
         InputStream stream = new FileInputStream(argv[0]);
-        assembler.Assemble(stream);
+        Exception exception = null;
+        try { assembler.Assemble(stream); }
+        catch(InvalidInstructionError e) { exception = e; }
+        catch(LabelNotResolvedError e)   { exception = e; }
+        if(exception != null) {
+            System.err.println(exception.getMessage()); return;
+        }
 
         // Run the code
         Machine.setPC((short) 0);
@@ -208,7 +214,7 @@ public class Assembler {
         return codeEmitter;
     }
 
-    List<Operand> parseOperands(String operands) {
+    List<Operand> parseOperands(String operands) throws InvalidInstructionError {
         List<Operand> result = new LinkedList<Operand>();
         if(operands == null) return result;
         for(String part : operands.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
@@ -224,7 +230,9 @@ public class Assembler {
                         ? Machine.MACHINE_TRUE : Machine.MACHINE_FALSE));
             // If it is a number
             else try { result.add(new IntegerOperand((short)Integer.parseInt(part))); }
-            catch(NumberFormatException e) {}
+            catch(NumberFormatException e) {
+                throw new InvalidInstructionError("invalid operand", codeInstruction, codeLine);
+            }
         } return result;
     }
 
