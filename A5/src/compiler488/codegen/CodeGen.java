@@ -41,6 +41,7 @@ import compiler488.runtime.Machine;
 import compiler488.compiler.Main;
 import compiler488.codegen.visitor.Visitor;
 import compiler488.codegen.visitor.Processor;
+import compiler488.highlighting.AssemblyHighlighting;
 
 /**
  * Code generator for compiler 488
@@ -628,18 +629,19 @@ public class CodeGen extends Visitor
     Boolean assemblerStart() {
         assemblerThread = new AssemblerThread();
         assemblerStream = new PrintStream(assemblerThread.getPipe());
+        assemblerHighlighting = new AssemblyHighlighting(System.out, Main.syntaxHighlighting);
         assemblerThread.start();
         return true;
     }
 
     void assemblerPrint(String x) {
         assemblerStream.print(x);
-        if(Main.dumpCode) System.out.print(x);
+        if(Main.dumpCode || Main.traceCodeGen) assemblerHighlighting.print(x);
     }
 
     void assemblerPrintln(String x) {
         assemblerStream.println(x);
-        if(Main.dumpCode) System.out.println(x);
+        if(Main.dumpCode  || Main.traceCodeGen) assemblerHighlighting.println(x);
     }
 
     int assemblerEnd() {
@@ -707,6 +709,7 @@ public class CodeGen extends Visitor
     }
 
     // Assembler internals
-    private PrintStream     assemblerStream;
-    private AssemblerThread assemblerThread;
+    private PrintStream          assemblerStream;
+    private AssemblerThread      assemblerThread;
+    private AssemblyHighlighting assemblerHighlighting;
 }

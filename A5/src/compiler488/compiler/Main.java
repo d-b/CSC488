@@ -50,9 +50,12 @@ public class Main {
 
     /** User option -- supress execution */
     public static boolean supressExecution   = false ;
+    
+    /** User option -- syntax highlighting for dumped assembly */
+    public static boolean syntaxHighlighting = false;    
 
     /** User option -- roundtrip the AST and verify the pretty print */
-    private static boolean checkRoundtrip = false;
+    private static boolean checkRoundtrip = false;    
     
     // DUMP Options
     /** User option -- dump AST after parsing */
@@ -154,6 +157,8 @@ public class Main {
                         supressExecution = true;
                     } else if (arguments[i].equals("--roundtrip")) {
                         checkRoundtrip = true;
+                    } else if (arguments[i].equals("--syntax-highlighting")) {
+                        syntaxHighlighting = true;                        
                     } else if (arguments[i].equals("-D")) {
                         i++;	// advance to next argument
                         argTmp = arguments[ i ] ;
