@@ -1,0 +1,52 @@
+%
+% Deeply nested minor scopes, used to demonstrate that minor scopes are merged into the enclosing major scope
+%
+
+% Expected output:
+% @output=I'm alive!
+
+{
+    proc f()
+    { % LL+1
+        { % LL+2
+            { % LL+3
+                { % LL+4
+                    { % LL+5
+                        { % LL+6
+                            { % LL+7
+                                { % LL+8
+                                    { % LL+9
+                                        { % LL+10
+                                            { % LL+11
+                                                { % LL+12
+                                                    { % LL+13
+                                                        { % LL+14
+                                                            { % LL+15
+                                                                { % LL+16
+                                                                    { % LL+17
+                                                                        { % LL+18
+                                                                            { % LL+19
+                                                                                { % LL+20
+                                                                                    put "I'm alive!"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    f()
+}

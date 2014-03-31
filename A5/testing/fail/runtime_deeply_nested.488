@@ -1,0 +1,67 @@
+%
+% Deeply nested major scopes, used to demonstrate a display overflow
+%
+
+{
+    proc f() { % LL+1
+        proc f() { % LL+2
+            proc f() { % LL+3
+                proc f() { % LL+4
+                    proc f() { % LL+5
+                        proc f() { % LL+6
+                            proc f() { % LL+7
+                                proc f() { % LL+8
+                                    proc f() { % LL+9
+                                        proc f() { % LL+10
+                                            proc f() { % LL+11
+                                                proc f() { % LL+12
+                                                    proc f() { % LL+13
+                                                        proc f() { % LL+14
+                                                            proc f() { % LL+15
+                                                                proc f() { % LL+16
+                                                                    proc f() { % LL+17
+                                                                        proc f() { % LL+18
+                                                                            proc f() { % LL+19
+                                                                                proc f() { % LL+20
+                                                                                    put "I'm alive!" % Should never reach this statement.
+                                                                                }
+                                                                                f()
+                                                                            }
+                                                                            f()
+                                                                        }
+                                                                        f()
+                                                                    }
+                                                                    f()
+                                                                }
+                                                                f()
+                                                            }
+                                                            f()
+                                                        }
+                                                        f()
+                                                    }
+                                                    f()
+                                                }
+                                                f()
+                                            }
+                                            f()
+                                        }
+                                        f()
+                                    }
+                                    f()
+                                }
+                                f()
+                            }
+                            f()
+                        }
+                        f()
+                    }
+                    f()
+                }
+                f()
+            }
+            f()
+        }
+        f()
+    }
+    f()
+}

@@ -1,0 +1,10 @@
+%
+% Stack overflow by infinite recursion
+%
+
+{
+    proc f() {
+        f()
+    }
+    f()
+}
