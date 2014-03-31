@@ -1,0 +1,84 @@
+% ----------------------------------------------------------------
+% AMS-LaTeX Paper ************************************************
+% **** -----------------------------------------------------------
+\documentclass[oneside]{amsart}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[letterpaper]{geometry}
+\usepackage[colorlinks=false,
+            pdfborder={0 0 0},
+            pdftitle={CSC488 A5},
+            pdfauthor={Daniel Bloemendal},
+            pdfsubject={CSC488},
+            pdfstartview=FitH,
+            pdfmenubar=false,
+            pdfdisplaydoctitle=true,
+            bookmarks=false]{hyperref}
+\usepackage{subcaption}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage[table]{xcolor}
+% ----------------------------------------------------------------
+\vfuzz2pt % Don't report over-full v-boxes if over-edge is small
+\hfuzz2pt % Don't report over-full h-boxes if over-edge is small
+% THEOREMS -------------------------------------------------------
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\theoremstyle{remark}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+% MATH -----------------------------------------------------------
+\newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+\newcommand{\abs}[1]{\left\vert#1\right\vert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\Real}{\mathbb R}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\To}{\longrightarrow}
+\newcommand{\BX}{\mathbf{B}(X)}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\AND}{\wedge}
+\newcommand{\OR}{\vee}
+\newcommand{\NOT}{\neg}
+\newcommand{\IMPLIES}{\to}
+\newcommand{\TRUE}{\top}
+\newcommand{\FALSE}{\bot}
+\newcommand{\EQUALS}{\equiv}
+\DeclareMathOperator{\sech}{sech}
+\newcolumntype{B}{>{\columncolor{black}\color{white}}c}
+% ----------------------------------------------------------------
+\lstset {
+    basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
+    frame=none,
+    numbers=none
+}
+% ----------------------------------------------------------------
+
+\begin{document}
+
+\title[CSC488 A5]{CSC488\\ASSIGNMENT 5\\Testing}
+\author{Daniel Bloemendal}
+
+% ----------------------------------------------------------------
+\begin{titlepage}
+\maketitle
+\thispagestyle{empty}
+\tableofcontents
+\end{titlepage}
+% ----------------------------------------------------------------
+
+\section{Overview}
+
+\section{Passing tests}
+
+\section{Failing tests}
+
+\section{Test runner}
+
+% ----------------------------------------------------------------
+\end{document}
+% ----------------------------------------------------------------
