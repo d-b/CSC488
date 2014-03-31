@@ -271,10 +271,6 @@ public class CodeGen extends Visitor
         String _error_upper1 = table.getLabel();
         String _error_lower2 = table.getLabel();
         String _error_upper2 = table.getLabel();
-        String _check_upper1 = table.getLabel();
-        String _check_upper2 = table.getLabel();
-        String _ready_sub1 = table.getLabel();
-        String _ready_sub2 = table.getLabel();
         String _end = table.getLabel();
 
         // Compute the stride of the array
@@ -284,18 +280,16 @@ public class CodeGen extends Visitor
         emit("DUP");                                   // Create duplicate, for bounds checking
         emit("PUSH", bound1.getLowerboundValue());     // Lower bound on stack
         emit("LT");                                    // Is subscript_1 less than the lower bound?
-        emit("BFALSE", _check_upper1);                 // No, then head to the next phase
-        emit("JMP", _error_lower1);                    // Yes, then jump to error handler
+        emit("NOT");
+        emit("BFALSE", _error_lower1);                    // Yes, then jump to error handler
 
-        label(_check_upper1);
         emit("DUP");                                   // Another duplicate of subscript_1
         emit("PUSH", bound1.getUpperboundValue());     // Upper bound on stack
         emit("SWAP");                                  // Is subscript_1 greater than the upper bound?
         emit("LT");                                    // ...
-        emit("BFALSE", _ready_sub1);                   // No, then head to the next phase
-        emit("JMP", _error_upper1);                    // Yes, then jump to the error handler.
+        emit("NOT");
+        emit("BFALSE", _error_upper1);                 // Yes, then jump to the error handler.
 
-        label(_ready_sub1);
         emit("PUSH", bound1.getLowerboundValue());     // subscript_1 - lower_bound_1
         emit("SUB");                                   // ...
 
@@ -314,18 +308,16 @@ public class CodeGen extends Visitor
             emit("DUP");                               // Create duplicate, for bounds checking
             emit("PUSH", bound2.getLowerboundValue()); // Lower bound on stack
             emit("LT");                                // Is subscript_2 less than the lower bound?
-            emit("BFALSE", _check_upper2);             // No, then head to the next phase
-            emit("JMP", _error_lower2);                // Yes, then jump to error handler
+            emit("NOT");
+            emit("BFALSE", _error_lower2);                // Yes, then jump to error handler
 
-            label(_check_upper2);
             emit("DUP");                               // Another duplicate of subscript_2
             emit("PUSH", bound2.getUpperboundValue()); // Upper bound on stack
             emit("SWAP");                              // Is subscript_2 greater than the upper bound?
             emit("LT");                                // ...
-            emit("BFALSE", _ready_sub2);               // No, then head to the next phase
-            emit("JMP", _error_upper2);                // Yes, then jump to the error handler.
+            emit("NOT");
+            emit("BFALSE", _error_upper2);                // Yes, then jump to the error handler.
 
-            label(_ready_sub2);
             emit("PUSH", bound2.getLowerboundValue()); // subscript_2 - lower_bound_2
             emit("SUB");
             emit("ADD");                               // Add computed array offset to base address
