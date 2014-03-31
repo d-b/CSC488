@@ -505,22 +505,24 @@ public class CodeGen extends Visitor
     void processIfStmt(IfStmt ifStmt) {
         // Generate unique labels for branch targets
         String _else = table.getLabel();
-        String _end = table.getLabel();
-
         // If then clause
         visit(ifStmt.getCondition()); // Evaluate condition of the if statement
         emit("BFALSE", _else);        // Branch to else statement if false
         visit(ifStmt.getWhenTrue());  // Execute ``when true'' statements
-        emit("JMP", _end);            // Jump to the end of the if statement
 
-        // Else clause
-        label(_else);
         // If a ``when false'' clause exists, execute the statements
-        if(ifStmt.getWhenFalse() != null)
+        if(ifStmt.getWhenFalse() != null) {
+            String _end = table.getLabel();
+            emit("JMP", _end);            // Jump to the end of the if statement
+            label(_else);
+            // Else clause
             visit(ifStmt.getWhenFalse());
+            label(_end);
+        } else {
+            label(_else);
+        }
 
         // End of block
-        label(_end);
     }
 
     @Processor(target="ProcedureCallStmt")
