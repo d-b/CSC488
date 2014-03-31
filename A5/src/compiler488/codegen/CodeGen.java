@@ -387,9 +387,6 @@ public class CodeGen extends Visitor
         ArrayBound bound2 = var.getBounds().size() > 1 ? var.getBounds().get(1) : null;
         if(bound1 == null && bound2 == null) throw new RuntimeException("array with no bounds");
 
-        // Generate labels
-        String _end = table.getLabel();
-
         // Compute the stride of the array
         int stride = bound1.getUpperboundValue() - bound1.getLowerboundValue();
 
@@ -398,10 +395,8 @@ public class CodeGen extends Visitor
         emit("SUB");                                   // ...
 
         // If array is 1D
-        if(bound2 == null) {
+        if(bound2 == null)
             emit("ADD");                               // Add subscript to base address
-            emit("JMP", _end);                         // Jump to end
-        }
         // If array is 2D
         else {
             emit("PUSH", stride);                      // Multiply by stride
@@ -411,11 +406,7 @@ public class CodeGen extends Visitor
             emit("PUSH", bound2.getLowerboundValue()); // subscript_2 - lower_bound_2
             emit("SUB");
             emit("ADD");                               // Add computed array offset to base address
-            emit("JMP", _end);                         // Jump to end
         }
-
-        // End of block
-        label(_end);
     }
 
     @Processor(target="SubsExpn")
