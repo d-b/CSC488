@@ -56,7 +56,7 @@ public class Assembler {
             { System.err.println(e.getMessage()); return; }
         catch(LabelNotResolvedException e)
             { System.err.println(e.getMessage()); return; }
-        catch (ProgramSizeException e)
+        catch(ProgramSizeException e)
             { System.err.println(e.getMessage()); return; }
 
         // Run the code
@@ -181,9 +181,9 @@ public class Assembler {
 
         // Invoke the processor on  instruction
         try { m.invoke(getProcessorManager(), instruction); }
-        catch (IllegalAccessException e)    { throw new RuntimeException(e); }
-        catch (IllegalArgumentException e)  { throw new RuntimeException(e); }
-        catch (InvocationTargetException e) {
+        catch(IllegalAccessException e)    { throw new RuntimeException(e); }
+        catch(IllegalArgumentException e)  { throw new RuntimeException(e); }
+        catch(InvocationTargetException e) {
             // If it is a label error
             if(e.getCause() instanceof LabelNotResolvedException)
                 throw (LabelNotResolvedException) e.getCause();

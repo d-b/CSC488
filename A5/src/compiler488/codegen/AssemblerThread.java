@@ -21,7 +21,7 @@ public class AssemblerThread extends Thread {
             assemblerIn = new PipedInputStream();
             assemblerOut = new PipedOutputStream(assemblerIn);
             assemblerSuccess = false;
-        } catch (IOException e) {}
+        } catch(IOException e) {}
     }
 
     @Override
@@ -29,11 +29,11 @@ public class AssemblerThread extends Thread {
         try {
             assembler.Assemble(assemblerIn);
             assemblerSuccess = true;
-        } catch (InvalidInstructionException e) {
+        } catch(InvalidInstructionException e) {
             System.err.println("Assembler: " + e.getMessage());
-        } catch (LabelNotResolvedException e) {
+        } catch(LabelNotResolvedException e) {
             System.err.println("Assembler: " + e.getMessage());
-        } catch (ProgramSizeException e) {
+        } catch(ProgramSizeException e) {
             System.err.println("Assembler: " + e.getMessage());
         }
     }

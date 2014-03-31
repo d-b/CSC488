@@ -281,7 +281,7 @@ public class CodeGen extends Visitor
         emit("PUSH", bound1.getLowerboundValue());     // Lower bound on stack
         emit("LT");                                    // Is subscript_1 less than the lower bound?
         emit("NOT");
-        emit("BFALSE", _error_lower1);                    // Yes, then jump to error handler
+        emit("BFALSE", _error_lower1);                 // Yes, then jump to error handler
 
         emit("DUP");                                   // Another duplicate of subscript_1
         emit("PUSH", bound1.getUpperboundValue());     // Upper bound on stack
@@ -309,14 +309,14 @@ public class CodeGen extends Visitor
             emit("PUSH", bound2.getLowerboundValue()); // Lower bound on stack
             emit("LT");                                // Is subscript_2 less than the lower bound?
             emit("NOT");
-            emit("BFALSE", _error_lower2);                // Yes, then jump to error handler
+            emit("BFALSE", _error_lower2);             // Yes, then jump to error handler
 
             emit("DUP");                               // Another duplicate of subscript_2
             emit("PUSH", bound2.getUpperboundValue()); // Upper bound on stack
             emit("SWAP");                              // Is subscript_2 greater than the upper bound?
             emit("LT");                                // ...
             emit("NOT");
-            emit("BFALSE", _error_upper2);                // Yes, then jump to the error handler.
+            emit("BFALSE", _error_upper2);             // Yes, then jump to the error handler.
 
             emit("PUSH", bound2.getLowerboundValue()); // subscript_2 - lower_bound_2
             emit("SUB");
@@ -755,7 +755,7 @@ public class CodeGen extends Visitor
             assemblerStream.close();
             assemblerThread.join();
             return assemblerThread.getResult();
-        } catch (InterruptedException e) {
+        } catch(InterruptedException e) {
             return -1;
         }
     }
