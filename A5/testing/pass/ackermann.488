@@ -1,6 +1,44 @@
 %
 % Ackermann function
 %
+% See http://en.wikipedia.org/wiki/Ackermann_function
+%
+
+% Trial #1
+% @input=3
+% @input=0
+%
+% @output=A(3,0)=5
+
+% Trial #2
+% @input=3
+% @input=1
+%
+% @output=A(3,1)=13
+
+% Trial #3
+% @input=3
+% @input=2
+%
+% @output=A(3,2)=29
+
+% Trial #4
+% @input=3
+% @input=3
+%
+% @output=A(3,3)=61
+
+% Trial #5
+% @input=3
+% @input=4
+%
+% @output=A(3,4)=125
+
+% End trials
+% @input=-1
+% @input=-1
+% @output=done
+
 {
   func A(m : integer, n:integer) : integer {
     if m = 0 then
@@ -11,14 +49,13 @@
       result A(m-1,A(m,n-1))
     fi fi
   }
+
   var n,m : integer
-  put "enter two numbers", newline
-  %@output=enter two numbers
-  get n, m
-  %@input=2
-  %@input=2
-  
-  put "A(",n,",",m,")=",A(n,m)
-  %@output=A(2,2)=7
-  
+  while true do
+    get n, m
+    if n < 0  or m < 0 then exit fi
+    put "A(",n,",",m,")=",A(n,m), newline
+  end
+
+  put "done"
 }

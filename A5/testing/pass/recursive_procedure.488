@@ -1,9 +1,0 @@
-%
-% Tests recursion of procedure in an isolated manner.
-%
-{
-  proc foo() {
-    foo()
-  }
-  foo()
-}

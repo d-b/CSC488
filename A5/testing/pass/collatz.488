@@ -1,4 +1,26 @@
+%
 % Verifies collatz conjecture for input numbers.
+%
+
+% Trial #1
+% @input=7
+%
+% @output=proved
+
+% Trial #2
+% @input=3333
+%
+% @output=proved
+
+% Trial #3
+% @input=13334
+%
+% @output=went too high
+
+% End trials
+% @input=0
+% @output=done
+
 {
     var i:integer
     get i
@@ -10,7 +32,6 @@
                 exit when i > 21844
                 i := i + (i + 1) / 2
             fi
-%            put i,newline
         until i = 1
         if i not= 1 then
             put "went too high",newline
@@ -19,13 +40,6 @@
         fi
         get i
     end
+
+    put "done"
 }
-%@input=7
-%@output=proved
-%@input=3333
-%@output=proved
-%@input=13334
-%@output=went too high
-%@input=0
-
-

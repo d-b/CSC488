@@ -26,7 +26,7 @@ import subprocess
 import tempfile
 
 # Test directories
-PATHS = {'passing': 'testing/io',
+PATHS = {'passing': 'testing/pass',
          'failing': 'testing/fail'}
 
 # Compiler location

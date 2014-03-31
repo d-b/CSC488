@@ -1,9 +1,0 @@
-%
-% type error, argument type wrong for procedure
-%
-% @line=8
-%
-{
-    proc foo (x : boolean) {put  "foo" return}
-    foo(5)
-}

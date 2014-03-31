@@ -21,8 +21,8 @@
     repeat
         i := i - 1
     until i = 0
-    put i,"foo",newline
-    %@output=0foo
+    put i,newline
+    %@output=0
 
     % unconditional loop exits
     i := 0
@@ -30,16 +30,16 @@
         exit
         i := 1
     end
-    put i,"bar",newline
-    %@output=0bar
+    put i,newline
+    %@output=0
 
     i := 0
     repeat
         exit
         i := 1
     until i = 1
-    put i,"baz",newline
-    %@output=0baz
+    put i,newline
+    %@output=0
 
     % conditional loop exits
     i := 10
@@ -47,8 +47,8 @@
         exit when i <= 5
         i := i - 1
     end
-    put i,"qux",newline
-    %@output=5qux
+    put i,newline
+    %@output=5
 
     i := 1
     repeat
@@ -58,4 +58,3 @@
     put i,newline
     %@output=5
 }
-

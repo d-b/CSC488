@@ -1,9 +1,0 @@
-%
-% Result statement outside of a function (top level scope)
-%
-% @line=7
-%
-{
-    result 0
-}
-

@@ -1,9 +1,0 @@
-%
-% number of arguments wrong for procedure
-%
-% @line=8
-%
-{
-    proc foo (x : boolean) {put  "foo" return}
-    foo(true, false)
-}

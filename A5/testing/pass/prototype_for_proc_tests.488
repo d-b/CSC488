@@ -1,9 +1,0 @@
-%
-% Prototype code for the procedure tests. Each procedure test messes this code up in a specific way.
-%
-{
-	forward proc foo(x : integer, y:integer)
-	proc foo(x : integer, y:integer) {put "bar",newline}
-	put "foo"
-	foo(1,2)
-}

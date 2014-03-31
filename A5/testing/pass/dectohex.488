@@ -1,6 +1,61 @@
 %
-% convert number to hexadecimal
+% Convert number to hexadecimal
 %
+
+% Trial #1
+% @input=108
+%
+% @output=6C
+
+% Trial #2
+% @input=153
+%
+% @output=99
+
+% Trial #3
+% @input=307
+%
+% @output=133
+
+% Trial #4
+% @input=318
+%
+% @output=13E
+
+% Trial #5
+% @input=341
+%
+% @output=155
+
+% Trial #6
+% @input=533
+%
+% @output=215
+
+% Trial #7
+% @input=578
+%
+% @output=242
+
+% Trial #8
+% @input=622
+%
+% @output=26E
+
+% Trial #9
+% @input=650
+%
+% @output=28A
+
+% Trial #10
+% @input=868
+%
+% @output=364
+
+% End trials
+% @input=-1
+% @output=done
+
 {
   func w0():integer{put "0" result 0}
   func w1():integer{put "1" result 0}
@@ -31,23 +86,26 @@
        :(i<14?(i=12?wC():wD())
             :(i=14?wE():wF()))))
   }
-  var n,i,d[4] : integer
-  get n
-  %@input=2456
-  i := 1
-  while i <= 4 do
-    d[i] := n - n/16*16
-    n := n/16
-    i := i +1
-  end
-  i := 4
-  repeat i := i - 1 until i = 1 or d[i] not= 0
-  while i > 0 do
-    puthex(d[i])
-    i := i - 1
-  end
-  put newline  
-}
-%@input=2748
-%@output=ABC
+  while true do {
+    var n,i,d[4] : integer
+   
+    get n
+    if n < 0 then exit fi
 
+    i := 1
+    while i <= 4 do
+      d[i] := n - n/16*16
+      n := n/16
+      i := i +1
+    end
+    i := 4
+    repeat i := i - 1 until i = 1 or d[i] not= 0
+    while i > 0 do
+      puthex(d[i])
+      i := i - 1
+    end
+    put newline
+  } end
+
+  put "done"
+}

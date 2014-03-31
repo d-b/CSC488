@@ -9,168 +9,263 @@
     var x, y : integer
     var b : boolean
 
+    proc putint(x : integer) {
+        put x, newline
+    }
+    proc putbool(b : boolean) {
+        if b then
+            put "true"
+        else
+            put "false"
+        fi
+        put newline
+    }
 
     % assignment with integer literal constant
     x := 1
+    putint(x) % @output=1
 
     % NB: also valid because of two distinct tokens
     x : = 1
+    putint(x) % @output=1
 
     % unary minus
     x := - 1
+    putint(x) % @output=-1
     x := -1
+    putint(x) % @output=-1
 
     % addition
     x := 1 + 1
+    putint(x) % @output=2
 
     % subtraction
     x := 1 - 1
+    putint(x) % @output=0
 
     % multiplication
     x := 1 * 1
+    putint(x) % @output=1
 
     % division
     x := 1 / 1
+    putint(x) % @output=1
 
 
     % Boolean constant true
     b := true
+    putbool(b) % @output=true
 
     % Boolean constant false
     b := false
+    putbool(b) % @output=false
 
     % Boolean not
     b := not false
+    putbool(b) % @output=true
 
     % Boolean and
     b := true and true
+    putbool(b) % @output=true
 
     % Boolean or
     b := true or false
+    putbool(b) % @output=true
 
 
     % equality comparison
     b := 1 = 1
+    putbool(b) % @output=true
 
     % inequality comparison
     b := 1 not= 2
+    putbool(b) % @output=true
     b := 2 not = 1
+    putbool(b) % @output=true
 
     % less than comparison
     b := 1 < 2
+    putbool(b) % @output=true
 
     % less than or equal comparison
     b := 1 <= 1
+    putbool(b) % @output=true
     b := 2 < = 2
+    putbool(b) % @output=true
 
     % greater than comparison
     b := 2 > 1
+    putbool(b) % @output=true
 
     % greater than or equal comparison
     b := 1 >= 1
+    putbool(b) % @output=true
     b := 2 > = 2
+    putbool(b) % @output=true
 
 
     % conditional expression
     b := ( 1 > 2 ? false : true )
+    putbool(b) % @output=true
 
     % reference to a variable    
     y := x
+    putint(y) % @output=1
 
 
     % conditional statement
+    b := true
     if false then
         b := false
     fi
+    putbool(b) % @output=true
 
+    b := false
     if not true then
         b := false
     else
         b := true
     fi
+    putbool(b) % @output=true
 
 
     % Operator Precedence -- all the following values for `b` MUST be true
 
     % NB: Arithmetic operators associate from left to right
     x := 3 * 4 / 6 * 2
+    putint(x) % @output=4
     y := ((3 * 4) / 6) * 2
     b := x = y
+    putbool(b) % @output=true
 
     x := 6 / 3 * 2 / 2
+    putint(x) % @output=2
     y := ((6 / 3) * 2) / 2
     b := x = y
+    putbool(b) % @output=true
 
     % NB: Mulitply & division binds tighter than addition and subtraction
     x := 1 * 2 + 3 * 4
+    putint(x) % @output=14
     y := (1 * 2) + (3 * 4)
     b := x = y
+    putbool(b) % @output=true
 
     x := -1 * 2 + 3 * -4
+    putint(x) % @output=-14
     y := ((-1) * 2) + (3 * (-4))
     b := x = y
+    putbool(b) % @output=true
 
     x := 2 * 3 - 12 / 2 + 1 * 2
+    putint(x) % @output=2
     y := ((2 * 3) - (12 / 2)) + (1 * 2)
     b := x = y
+    putbool(b) % @output=true
 
     % Boolean comparisons
     b := 1 + 2 = 2 + 1
+    putbool(b) % @output=true
     b := (1 + 2) = (2 + 1)
+    putbool(b) % @output=true
     b := 3 = 3
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := 1 + 2 not = 3 + 4
+    putbool(b) % @output=true
     b := (1 + 2) not = (3 + 4)
+    putbool(b) % @output=true
     b := 3 not = 7
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := 1 * 2 < 3 + 4
+    putbool(b) % @output=true
     b := (1 * 2) < (3 + 4)
+    putbool(b) % @output=true
     b := 2 < 7
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
     
     b := -1 * 2 > -3 * 4
+    putbool(b) % @output=true
     b := ((-1) * 2) > ((-3) * 4)
+    putbool(b) % @output=true
     b := -2 > -12
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := -1 + 2 * 3 <= 2 + 3
+    putbool(b) % @output=true
     b := ((-1) + (2 * 3)) <= (2 + 3)
+    putbool(b) % @output=true
     b := 5 <= 5
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := 1 + 2 * 3 >= -4
+    putbool(b) % @output=true
     b := (1 + (2 * 3)) >= -4
+    putbool(b) % @output=true
     b := 7 >= -4
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := not 2 < 1
+    putbool(b) % @output=true
     b := not (2 < 1)
+    putbool(b) % @output=true
     b := not false
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := not 3 * 4 < 1 * 2
+    putbool(b) % @output=true
     b := not ((3 * 4) < (1 * 2))
+    putbool(b) % @output=true
     b := not (12 < 2)
+    putbool(b) % @output=true
     b := not false
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := not not true and not false
+    putbool(b) % @output=true
     b := (not (not true)) and (not false)
+    putbool(b) % @output=true
     b := (not false) and true
+    putbool(b) % @output=true
     b := true and true
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := true and false or true
+    putbool(b) % @output=true
     b := (true and false) or true
+    putbool(b) % @output=true
     b := false or true
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 
     b := not false or not true and not false
+    putbool(b) % @output=true
     b := (not false) or ((not true) and (not false))
+    putbool(b) % @output=true
     b := true or (false and true)
+    putbool(b) % @output=true
     b := true or false
+    putbool(b) % @output=true
     b := true
+    putbool(b) % @output=true
 }
-

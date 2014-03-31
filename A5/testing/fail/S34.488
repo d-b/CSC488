@@ -1,9 +1,0 @@
-%
-% type error, assignment between different types.
-%
-% @line=8
-%
-{
-    var x : boolean
-    x := 2
-}
