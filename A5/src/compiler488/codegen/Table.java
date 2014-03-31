@@ -23,10 +23,10 @@ public class Table {
         labelCount = 0;
     }
 
-    public void enterScope(Scope scope) {
+    public void enterScope(Scope scope) throws CodeGenException {
         // If the new scope is a major scope construct a frame
         if(Frame.scopeIsMajor(scope))
-            majorStack.push(new Frame(scope, currentScope(), (short)majorStack.size()));
+            majorStack.push(new Frame(scope, currentScope(), majorStack.size()));
         // Construct minor scope and add labels
         Minor minor = new Minor(scope);
         minorStack.push(minor);
@@ -53,8 +53,8 @@ public class Table {
         return majorStack.peek();
     }
 
-    public short getLevel() {
-        return (short)(majorStack.size() - 1);
+    public int getLevel() {
+        return majorStack.size() - 1;
     }
 
     public String getLabel() {
@@ -87,6 +87,13 @@ public class Table {
         return (m != null) ? m.getSize() : 0;
     }
 
+    public int getLocalsSize() {
+        int localsSize = 0;
+        for(Frame frame : majorStack)
+            localsSize += frame.getLocalsSize();
+        return localsSize;
+    }
+
     public boolean inMajorScope() {
         Scope scope = currentScope();
         if(scope == null) return false;
@@ -95,10 +102,10 @@ public class Table {
 
     // Frame access convenience functions
     public RoutineDecl getRoutine() { return currentFrame().getRoutine(); }
-    public short getLocalsSize() { return currentFrame().getLocalsSize(); }
-    public short getArgumentsSize() { return currentFrame().getArgumentsSize(); }
-    public short getOffsetReturn() { return currentFrame().getOffsetReturn(); }
-    public short getOffsetResult() { return currentFrame().getOffsetResult(); }
+    public int getFrameLocalsSize() { return currentFrame().getLocalsSize(); }
+    public int getArgumentsSize() { return currentFrame().getArgumentsSize(); }
+    public int getOffsetReturn() { return currentFrame().getOffsetReturn(); }
+    public int getOffsetResult() { return currentFrame().getOffsetResult(); }
 
     // Get a label
     String getLabel(int level, String routine, boolean end) {

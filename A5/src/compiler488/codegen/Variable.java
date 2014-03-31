@@ -19,7 +19,7 @@ import compiler488.langtypes.LangType;
  */
 public class Variable {
     // A copy of an old variable with a new level and offset
-    public Variable(Variable variable, short level, short offset) {
+    public Variable(Variable variable, int level, int offset) {
         this.name = variable.name;
         this.bounds = variable.bounds;
         this.type = variable.type;
@@ -28,12 +28,12 @@ public class Variable {
     }
 
     // Instantiate a new variable reference from a single declaration
-    public Variable(AST node, short level, short offset) {
+    public Variable(AST node, int level, int offset) {
         this(node, null, level, offset);
     }
 
     // Instantiate a new variable reference from a multi-declaration
-    public Variable(AST node, MultiDeclarations parent, short level, short offset){
+    public Variable(AST node, MultiDeclarations parent, int level, int offset){
         // Set the level, offset & bounds
         this.level = level;
         this.offset = offset;
@@ -63,15 +63,15 @@ public class Variable {
 
     // Getters for reference info
     public String getName() { return name; }
-    public short getLevel() { return level; }
-    public short getOffset() { return offset; }
+    public int getLevel() { return level; }
+    public int getOffset() { return offset; }
     public List<ArrayBound> getBounds() { return Collections.unmodifiableList(bounds); }
     public LangType getType() { return type; }
 
     // Reference info
     private String name;
-    private short level;
-    private short offset;
+    private int level;
+    private int offset;
     private List<ArrayBound> bounds;
     private LangType type;
 }

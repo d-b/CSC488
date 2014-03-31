@@ -5,8 +5,9 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import compiler488.codegen.assembler.Assembler;
-import compiler488.codegen.assembler.InvalidInstructionError;
-import compiler488.codegen.assembler.LabelNotResolvedError;
+import compiler488.codegen.assembler.InvalidInstructionException;
+import compiler488.codegen.assembler.LabelNotResolvedException;
+import compiler488.codegen.assembler.ProgramSizeException;
 
 /**
  * Assembler thread with pipe
@@ -28,9 +29,11 @@ public class AssemblerThread extends Thread {
         try {
             assembler.Assemble(assemblerIn);
             assemblerSuccess = true;
-        } catch (InvalidInstructionError e) {
+        } catch (InvalidInstructionException e) {
             System.err.println(e.getMessage());
-        } catch (LabelNotResolvedError e) {
+        } catch (LabelNotResolvedException e) {
+            System.err.println(e.getMessage());
+        } catch (ProgramSizeException e) {
             System.err.println(e.getMessage());
         }
     }

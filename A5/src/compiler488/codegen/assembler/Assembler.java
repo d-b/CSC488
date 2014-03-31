@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import compiler488.runtime.ExecutionException;
 import compiler488.runtime.Machine;
+import compiler488.runtime.MemoryAddressException;
 import compiler488.runtime.TextReader;
 import compiler488.codegen.assembler.Operand.OperandType;
 import compiler488.codegen.assembler.ir.AssemblerIREmitter;
@@ -51,9 +52,11 @@ public class Assembler {
         Assembler assembler = new Assembler();
         InputStream stream = new FileInputStream(argv[0]);
         try { assembler.Assemble(stream); }
-        catch(InvalidInstructionError e)
+        catch(InvalidInstructionException e)
             { System.err.println(e.getMessage()); return; }
-        catch(LabelNotResolvedError e)
+        catch(LabelNotResolvedException e)
+            { System.err.println(e.getMessage()); return; }
+        catch (ProgramSizeException e)
             { System.err.println(e.getMessage()); return; }
 
         // Run the code
@@ -86,7 +89,7 @@ public class Assembler {
     }
 
     // Assemble an IR program
-    public Boolean Assemble(InputStream input) throws InvalidInstructionError, LabelNotResolvedError {
+    public void Assemble(InputStream input) throws InvalidInstructionException, LabelNotResolvedException, ProgramSizeException {
         // Reset internal state
         codeSection = null;
         codeSectionList.clear();
@@ -134,7 +137,7 @@ public class Assembler {
         emitter.setDataSection(textConst);
 
         // Pass 2: layout sections
-        short baseAddress = 0;
+        int baseAddress = 0;
         for(Section section : codeSectionList) {
             section.setAddress(baseAddress);
             baseAddress += section.getSize();
@@ -146,7 +149,7 @@ public class Assembler {
                 for(Operand op : instr.getOperands())
                     if(op instanceof LabelOperand) {
                         LabelOperand lop = (LabelOperand) op;
-                        Short addr = getLabel(lop.getLabel());
+                        Integer addr = getLabel(lop.getLabel());
                         if(addr != null) lop.setAddress(addr);
                     }
 
@@ -155,21 +158,22 @@ public class Assembler {
             for(Instruction instr : section.getInstructions())
                 processInstruction(instr);
 
-        // Successful assembly
-        return true;
+        // Check final program size, we need at least one byte for the stack
+        if(getSize() > Machine.memorySize - 1)
+            throw new ProgramSizeException("size of program, " + getSize() + " words, exceeds machine maximum of " + (Machine.memorySize - 1));
     }
 
-    public short getSize() {
+    public int getSize() {
         Section sec = currentSection();
         if(sec == null) return 0;
-        return (short)(sec.getAddress() + sec.getSize());
+        return sec.getAddress() + sec.getSize();
     }
 
     //
     // Instruction parsing
     //
 
-    void processInstruction(Instruction instruction) throws LabelNotResolvedError {
+    void processInstruction(Instruction instruction) throws LabelNotResolvedException {
         // Get instruction method
         String name = instruction.getName().toUpperCase();
         Method m = instructionMap.get(name);
@@ -181,8 +185,10 @@ public class Assembler {
         catch (IllegalArgumentException e)  { throw new RuntimeException(e); }
         catch (InvocationTargetException e) {
             // If it is a label error
-            if(e.getCause() instanceof LabelNotResolvedError)
-                throw (LabelNotResolvedError) e.getCause();
+            if(e.getCause() instanceof LabelNotResolvedException)
+                throw (LabelNotResolvedException) e.getCause();
+            // If it is a memory address exception, deal with it later during size check
+            if(e.getCause() instanceof MemoryAddressException) return;
             // Otherwise it was something much more serious
             else throw new RuntimeException(e);
         }
@@ -212,9 +218,9 @@ public class Assembler {
         return codeEmitter;
     }
 
-    List<Operand> parseOperands(String operands) throws InvalidInstructionError {
+    List<Operand> parseOperands(String operands) throws InvalidInstructionException {
         List<Operand> result = new LinkedList<Operand>();
-        if(operands == null) return result;
+        if(operands == null) return result; // No operands provided
         for(String part : operands.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
             // If it is a label
             if(patternOpLabel.matcher(part).matches())
@@ -227,9 +233,18 @@ public class Assembler {
                 result.add(new IntegerOperand(part.toLowerCase().equals("$true")
                         ? Machine.MACHINE_TRUE : Machine.MACHINE_FALSE));
             // If it is a number
-            else try { result.add(new IntegerOperand((short)Integer.parseInt(part))); }
-            catch(NumberFormatException e) {
-                throw new InvalidInstructionError("invalid operand", codeInstruction, codeLine);
+            else try {
+                // Check range of integer operand
+                int index = result.size() + 1;
+                int value = Integer.parseInt(part);
+                if(value < Machine.MIN_INTEGER)
+                    invalidInstruction("integer operand " + index + " is less than the minimum machine value " + Machine.MIN_INTEGER);
+                if(value > Machine.MAX_INTEGER)
+                    invalidInstruction("integer operand " + index + " is greater than the maximum machine value " + Machine.MAX_INTEGER);
+                // Add the operand
+                result.add(new IntegerOperand(value));
+            } catch(NumberFormatException e) {
+                throw new InvalidInstructionException("invalid operand", codeInstruction, codeLine);
             }
         } return result;
     }
@@ -254,18 +269,18 @@ public class Assembler {
         currentSection().addLabel(name);
     }
 
-    Short getLabel(String name) {
+    Integer getLabel(String name) {
         for(Section sec : codeSectionList) {
-            Short addr = sec.getLabel(name);
+            Integer addr = sec.getLabel(name);
             if(addr != null) return addr;
         } return null;
     }
 
-    void invalidInstruction(String message) throws InvalidInstructionError {
-        throw new InvalidInstructionError(message, codeInstruction, codeLine);
+    void invalidInstruction(String message) throws InvalidInstructionException {
+        throw new InvalidInstructionException(message, codeInstruction, codeLine);
     }
 
-    void addInstruction(String name, List<Operand> operands) throws InvalidInstructionError {
+    void addInstruction(String name, List<Operand> operands) throws InvalidInstructionException, ProgramSizeException {
         // Get instruction specification
         name = name.toUpperCase();
         Processor s = instructionSpec.get(name);

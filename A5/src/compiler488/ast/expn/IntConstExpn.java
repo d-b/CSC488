@@ -10,7 +10,7 @@ public class IntConstExpn extends ConstExpn {
 
     public IntConstExpn(IntConstNode intconst) {
         // IntConstExpn is a thin wrapper around the underlying IntConstNode, so use as a `SourceLoc` directly
-        super(intconst);
+        super(intconst.getLoc());
 
         this.intconst = intconst;
         intconst.setParent(this);

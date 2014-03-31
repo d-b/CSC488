@@ -6,18 +6,18 @@ package compiler488.codegen.assembler;
  * @author Daniel Bloemendal
  */
 public class LabelOperand extends IntegerOperand {
-    public LabelOperand(String label) {super((short) 0); this.label = label;}
-    public void setAddress(short address) { resolved = true; value = address; }
+    public LabelOperand(String label) {super(0); this.label = label;}
+    public void setAddress(Integer addr) { resolved = true; value = addr; }
     public String getLabel() { return label; }
 
-    // Get resolved value
-    public short getValue() throws LabelNotResolvedError {
-        if(!resolved) throw new LabelNotResolvedError("label '" + label + "' has not been resolved" );
-        return value;
+    @Override // Get resolved value
+    public int getValue() throws LabelNotResolvedException {
+        if(resolved) return value;
+        else throw new LabelNotResolvedException("label '" + label + "' has not been resolved" );
     }
 
     // Internal members
     private boolean resolved;
     private String label;
-    private short value;
+    private int value;
 }

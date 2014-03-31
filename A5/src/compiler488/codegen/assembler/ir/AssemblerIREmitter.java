@@ -3,7 +3,7 @@ package compiler488.codegen.assembler.ir;
 import compiler488.codegen.assembler.Processor;
 import compiler488.codegen.assembler.Instruction;
 import compiler488.codegen.assembler.Operand.OperandType;
-import compiler488.codegen.assembler.LabelNotResolvedError;
+import compiler488.codegen.assembler.LabelNotResolvedException;
 import compiler488.runtime.Machine;
 import compiler488.runtime.MemoryAddressException;
 
@@ -18,20 +18,20 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
     }
 
     @Processor(target="SETUPCALL", operands={OperandType.OPERAND_INTEGER}, size=4)
-    void emitSetupCall(Instruction ins) throws MemoryAddressException, LabelNotResolvedError {
+    void emitSetupCall(Instruction ins) throws MemoryAddressException, LabelNotResolvedException {
         emitter.emit(Machine.PUSH, (short) Machine.UNDEFINED);
         emitter.emit(Machine.PUSH, (short) ins.val(0));
     }
 
     @Processor(target="JMP", operands={OperandType.OPERAND_INTEGER}, size=3)
-    void emitJump(Instruction ins) throws MemoryAddressException, LabelNotResolvedError {
-        emitter.emit(Machine.PUSH, ins.val(0));
+    void emitJump(Instruction ins) throws MemoryAddressException, LabelNotResolvedException {
+        emitter.emit(Machine.PUSH, (short) ins.val(0));
         emitter.emit(Machine.BR);
     }
 
     @Processor(target="BFALSE", operands={OperandType.OPERAND_INTEGER}, size=3)
-    void emitBFalse(Instruction ins) throws MemoryAddressException, LabelNotResolvedError {
-        emitter.emit(Machine.PUSH, ins.val(0));
+    void emitBFalse(Instruction ins) throws MemoryAddressException, LabelNotResolvedException {
+        emitter.emit(Machine.PUSH, (short) ins.val(0));
         emitter.emit(Machine.BF);
     }
 
@@ -42,16 +42,16 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
     }
 
     @Processor(target="SAVECTX", operands={OperandType.OPERAND_INTEGER}, size=6)
-    void emitSaveCtx(Instruction ins) throws MemoryAddressException, LabelNotResolvedError {
-        emitter.emit(Machine.ADDR, ins.val(0), (short) 0);
+    void emitSaveCtx(Instruction ins) throws MemoryAddressException, LabelNotResolvedException {
+        emitter.emit(Machine.ADDR, (short) ins.val(0), (short) 0);
         emitter.emit(Machine.PUSHMT);
-        emitter.emit(Machine.SETD, ins.val(0));
+        emitter.emit(Machine.SETD, (short) ins.val(0));
     }
 
     @Processor(target="RESTORECTX", operands={OperandType.OPERAND_INTEGER, OperandType.OPERAND_INTEGER}, size=10)
-    void emitRestoreCtx(Instruction ins) throws LabelNotResolvedError, MemoryAddressException {
-        short LL = ins.val(0);
-        short nargs = ins.val(1);
+    void emitRestoreCtx(Instruction ins) throws LabelNotResolvedException, MemoryAddressException {
+        short LL = (short) ins.val(0);
+        short nargs = (short) ins.val(1);
         emitter.emit(Machine.ADDR, LL, (short) -1);
         emitter.emit(Machine.LOAD);
         emitter.emit(Machine.SETD, LL);
@@ -61,9 +61,9 @@ public class AssemblerIREmitter extends AssemblerMachineEmitter {
     }
 
     @Processor(target="RESERVE", operands={OperandType.OPERAND_INTEGER}, size=5)
-    void emitReserve(Instruction ins) throws MemoryAddressException, LabelNotResolvedError {
+    void emitReserve(Instruction ins) throws MemoryAddressException, LabelNotResolvedException {
         emitter.emit(Machine.PUSH, (short) 0);
-        emitter.emit(Machine.PUSH, ins.val(0));
+        emitter.emit(Machine.PUSH, (short) ins.val(0));
         emitter.emit(Machine.DUPN);
     }
 }

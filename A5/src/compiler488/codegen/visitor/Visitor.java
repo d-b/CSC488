@@ -1,6 +1,5 @@
 package compiler488.codegen.visitor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.HashMap;
@@ -13,8 +12,6 @@ import java.util.Set;
 
 import compiler488.ast.AST;
 import compiler488.ast.ASTList;
-import compiler488.ast.SourceLocPrettyPrinter;
-import compiler488.codegen.CodeGenException;
 
 /**
  * Helper for traversing an AST automatically and manually
@@ -35,7 +32,6 @@ public class Visitor {
         visitorGrey       = new HashSet<AST>();
         visitorExcluded   = new HashSet<AST>();
         visitorStack      = new LinkedList<AST>();
-        visitorSource     = source;
         // Populate the processors
         populateMappings();
     }
@@ -44,8 +40,9 @@ public class Visitor {
      * Manual visitation of an AST node
      *
      * @param node the AST node to visit
+     * @throws Exception any exception that occurred during visitation
      */
-    public void visit(AST node) {
+    public void visit(AST node) throws Exception {
         invokeProcessor(node, processorsMap);
     }
 
@@ -53,8 +50,9 @@ public class Visitor {
      * Manual visitation of all AST nodes in a list
      *
      * @param list the list of AST nodes to visit
+     * @throws Exception any exception that occurred during visitation
      */
-    public void visit(List<AST> list) {
+    public void visit(List<AST> list) throws Exception {
         for(AST node : list) visit(node);
     }
 
@@ -62,8 +60,9 @@ public class Visitor {
      * Traverse an AST starting from a specified root node
      *
      * @param root the root of the AST
+     * @throws Exception any exception that occurred during traversal
      */
-    public void traverse(AST root) {
+    public void traverse(AST root) throws Exception {
         // Add the initial element to the stack
         visitorStack.add(root);
 
@@ -112,21 +111,12 @@ public class Visitor {
         visitorExcluded.add(node);
     }
 
-    /**
-     * The number of errors that have occurred during visitation
-     *
-     * @return the number of errors
-     */
-    public int errors() {
-        return visitorErrors;
-    }
-
     //
     // Default manual visitors
     //
 
     @Processor(target="ASTList")
-    void processAstList(ASTList<? extends AST> list) {
+    void processAstList(ASTList<? extends AST> list) throws Exception {
         for(AST node : list.getList()) visit(node);
     }
 
@@ -153,15 +143,15 @@ public class Visitor {
         }
     }
 
-    void invokePreProcessor(AST node) {
+    void invokePreProcessor(AST node) throws Exception {
         invokeProcessor(node, preProcessorsMap);
     }
 
-    void invokePostProcessor(AST node) {
+    void invokePostProcessor(AST node) throws Exception {
         invokeProcessor(node, postProcessorsMap);
     }
 
-    void invokeProcessor(AST node, Map<String, Method> map) {
+    void invokeProcessor(AST node, Map<String, Method> map) throws Exception {
         // Get class tree
         Deque<Class<?>> classes = new LinkedList<Class<?>>();
         for(Class<?> cls = node.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass())
@@ -174,26 +164,7 @@ public class Visitor {
             m.setAccessible(true);
 
             // Invoke the processor on object
-            Exception exception = null;
-            try { m.invoke(this, node); }
-            catch (IllegalAccessException e)    { exception = e; }
-            catch (IllegalArgumentException e)  { exception = e; }
-            catch (InvocationTargetException e) { exception = e; }
-            if(exception != null) {
-                // Increment error count
-                visitorErrors += 1;
-                // Print a stack trace if it is not an expected error
-                if(!(exception.getCause() instanceof CodeGenException))
-                    exception.printStackTrace();
-                // Pretty print the error location
-                if(visitorSource != null) {
-                    AST errorLocation = node;
-                    SourceLocPrettyPrinter printer
-                        = new SourceLocPrettyPrinter(System.err, visitorSource, errorLocation);
-                    System.err.println(printer.getFileRef() + ": " + exception.getCause().getMessage());
-                    printer.print();
-                }
-            }
+            m.invoke(this, node);
         }
     }
 
@@ -203,9 +174,7 @@ public class Visitor {
     private Map<String, Method> postProcessorsMap;
 
     // Visitor state
-    private Set<AST>     visitorGrey;     // AST nodes which have been seen
-    private Set<AST>     visitorExcluded; // AST nodes which have been excluded
-    private Deque<AST>   visitorStack;    // AST node stack
-    private int          visitorErrors;   // Error count
-    private List<String> visitorSource;   // Source listing
+    private Set<AST>   visitorGrey;     // AST nodes which have been seen
+    private Set<AST>   visitorExcluded; // AST nodes which have been excluded
+    private Deque<AST> visitorStack;    // AST node stack
 }

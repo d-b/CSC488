@@ -6,10 +6,10 @@ package compiler488.codegen.assembler;
  * @author Daniel Bloemendal
  */
 public class IntegerOperand implements Operand  {
-    public IntegerOperand(short value) { this.value = value; }
-    public short getValue()  throws LabelNotResolvedError { return value; }
+    public IntegerOperand(int value) { this.value = value; }
+    public int getValue()  throws LabelNotResolvedException { return value; }
     public OperandType getType() { return OperandType.OPERAND_INTEGER; }
 
     // Internal members
-    private short value;
+    private int value;
 }

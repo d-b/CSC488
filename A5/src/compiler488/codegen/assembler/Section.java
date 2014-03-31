@@ -16,7 +16,7 @@ public class Section {
     Section(String name) {
         this.name = name;
         this.instructions = new LinkedList<Instruction>();
-        this.labels = new HashMap<String, Short>();
+        this.labels = new HashMap<String, Integer>();
         this.size = 0;
         this.address = 0;
     }
@@ -29,10 +29,10 @@ public class Section {
         labels.put(name, size);
     }
 
-    public Short getLabel(String name) {
-        Short offset = labels.get(name);
+    public Integer getLabel(String name) {
+        Integer offset = labels.get(name);
         if (offset == null) return null;
-        return (short)(address + offset);
+        return address + offset;
     }
 
     public void addInstruction(Instruction instruction) {
@@ -48,22 +48,22 @@ public class Section {
     // Memory allocation
     //
 
-    public short allocateMemory(short words) {
-        short addr = (short)(address + size);
+    public int allocateMemory(int words) {
+        int addr = address + size;
         size += words;
         return addr;
     }
 
     // Getters/setters
     public String getName() { return name; }
-    public short getAddress() { return address; }
-    public void setAddress(short address) { this.address = address; }
-    public short getSize() { return size; }
+    public int getAddress() { return address; }
+    public void setAddress(int baseAddress) { this.address = baseAddress; }
+    public int getSize() { return size; }
 
     // Internal members
     private String name;
     private List<Instruction> instructions;
-    private Map<String, Short> labels;
-    private short size;
-    private short address;
+    private Map<String, Integer> labels;
+    private int size;
+    private int address;
 }

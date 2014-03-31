@@ -26,7 +26,7 @@ import subprocess
 import tempfile
 
 # Test directories
-PATHS = {'passing': 'testing/pass',
+PATHS = {'passing': 'testing/io',
          'failing': 'testing/fail'}
 
 # Compiler location
@@ -78,7 +78,7 @@ def test(path, failing = False):
             else:
                 match = patInputLine.search(x)
                 if match:
-                    inFile.write(bytes(match.groups()[0]+"\r\n",'utf8'))
+                    inFile.write(bytes(match.groups()[0]+'\r\n','utf8'))
 
     inFile.seek(0)
 
@@ -102,8 +102,8 @@ def test(path, failing = False):
             for x in lines:
                 if comparingOutput == True:
                     if i >= 0 and i < len(correctOutput) and x != correctOutput[i]:
-                        print("\nWrong output. Expected: ",correctOutput[i])
-                        print("But instead got: ",x)
+                        print('\n@output[{}]={}'.format(i, correctOutput[i]))
+                        print(' actual[{}]={}'.format(i, x))
                         success = False
                     i = i + 1
                 if patStartOutput.match(x):
@@ -147,9 +147,9 @@ def main():
     print('Running passing tests...')
     failures  = run(PATHS['passing'], False)
     print()
-    print('Running failing tests...')
-    failures += run(PATHS['failing'], True)
-    print()
+    # print('Running failing tests...')
+    # failures += run(PATHS['failing'], True)
+    # print()
     print('Total failures: {}'.format(failures))
 
 if __name__ == '__main__':

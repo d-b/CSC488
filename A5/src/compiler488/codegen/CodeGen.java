@@ -1,8 +1,12 @@
 package compiler488.codegen;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import compiler488.ast.AST;
 import compiler488.ast.Readable;
 import compiler488.ast.Printable;
 import compiler488.ast.SourceLocPrettyPrinter;
@@ -65,6 +69,9 @@ public class CodeGen extends Visitor
         // Fetch enclosing routine
         RoutineDecl routine = (RoutineDecl) table.currentScope().getParent();
 
+        // Add total locals size to the sizes table
+        sizes.put(table.currentScope(), table.getLocalsSize());
+
         if(routine != null) {
             comment("------------------------------------");
             comment("Start of " + routine.getName());
@@ -73,8 +80,8 @@ public class CodeGen extends Visitor
             label(table.getRoutineLabel(false));
         }
 
-        emit("SAVECTX", table.getLevel()); // Scope prolog
-        reserve(table.getLocalsSize());    // Reserve memory for locals
+        emit("SAVECTX", table.getLevel());   // Scope prolog
+        reserve(table.getFrameLocalsSize()); // Reserve memory for locals
     }
 
     void majorEpilog() {
@@ -83,7 +90,7 @@ public class CodeGen extends Visitor
 
         if(routine != null)                           // Routine ending label
             label(table.getRoutineLabel(true));       // ...
-        free(table.getLocalsSize());                  // Free locals
+        free(table.getFrameLocalsSize());             // Free locals
         emit("RESTORECTX", table.getLevel(),          // Restore context
                            table.getArgumentsSize()); // ...
         if(routine != null) emit("BR");               // Return from routine
@@ -98,7 +105,7 @@ public class CodeGen extends Visitor
     }
 
     @Processor(target="Scope")
-    void processScope(Scope scope) {
+    void processScope(Scope scope) throws CodeGenException {
         // Enter the scope
         table.enterScope(scope);
 
@@ -233,9 +240,11 @@ public class CodeGen extends Visitor
     @Processor(target="IntConstExpn")
     void processIntConstExpn(IntConstExpn intConstExpn) throws CodeGenException {
         if(intConstExpn.getValue() < Machine.MIN_INTEGER)
-            throw new CodeGenException("integer constant below machine minimum of " + Machine.MIN_INTEGER);
+            throw new CodeGenException(source, intConstExpn,
+                    "integer constant below machine minimum of " + Machine.MIN_INTEGER);
         if(intConstExpn.getValue() > Machine.MAX_INTEGER)
-            throw new CodeGenException("integer constant above machine maximum of " + Machine.MAX_INTEGER);
+            throw new CodeGenException(source, intConstExpn,
+                    "integer constant above machine maximum of " + Machine.MAX_INTEGER);
         emit("PUSH", intConstExpn.getValue()); // Push the constant literal
     }
 
@@ -269,7 +278,7 @@ public class CodeGen extends Visitor
         String _end = table.getLabel();
 
         // Compute the stride of the array
-        short stride = (short)(bound1.getUpperboundValue() - bound1.getLowerboundValue());
+        int stride = bound1.getUpperboundValue() - bound1.getLowerboundValue();
 
         visit(subsExpn.getSubscript1());               // Evaluate subscript_1
         emit("DUP");                                   // Create duplicate, for bounds checking
@@ -361,7 +370,8 @@ public class CodeGen extends Visitor
     @Processor(target="TextConstExpn")
     void processTextConstExpn(TextConstExpn textConstExpn) throws CodeGenException {
         if(textConstExpn.getValue().length() > LANGUAGE_MAX_STRING_LENGTH)
-            throw new CodeGenException("string exceeds maximum allowable length of " + LANGUAGE_MAX_STRING_LENGTH + " characters");
+            throw new CodeGenException(source, textConstExpn,
+                    "string exceeds maximum allowable length of " + LANGUAGE_MAX_STRING_LENGTH + " characters");
     }
 
     @Processor(target="UnaryMinusExpn")
@@ -573,6 +583,35 @@ public class CodeGen extends Visitor
     }
 
     //
+    // Exception handling
+    //
+
+    void exception(Exception e) {
+        // Increment error count
+        errors += 1;
+        // Print a stack trace if it is not an expected error
+        if(e.getCause() instanceof CodeGenException) {
+            CodeGenException cge = (CodeGenException) e.getCause();
+            cge.setSource(source);
+            cge.printCodeTrace();
+        } else {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void visit(AST node) {
+        try{super.visit(node);}
+        catch(Exception e) { exception(e); }
+    }
+
+    @Override
+    public void visit(List<AST> list) {
+        try{super.visit(list);}
+        catch(Exception e) { exception(e); }
+    }
+
+    //
     // Code generator life cycle
     //
 
@@ -584,6 +623,7 @@ public class CodeGen extends Visitor
     public void Initialize() {
         // Instantiate internals
         table = new Table();
+        sizes = new HashMap<Scope, Integer>();
         // Start the assembler
         assemblerStart();
     }
@@ -609,18 +649,32 @@ public class CodeGen extends Visitor
         int result = assemblerEnd();
         if(result < 0) return false;
         // See if any errors have occurred
-        if(errors() > 0) return false;
+        if(errors > 0) return false;
+
+        // Check sanity of program
+        int sizeProgram = result;
+        int sizeStack = Machine.memorySize - sizeProgram;
+        for(Entry<Scope, Integer> entry : sizes.entrySet()) {
+            if(entry.getValue() > sizeStack) {
+                CodeGenException e = new CodeGenException(source, entry.getKey(),
+                        "locals size of major scope, " + entry.getValue() + " words, exceeds the machine stack size, " + sizeStack + " words");
+                e.printCodeTrace(); return false;
+            }
+        }
+
         // Set initial machine state
         Machine.setPC((short) 0);
-        Machine.setMSP((short) result);
+        Machine.setMSP((short) sizeProgram);
         Machine.setMLP((short) (Machine.memorySize - 1));
         return true;
     }
 
     // Code generator internals
-    private Table        table;         // Master table
-    private List<String> source;        // Source listing
-    private String       loopExitLabel; // Loop exit label
+    private int                 errors;        // The error count
+    private Table               table;         // Master table
+    private List<String>        source;        // Source listing
+    private Map<Scope, Integer> sizes;         // Major scope sizes
+    private String              loopExitLabel; // Loop exit label
 
     //
     // Assembler
@@ -678,7 +732,7 @@ public class CodeGen extends Visitor
     }
 
     void newline() {
-        emit("PUSH", (short) '\n');
+        emit("PUSH", (int) '\n');
         emit("PRINTC");
     }
 
@@ -699,12 +753,12 @@ public class CodeGen extends Visitor
         } assemblerPrintln(command);
     }
 
-    void reserve(short words) {
+    void reserve(int words) {
         if(words == 0) return;
         emit("RESERVE", words);
     }
 
-    void free(short words) {
+    void free(int words) {
         if(words == 0) return;
         emit("PUSH", words);
         emit("POPN");

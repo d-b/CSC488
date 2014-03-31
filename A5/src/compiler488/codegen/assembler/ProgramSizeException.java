@@ -1,13 +1,13 @@
 package compiler488.codegen.assembler;
 
 /**
- * Thrown when the value of an unresolved label is queried
+ * Thrown when the size of a program exceeds size of machine memory
  *
  * @author Daniel Bloemendal
  */
-public class LabelNotResolvedError extends Exception {
+public class ProgramSizeException extends Exception {
     private static final long serialVersionUID = 1L;
-    LabelNotResolvedError(String message) {
+    ProgramSizeException(String message) {
         super(message);
     }
 }

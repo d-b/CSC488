@@ -36,16 +36,15 @@ public class Emitter {
     }
 
     public short addConstant(short w) throws MemoryAddressException {
-        short base = dataSec.allocateMemory((short) 1);
+        short base = (short) dataSec.allocateMemory(1);
         Machine.writeMemory(base, w);
         return base;
     }
     public short addConstant(char constant[]) throws MemoryAddressException {
-        short base = dataSec.allocateMemory((short) constant.length);
+        short base = (short) dataSec.allocateMemory(constant.length);
         for (int i = 0; i < constant.length; i++) {
             Machine.writeMemory((short) (base + i), (short) constant[i]);
-        }
-        return base;
+        } return base;
     }
 
     public short addConstant(String str) throws MemoryAddressException {

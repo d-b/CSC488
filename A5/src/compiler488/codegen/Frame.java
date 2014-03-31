@@ -18,6 +18,7 @@ import compiler488.ast.stmt.Scope;
 import compiler488.codegen.visitor.Visitor;
 import compiler488.codegen.visitor.PreProcessor;
 import compiler488.codegen.visitor.PostProcessor;
+import compiler488.runtime.Machine;
 
 /**
  * Stack frame for major scopes
@@ -55,9 +56,31 @@ public class Frame extends Visitor {
     }
 
     @PreProcessor(target="MultiDeclarations")
-    void preMultiDeclarations(MultiDeclarations multiDeclarations) {
-        for(DeclarationPart part : multiDeclarations.getElements().getList())
+    void preMultiDeclarations(MultiDeclarations multiDeclarations) throws CodeGenException {
+        for(DeclarationPart part : multiDeclarations.getElements().getList()) {
+            // Check the size of the variable if it is an array
+            if(part instanceof ArrayDeclPart) {
+                ArrayDeclPart decl = (ArrayDeclPart) part;
+                if(decl.getSize() > Machine.memorySize)
+                    throw new CodeGenException(decl, "size of array exceeds available machine memory");
+            }
+
+            // Add the variable to the frame
             currentFrame().addVariable(part, multiDeclarations);
+        }
+    }
+
+    //
+    // Exception handling
+    //
+
+    public void traverse(AST root) throws CodeGenException {
+        try { super.traverse(root); }
+        catch(Exception e) {
+            if(e.getCause() instanceof CodeGenException)
+                throw (CodeGenException) e.getCause();
+            else throw new RuntimeException(e);
+        }
     }
 
     //
@@ -81,7 +104,7 @@ public class Frame extends Visitor {
         List<MinorFrame> children = current.getChildren();
         if(!children.isEmpty()) {
             MinorFrame max = Collections.max(children);
-            short size = (short)(current.getSize() + max.getSize());
+            int size = current.getSize() + max.getSize();
             current.setSize(size);
         }
 
@@ -100,7 +123,7 @@ public class Frame extends Visitor {
         for(int i = 0; i < parameterList.size(); i++) {
             ScalarDecl decl = parameterList.get(i);
             frameArgs.put(decl.getName(), new Variable(decl, frameLevel,
-                    (short)(-parameterList.size() - 1 + i))); // ON = -N - 1 + i argument i
+                    -parameterList.size() - 1 + i)); // ON = -N - 1 + i argument i
         }
     }
 
@@ -108,7 +131,7 @@ public class Frame extends Visitor {
     // Frame interface
     //
 
-    public Frame(Scope scope, Scope parent, short lexicalLevel) {
+    public Frame(Scope scope, Scope parent, int lexicalLevel) throws CodeGenException {
         // Scope must be major
         if(!scopeIsMajor(scope))
             throw new RuntimeException("A frame can only be constructed for a major scope.");
@@ -143,26 +166,26 @@ public class Frame extends Visitor {
         return frameArgs.get(identifier);
     }
 
-    public Short getOffsetReturn() {
+    public Integer getOffsetReturn() {
         if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
-        return (short)(-frameArgs.size() - 2); // ON = -N - 2 return address
+        return -frameArgs.size() - 2; // ON = -N - 2 return address
     }
 
-    public Short getOffsetResult() {
+    public Integer getOffsetResult() {
         if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
-        return (short)(-frameArgs.size() - 3); // ON = -N - 3 return value (always present, but ignored if procedure)
+        return -frameArgs.size() - 3; // ON = -N - 3 return value (always present, but ignored if procedure)
     }
 
-    public short getLevel() {
+    public int getLevel() {
         return frameLevel;
     }
 
-    public short getLocalsSize() {
+    public int getLocalsSize() {
         return (frameRoot != null) ? frameRoot.getSize() : 0;
     }
 
-    public short getArgumentsSize() {
-        return (short) frameArgs.size();
+    public int getArgumentsSize() {
+        return frameArgs.size();
     }
 
     public Scope getScope() {
@@ -188,7 +211,7 @@ public class Frame extends Visitor {
     private Map<AST, MinorFrame>  frameMap;
     private MinorFrame            frameRoot;
     private MinorFrame            frameCurrent;
-    private short                 frameLevel;
+    private int                   frameLevel;
 }
 
 //
@@ -210,7 +233,7 @@ class MinorFrame implements Comparable<MinorFrame> {
     public Variable getVariable(String identifier) {
         Variable variable = frameVariables.get(identifier);
         if(variable == null) return null;
-        return new Variable(variable, frameMajor.getLevel(), (short)(frameBase + variable.getOffset()));
+        return new Variable(variable, frameMajor.getLevel(), frameBase + variable.getOffset());
     }
 
     public void addVariable(AST node, MultiDeclarations parent) {
@@ -226,8 +249,8 @@ class MinorFrame implements Comparable<MinorFrame> {
     // Getters/setters
     public MinorFrame getParent() { return frameParent; }
     public List<MinorFrame> getChildren() { return Collections.unmodifiableList(frameChildren); }
-    public short getSize() { return frameSize; }
-    public void setSize(short size) { frameSize = size; }
+    public int getSize() { return frameSize; }
+    public void setSize(int size) { frameSize = size; }
 
     // Compare support
     public int compareTo(MinorFrame other) { return this.frameSize - other.frameSize; }
@@ -244,6 +267,6 @@ class MinorFrame implements Comparable<MinorFrame> {
     private MinorFrame            frameParent;
     private List<MinorFrame>      frameChildren;
     private Map<String, Variable> frameVariables;
-    private short                 frameBase;
-    private short                 frameSize;
+    private int                   frameBase;
+    private int                   frameSize;
 }

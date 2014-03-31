@@ -21,7 +21,7 @@ public class Instruction {
     public int getSize() { return size; }
 
     // Helpers
-    public short val(int op) throws LabelNotResolvedError
+    public int val(int op) throws LabelNotResolvedException
         {return ((IntegerOperand) operands.get(op)).getValue();}
     public String str(int op)
         {return ((StringOperand) operands.get(op)).getValue();}

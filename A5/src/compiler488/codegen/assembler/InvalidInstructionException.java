@@ -5,9 +5,9 @@ package compiler488.codegen.assembler;
  *
  * @author Daniel Bloemendal
  */
-public class InvalidInstructionError extends Exception {
+public class InvalidInstructionException extends Exception {
     private static final long serialVersionUID = 1L;
-    InvalidInstructionError(String message, String instruction, int line) {
+    InvalidInstructionException(String message, String instruction, int line) {
         this.message = message;
         this.instruction = instruction;
         this.line = line;
