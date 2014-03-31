@@ -80,7 +80,7 @@
 
     % 2D array reference by expression
     area1[ 5 + 5, 4 + 6 ] := 3
-    putint(area1[10, 10]) % @output=1
+    putint(area1[10, 10]) % @output=3
 
     area2[ 1, 2 ] := 1
     area2[ 10, 2 ] := 2

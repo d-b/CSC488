@@ -84,9 +84,9 @@ def test(path, failing = False):
             comparingOutput = False
             for x in lines:
                 if comparingOutput == True:
-                    if i >= 0 and i < len(correctOutput) and x != correctOutput[i]:
+                    if i >= 0 and i < len(correctOutput) and x.strip() != correctOutput[i].strip():
                         if(success): print()
-                        print('expected[{}]={} output[{}]={}'.format(i, correctOutput[i], i, x))
+                        print('expected[{}]={} output[{}]={}'.format(i, correctOutput[i].strip(), i, x))
                         success = False
                     i = i + 1
                 if patStartOutput.match(x):
