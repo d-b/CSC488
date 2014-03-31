@@ -1,0 +1,18 @@
+%
+% Very large arrays
+%
+
+{
+    proc f() {
+        var a[100000] : integer
+        a[1] := 0
+    }
+
+    proc g() {
+        var b[100000] : integer
+        b[1] := 0
+    }
+
+    var x : integer
+    x := 0
+}

@@ -1,0 +1,9 @@
+%
+% Use of an integer above Machine.MAX_INTEGER
+%
+
+{
+    var x, a[10] : integer
+    x := 1 + 100000
+    a[100000 + 5] := 1
+}

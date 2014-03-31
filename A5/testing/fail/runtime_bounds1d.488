@@ -1,0 +1,8 @@
+%
+% Out of bounds access to 1D array
+%
+
+{
+    var a[10] : integer
+    a[11] := 1
+}

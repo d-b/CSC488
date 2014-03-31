@@ -364,8 +364,8 @@ public class CodeGen extends Visitor
             label(_error_upper1);
             label(_error_lower2);
             label(_error_upper2);
-            put("Error: subscript out of range for array "); put(subsExpn.getName());
-            put(" on line "); put(subsExpn.getLoc().getStartLine() + 1); newline();
+            put("Error: subscript out of range for array '"); put(subsExpn.getName());
+            put("' on line "); put(subsExpn.getLoc().getStartLine() + 1); newline();
             emit("HALT");
         }
 

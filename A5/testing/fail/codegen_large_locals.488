@@ -1,0 +1,23 @@
+%
+% Locals in a scope exceeding available stack space
+%
+
+{
+    proc f() {
+        proc g() {
+            var a[5000] : integer
+            a[1] := 0
+
+            {
+                var a[5000] : integer
+                a[1] := 0
+            }
+        }
+        
+        var a[5000] : integer
+        a[1] := 0
+    }
+
+    var a[5000] : integer
+    a[1] := 0
+}

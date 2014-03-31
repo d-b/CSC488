@@ -34,6 +34,8 @@ def test(path, failing = False):
     # Regexp patterns
     patSuccess     = re.compile(r'^End of Code Generation$')
     patFailure     = re.compile(r'^Ended Code Generation with failures$')
+    patFailBounds  = re.compile(r'^Error: subscript out of range for array')
+    patFailExec    = re.compile(r'^Exception during Machine Execution')
     patOutputLine  = re.compile(r'.*%[\s%]*@output=(.*)')
     patInputLine   = re.compile(r'.*%[\s%]*@input=(.*)')
     patStartOutput = re.compile(r'Start Execution')
@@ -59,7 +61,7 @@ def test(path, failing = False):
 
     # Execute the test
     try:
-        output = subprocess.check_output(['java', '-jar', COMPILER, path], stdin=inFile, stderr=subprocess.STDOUT)
+        output = subprocess.check_output(['java', '-jar', COMPILER, '-B', 's', path], stdin=inFile, stderr=subprocess.STDOUT)
         lines  = output.decode('utf8').replace('\r', '').split('\n')
     except:
         # On exception consider the test a failure
@@ -95,7 +97,10 @@ def test(path, failing = False):
         return success
     # Failing case
     else:
-        return findpattern(patFailure, lines)
+        failures = [findpattern(patFailure, lines),
+                    findpattern(patFailBounds, lines),
+                    findpattern(patFailExec, lines)]
+        return any(failures)
 
 def run(directory, failing = False):
     failures = 0
@@ -112,9 +117,9 @@ def main():
     print('Running passing tests...')
     failures  = run(PATHS['passing'], False)
     print()
-    # print('Running failing tests...')
-    # failures += run(PATHS['failing'], True)
-    # print()
+    print('Running failing tests...')
+    failures += run(PATHS['failing'], True)
+    print()
     print('Total failures: {}'.format(failures))
 
 if __name__ == '__main__':

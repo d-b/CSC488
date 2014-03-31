@@ -1,0 +1,11 @@
+%
+% Use of an undefined return value
+%
+
+{
+    func f() : integer {}
+    
+    var x : integer
+    x := f()
+    put x
+}

@@ -1,0 +1,8 @@
+%
+% Out of bounds access to 2D array
+%
+
+{
+    var a[10, 10] : integer
+    a[1, 11] := 1
+}
