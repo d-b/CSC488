@@ -24,7 +24,7 @@
 
     proc qsort(st: integer, e: integer) {
         var pt: integer
-        func partition(st: integer, e: integer): integer {
+        proc partition_and_qsort(st: integer, e: integer) {
             var i: integer
             var pivot: integer
             var part: integer
@@ -44,14 +44,13 @@
             tmp := arr[part]
             arr[part] := arr[e - 1]
             arr[e - 1] := tmp
-            result part
+            qsort(st, part)
+            qsort(part + 1, e)
         }
         if e - st < 2 then
             return
         fi
-        pt := partition(st, e)
-        qsort(st, pt)
-        qsort(pt + 1, e)
+        partition_and_qsort(st, e)
     }
     arr[0] := 463
     arr[1] := 637
