@@ -255,7 +255,7 @@ public class CodeGen extends Visitor
         emit("EQ");                  // ...
     }
 
-    void addressSubsExpn(SubsExpn subsExpn) {
+    void addressSubsExpnChecking(SubsExpn subsExpn) {
         // Fetch address of the array
         Variable var = table.getVaraible(subsExpn.getName());
         if(var == null) throw new RuntimeException("identifier does not match any variable declaration");
@@ -336,25 +336,82 @@ public class CodeGen extends Visitor
         // Error handling
         //
 
-        // Pretty printed locations of error
-        String locSub1 = new String(), locSub2 = new String();
-        if(bound1 != null) locSub1 = SourceLocPrettyPrinter.printToString(source, subsExpn.getSubscript1()).replace('"', '\'');
-        if(bound2 != null) locSub2 = SourceLocPrettyPrinter.printToString(source, subsExpn.getSubscript2()).replace('"', '\'');
+        // Enhanced bounds checking with pretty location information
+        if(checking == BoundsChecking.Enhanced) {
+            // Pretty printed locations of error
+            String locSub1 = new String(), locSub2 = new String();
+            if(bound1 != null) locSub1 = SourceLocPrettyPrinter.printToString(source, subsExpn.getSubscript1()).replace('"', '\'');
+            if(bound2 != null) locSub2 = SourceLocPrettyPrinter.printToString(source, subsExpn.getSubscript2()).replace('"', '\'');
 
-        // Handler for subscript_1 < lowerbound_1 & subscript_1 > upperbound_1
-        label(_error_lower1);
-        label(_error_upper1);
-        put(subsExpn.getLoc().toString() + ": subscript out of range"); newline();
-        put(locSub1);
-        emit("HALT");
+            // Handler for subscript_1 < lowerbound_1 & subscript_1 > upperbound_1
+            label(_error_lower1);
+            label(_error_upper1);
+            put(subsExpn.getLoc().toString()); put(": subscript out of range"); newline();
+            put(locSub1);
+            emit("HALT");
 
-        if(bound2 != null) {
-            // Handler for subscript_2 < lowerbound_2 & subscript_2 > upperbound_2
+            if(bound2 != null) {
+                // Handler for subscript_2 < lowerbound_2 & subscript_2 > upperbound_2
+                label(_error_lower2);
+                label(_error_upper2);
+                put(subsExpn.getLoc().toString()); put(": subscript out of range"); newline();
+                put(locSub2);
+                emit("HALT");
+            }
+        // Bounds checking with less detailed information
+        } else {
+            label(_error_lower1);
+            label(_error_upper1);
             label(_error_lower2);
             label(_error_upper2);
-            put(subsExpn.getLoc().toString() + ": subscript out of range"); newline();
-            put(locSub2);
+            put("Error: subscript out of range for array "); put(subsExpn.getName());
+            put(" on line "); put(subsExpn.getLoc().getStartLine() + 1); newline();
             emit("HALT");
+        }
+
+        // End of block
+        label(_end);
+    }
+
+    void addressSubsExpn(SubsExpn subsExpn) {
+        // See if we need to perform bounds checking
+        if(checking != BoundsChecking.None) { addressSubsExpnChecking(subsExpn); return; }
+
+        // Fetch address of the array
+        Variable var = table.getVaraible(subsExpn.getName());
+        if(var == null) throw new RuntimeException("identifier does not match any variable declaration");
+        emit("ADDR", var.getLevel(), var.getOffset());
+
+        // Fetch bounds and check sanity
+        ArrayBound bound1 = var.getBounds().size() > 0 ? var.getBounds().get(0) : null;
+        ArrayBound bound2 = var.getBounds().size() > 1 ? var.getBounds().get(1) : null;
+        if(bound1 == null && bound2 == null) throw new RuntimeException("array with no bounds");
+
+        // Generate labels
+        String _end = table.getLabel();
+
+        // Compute the stride of the array
+        int stride = bound1.getUpperboundValue() - bound1.getLowerboundValue();
+
+        visit(subsExpn.getSubscript1());               // Evaluate subscript_1
+        emit("PUSH", bound1.getLowerboundValue());     // subscript_1 - lower_bound_1
+        emit("SUB");                                   // ...
+
+        // If array is 1D
+        if(bound2 == null) {
+            emit("ADD");                               // Add subscript to base address
+            emit("JMP", _end);                         // Jump to end
+        }
+        // If array is 2D
+        else {
+            emit("PUSH", stride);                      // Multiply by stride
+            emit("MUL");                               // ...
+            emit("ADD");                               // Add to base address
+            visit(subsExpn.getSubscript2());           // Evaluate subscript_2
+            emit("PUSH", bound2.getLowerboundValue()); // subscript_2 - lower_bound_2
+            emit("SUB");
+            emit("ADD");                               // Add computed array offset to base address
+            emit("JMP", _end);                         // Jump to end
         }
 
         // End of block
@@ -612,6 +669,12 @@ public class CodeGen extends Visitor
     }
 
     //
+    // Bounds checking modes
+    //
+
+    public enum BoundsChecking { None, Simple, Enhanced };
+
+    //
     // Code generator life cycle
     //
 
@@ -628,7 +691,10 @@ public class CodeGen extends Visitor
         assemblerStart();
     }
 
-    public void Generate(Program program) {
+    public void Generate(Program program, BoundsChecking boundsChecking) {
+        // Set bounds checking mode
+        checking = boundsChecking;
+
         // Assemble the runtime library
         assemblerPrint(Library.code);
 
@@ -674,6 +740,7 @@ public class CodeGen extends Visitor
     private Table               table;         // Master table
     private List<String>        source;        // Source listing
     private Map<Scope, Integer> sizes;         // Major scope sizes
+    private BoundsChecking      checking;      // Bounds checking mode
     private String              loopExitLabel; // Loop exit label
 
     //
@@ -732,8 +799,13 @@ public class CodeGen extends Visitor
     }
 
     void newline() {
-        emit("PUSH", (int) '\n');
+        emit("PUSH", (short) '\n');
         emit("PRINTC");
+    }
+
+    void put(int number) {
+        emit("PUSH", (short) number);
+        emit("PRINTI");
     }
 
     void put(String string) {

@@ -3,12 +3,10 @@
 # Assignment 3: Test runner
 #
 # Daniel Bloemendal
-#
+# Oren Watson
 #
 #   Documentation of test annotations in .488 files.
 #  --------------------------------------------------
-# %@line=1,2,3
-# Specifies that errors should occur on the line number(s) given.
 # %@output=Rest of line
 # The text given in each annotation must be outputted in the order
 # that the annotations appear in the file.
@@ -34,23 +32,11 @@ COMPILER = 'dist/compiler488.jar'
 
 def test(path, failing = False):
     # Regexp patterns
-    patSingleLine  = re.compile(r'%@line=(\d+)')
-    patMultiLine   = re.compile(r'%@line=\[(\d+(,\d+)*)\]')
-    patError       = re.compile(r'(?P<file>[^:]*):(?P<line>[^:]*):(?P<column>[^:]*): (?P<action>S\d+):')
-    patSuccess     = re.compile(r'^End of Semantic Analysis$')
-    patFailure     = re.compile(r'^Ended Semantic Analysis with failures$')
-    patAction      = re.compile(r'(S\d+)')
+    patSuccess     = re.compile(r'^End of Code Generation$')
+    patFailure     = re.compile(r'^Ended Code Generation with failures$')
     patOutputLine  = re.compile(r'.*%[\s%]*@output=(.*)')
     patInputLine   = re.compile(r'.*%[\s%]*@input=(.*)')
     patStartOutput = re.compile(r'Start Execution')
-
-    # Parse error type
-    action = None
-    match = patAction.match(os.path.basename(path))
-    if match: action = match.groups()[0]
-
-    # Lines where errors are expected
-    expected = []
 
     # Lines of correct output:
     correctOutput = []
@@ -58,18 +44,8 @@ def test(path, failing = False):
     # File for input lines:
     inFile = tempfile.TemporaryFile()
 
-    # If failing parse file for lines
-    if failing:
-        testfile = open(path)
-        for x in testfile:
-            l = x.replace(' ', '').replace('\t', '')
-            match = patSingleLine.match(l)
-            if match: expected.append(int(match.groups()[0]))
-            else:
-                match = patMultiLine.match(l)
-                if match: expected += [int(x) for x in match.groups()[0].split(',')]
-        testfile.close()
-    else: # if passing, parse file for input lines and correct output lines
+    # If passing, parse file for input and output lines
+    if not failing:
         testfile = open(path)
         for x in testfile:
             match = patOutputLine.search(x)
@@ -79,7 +55,6 @@ def test(path, failing = False):
                 match = patInputLine.search(x)
                 if match:
                     inFile.write(bytes(match.groups()[0]+'\r\n','utf8'))
-
     inFile.seek(0)
 
     # Execute the test
@@ -90,20 +65,28 @@ def test(path, failing = False):
         # On exception consider the test a failure
         return False
 
+    # Find a pattern
+    def findpattern(pat, lines):
+        for line in lines:
+            if(pat.match(line)):
+                return True
+        return False
+
     # Successful case
     if not failing:
-        success = False
-        for x in lines:
-            if patSuccess.match(x): success = True
-        # check output if specified
-        if correctOutput != []:
+        # We expect successful code generation
+        if not findpattern(patSuccess, lines):
+            return False
+        # Check output if specified
+        success = True
+        if correctOutput:
             i = 0
             comparingOutput = False
             for x in lines:
                 if comparingOutput == True:
                     if i >= 0 and i < len(correctOutput) and x != correctOutput[i]:
-                        print('\n@output[{}]={}'.format(i, correctOutput[i]))
-                        print(' actual[{}]={}'.format(i, x))
+                        if(success): print()
+                        print('expected[{}]={} output[{}]={}'.format(i, correctOutput[i], i, x))
                         success = False
                     i = i + 1
                 if patStartOutput.match(x):
@@ -112,25 +95,7 @@ def test(path, failing = False):
         return success
     # Failing case
     else:
-        errors  = {}
-        failure = False
-        for x in lines:
-            match = patFailure.match(x)
-            if match: failure = True
-            match = patError.match(x)
-            if not match: continue
-            errinfo = match.groupdict()
-            errmap = errors.get(int(errinfo['line']), {})
-            errmap[errinfo['action']] = errinfo
-            errors[int(errinfo['line'])] = errmap
-        # If a failure did not occur bail out
-        if not failure: return False
-        # First check expected errors
-        for num in expected:
-            if (num not in errors) \
-            or (action and (action not in errors[num] \
-                         or errors[num][action]['action'] != action)): return False
-        return True
+        return findpattern(patFailure, lines)
 
 def run(directory, failing = False):
     failures = 0

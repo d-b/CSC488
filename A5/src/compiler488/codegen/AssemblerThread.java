@@ -30,11 +30,11 @@ public class AssemblerThread extends Thread {
             assembler.Assemble(assemblerIn);
             assemblerSuccess = true;
         } catch (InvalidInstructionException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Assembler: " + e.getMessage());
         } catch (LabelNotResolvedException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Assembler: " + e.getMessage());
         } catch (ProgramSizeException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Assembler: " + e.getMessage());
         }
     }
 

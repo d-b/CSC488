@@ -50,12 +50,14 @@ public class Main {
 
     /** User option -- supress execution */
     public static boolean supressExecution   = false ;
-    
-    /** User option -- syntax highlighting for dumped assembly */
-    public static boolean syntaxHighlighting = false;    
-
     /** User option -- roundtrip the AST and verify the pretty print */
-    private static boolean checkRoundtrip = false;    
+    private static boolean checkRoundtrip = false;
+    
+    // Code generation related options
+    /** User option -- syntax highlighting for dumped assembly */
+    public static boolean syntaxHighlighting = false;
+    /** User option -- bounds checking mode */
+    public static CodeGen.BoundsChecking boundsChecking = CodeGen.BoundsChecking.None;
     
     // DUMP Options
     /** User option -- dump AST after parsing */
@@ -158,7 +160,19 @@ public class Main {
                     } else if (arguments[i].equals("--roundtrip")) {
                         checkRoundtrip = true;
                     } else if (arguments[i].equals("--syntax-highlighting")) {
-                        syntaxHighlighting = true;                        
+                        syntaxHighlighting = true;
+                    } else if (arguments[i].equals("-B")) {
+                        i++;    // advance to next argument
+                        argTmp = arguments[ i ] ;
+                        if(argTmp.indexOf('s') >= 0) boundsChecking = CodeGen.BoundsChecking.Simple;
+                        if(argTmp.indexOf('e') >= 0) boundsChecking = CodeGen.BoundsChecking.Enhanced;
+                        k = argTmp.length();
+                        for (j = 0; j < k ; j++) {
+                            if ("se".indexOf( argTmp.charAt(j)) < 0) {
+                                System.err.println("Invalid flag '" +
+                                        argTmp.charAt(j) + "' for -B option (ignored)");
+                            }
+                        }                        
                     } else if (arguments[i].equals("-D")) {
                         i++;	// advance to next argument
                         argTmp = arguments[ i ] ;
@@ -557,7 +571,7 @@ public class Main {
             System.out.println("Begin Code Generation");
             CodeGen codegen = new CodeGen(lines);
             codegen.Initialize();
-            codegen.Generate(programAST);
+            codegen.Generate(programAST, boundsChecking);
             if(codegen.Finalize())
                 System.out.println("End of Code Generation");
             else {
