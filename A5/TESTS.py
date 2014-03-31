@@ -32,8 +32,8 @@ COMPILER = 'dist/compiler488.jar'
 
 def test(path, failing = False):
     # Regexp patterns
-    patSuccess     = re.compile(r'^End of Code Generation$')
-    patFailure     = re.compile(r'^Ended Code Generation with failures$')
+    patSuccess     = re.compile(r'^End of Execution$')
+    patFailCodeGen = re.compile(r'^Ended Code Generation with failures$')
     patFailBounds  = re.compile(r'^Error: subscript out of range for array')
     patFailExec    = re.compile(r'^Exception during Machine Execution')
     patOutputLine  = re.compile(r'.*%[\s%]*@output=(.*)')
@@ -76,7 +76,7 @@ def test(path, failing = False):
 
     # Successful case
     if not failing:
-        # We expect successful code generation
+        # We expect successful execution
         if not findpattern(patSuccess, lines):
             return False
         # Check output if specified
@@ -97,7 +97,7 @@ def test(path, failing = False):
         return success
     # Failing case
     else:
-        failures = [findpattern(patFailure, lines),
+        failures = [findpattern(patFailCodeGen, lines),
                     findpattern(patFailBounds, lines),
                     findpattern(patFailExec, lines)]
         return any(failures)
