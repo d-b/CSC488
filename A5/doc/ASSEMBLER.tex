@@ -18,6 +18,7 @@
 \usepackage{mathtools}
 \usepackage{listings}
 \usepackage[table]{xcolor}
+\usepackage{syntax}
 % ----------------------------------------------------------------
 \vfuzz2pt % Don't report over-full v-boxes if over-edge is small
 \hfuzz2pt % Don't report over-full h-boxes if over-edge is small
@@ -73,10 +74,10 @@
 
 \section{Overview}
 The first goal, before beginning work on code generation, was to implement an assembler for our IR
-instruction set. This includes instructions with label operands, instead of static addresses, and
+instruction set. This included instructions with label operands, instead of static addresses, and
 each macro, or IR instruction, outlined in the code generation templates. The entire IR instruction
-set will be covered again in detail in this document. There are also a few notable bugs fixed since
-the code generation templates in A4.
+set will be covered again in detail in this document. There are also a few notable bugs that were
+fixed since the code generation templates in A4.
 
 The assembler was designed to be decoupled from the code generator. It is standalone and can even be
 executed from command line on IR assembly programs. A run script is provided along with an
@@ -84,7 +85,47 @@ executed from command line on IR assembly programs. A run script is provided alo
 ``\texttt{ant assembler}''. To execute the assembler from command line, run
 ``\texttt{./RUNASSEMBLER.sh <source.ir>}''
 
-\section{Instruction Set}
+We will begin by outlining the grammar of the assembler. We will then explore the label system and
+IR instructions.
+
+\section{Grammar}
+\noindent The following is the grammar for assembly programs in EBNF. \\
+Please refer to http://en.wikipedia.org/wiki/Extended_Backus-Naur_Form for more information. \\
+
+\setlength{\grammarindent}{12em}
+\begin{grammar}
+<program>           ::= \{ <section> \}
+
+<section>           ::= `SECTION' <label> `\\n'
+\alt                  \{ <instruction> \}
+
+<instruction>       ::= ( <machine_operation> | <ir_operation> )  \{ <operand> \} `\\n'
+
+<machine_operation> ::= `HALT' | `ADDR' | `LOAD' | `STORE' | `PUSH' | `PUSHMT' | `SETD' | `POP' | `POPN' | `DUP' | `DUPN' | `BR' | `BF' | `NEG' | `ADD' | `SUB' | `MUL' | `DIV' | `EQ' | `LT' | `OR' | `SWAP' | `READC' | `PRINTC' | `READI' | `PRINTI' | `TRON' | `TROFF' | `ILIMIT'
+
+<ir_operation>      ::= `PUSHSTR' | `SETUPCALL' | `JMP' | `BFALSE' | `NOT' | `SAVECTX' | `RESTORECTX' | `RESERVE'
+
+<operand>           ::= <integer_operand>
+\alt                    <boolean_operand>
+\alt                    <label_operand>
+\alt                    <string_operand>
+
+<integer_operand>   ::= [`-'], <digit>, \{<digit>\}
+
+<boolean_operand>   ::= `\$true' | `\$false'
+
+<label_operand>     ::= <label>
+
+<string_operand>    ::= `"' \{ <character> \} `"'
+
+<label>             ::= <letter>, \{<letter> | <digit>\}
+
+<letter>            ::= `a'..`z' | `A'..`Z' | `_'
+
+<digit>             ::= `0'..`9'
+\end{grammar}
+
+\section{}
 
 
 % ----------------------------------------------------------------
