@@ -276,47 +276,48 @@ public class CodeGen extends Visitor
         // Compute the stride of the array
         int stride = bound1.getUpperboundValue() - bound1.getLowerboundValue();
 
-        visit(subsExpn.getSubscript1());               // Evaluate subscript_1
-        emit("DUP");                                   // Create duplicate, for bounds checking
-        emit("PUSH", bound1.getLowerboundValue() - 1); // Lower bound on stack. Note optimization of !(S < L) == S > L-1
-        emit("SWAP");
-        emit("LT");                                    // Is subscript_1 less than the lower bound?
-        emit("BFALSE", _error_lower1);                 // Yes, then jump to error handler
+        visit(subsExpn.getSubscript1());                   // Evaluate subscript_1
+        emit("DUP");                                       // Create duplicate, for bounds checking
+        emit("PUSH", bound1.getLowerboundValue() - 1);     // Is lower_bound_1 - 1 < subscript_1?
+        emit("SWAP");                                      // ...
+        emit("LT");                                        // ...
+        emit("BFALSE", _error_lower1);                     // No, then jump to error handler
 
-        emit("DUP");                                   // Another duplicate of subscript_1
-        emit("PUSH", bound1.getUpperboundValue() + 1); // Upper bound on stack. Note optimization of !(G < S) == G+1 > S
-        emit("LT");                                    // Is subscript_1 greater than the upper bound?
-        emit("BFALSE", _error_upper1);                 // Yes, then jump to the error handler.
-        emit("PUSH", bound1.getLowerboundValue());     // subscript_1 - lower_bound_1
-        emit("SUB");                                   // ...
+        emit("DUP");                                       // Another duplicate of subscript_1
+        emit("PUSH", bound1.getUpperboundValue() + 1);     // Is subscript_1 < upper_bound_1 + 1?
+        emit("LT");                                        // ...
+        emit("BFALSE", _error_upper1);                     // No, then jump to the error handler
+
+        emit("PUSH", bound1.getLowerboundValue());         // subscript_1 - lower_bound_1
+        emit("SUB");                                       // ...
 
         // If array is 1D
         if(bound2 == null) {
-            emit("ADD");                               // Add subscript to base address
-            emit("JMP", _end);                         // Jump to end
+            emit("ADD");                                   // Add subscript to base address
+            emit("JMP", _end);                             // Jump to end
         }
         // If array is 2D
         else {
-            emit("PUSH", stride);                      // Multiply by stride
-            emit("MUL");                               // ...
-            emit("ADD");                               // Add to base address
+            emit("PUSH", stride);                          // Multiply by stride
+            emit("MUL");                                   // ...
+            emit("ADD");                                   // Add to base address
 
-            visit(subsExpn.getSubscript2());           // Evaluate subscript_2
-            emit("DUP");                               // Create duplicate, for bounds checking
-            emit("PUSH", bound2.getLowerboundValue() - 1);// Lower bound on stack. Note optimization of !(S < L) == S > L-1
-            emit("SWAP");
-            emit("LT");                                // Is subscript_2 less than the lower bound?
-            emit("BFALSE", _error_lower2);             // Yes, then jump to error handler
+            visit(subsExpn.getSubscript2());               // Evaluate subscript_2
+            emit("DUP");                                   // Create duplicate, for bounds checking
+            emit("PUSH", bound2.getLowerboundValue() - 1); // Is lower_bound_2 - 1 < subscript_2?
+            emit("SWAP");                                  // ...
+            emit("LT");                                    // ...
+            emit("BFALSE", _error_lower2);                 // No, then jump to error handler
 
-            emit("DUP");                               // Another duplicate of subscript_2
-            emit("PUSH", bound2.getUpperboundValue() + 1); // Upper bound on stack. Note optimization of !(G < S) == G+1 > S
-            emit("LT");                                // Is subscript_2 greater than the upper bound?
-            emit("BFALSE", _error_upper2);             // Yes, then jump to the error handler.
+            emit("DUP");                                   // Another duplicate of subscript_2
+            emit("PUSH", bound2.getUpperboundValue() + 1); // Is subscript_2 < upper_bound_2 + 1?
+            emit("LT");                                    // ...
+            emit("BFALSE", _error_upper2);                 // No, then jump to the error handler
 
-            emit("PUSH", bound2.getLowerboundValue()); // subscript_2 - lower_bound_2
+            emit("PUSH", bound2.getLowerboundValue());     // subscript_2 - lower_bound_2
             emit("SUB");
-            emit("ADD");                               // Add computed array offset to base address
-            emit("JMP", _end);                         // Jump to end
+            emit("ADD");                                   // Add computed array offset to base address
+            emit("JMP", _end);                             // Jump to end
         }
 
         //
@@ -503,26 +504,29 @@ public class CodeGen extends Visitor
 
     @Processor(target="IfStmt")
     void processIfStmt(IfStmt ifStmt) {
-        // Generate unique labels for branch targets
+        // Generate unique label for else clause
         String _else = table.getLabel();
+
         // If then clause
         visit(ifStmt.getCondition()); // Evaluate condition of the if statement
         emit("BFALSE", _else);        // Branch to else statement if false
         visit(ifStmt.getWhenTrue());  // Execute ``when true'' statements
 
-        // If a ``when false'' clause exists, execute the statements
-        if(ifStmt.getWhenFalse() != null) {
-            String _end = table.getLabel();
-            emit("JMP", _end);            // Jump to the end of the if statement
-            label(_else);
-            // Else clause
-            visit(ifStmt.getWhenFalse());
-            label(_end);
-        } else {
-            label(_else);
+        // If a ``when false'' clause does not exist
+        if(ifStmt.getWhenFalse() == null) {
+            label(_else); return;
         }
 
+        // Jump to end after ``when true'' statements
+        String _end = table.getLabel();
+        emit("JMP", _end);
+
+        // Else clause
+        label(_else);
+        visit(ifStmt.getWhenFalse());
+
         // End of block
+        label(_end);
     }
 
     @Processor(target="ProcedureCallStmt")
@@ -572,9 +576,8 @@ public class CodeGen extends Visitor
         label(_start);
         visit(repeatUntilStmt.getBody());
         visit(repeatUntilStmt.getExpn()); // Evaluate condition of the while statement
-        emit("BFALSE", _start);           // Branch to end if false
+        emit("BFALSE", _start);           // Branch to start if false
         label(_end);
-
 
         // Restore old loop exit label
         loopExitLabel = prevLoopExitLabel;
