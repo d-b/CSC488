@@ -1,0 +1,79 @@
+% qsort
+%
+% @output=248
+% @output=281
+% @output=367
+% @output=382
+% @output=463
+% @output=476
+% @output=483
+% @output=551
+% @output=619
+% @output=637
+% @output=649
+% @output=715
+% @output=797
+% @output=856
+% @output=890
+% @output=988
+%
+
+{
+    var arr[0..15]: integer
+    var i: integer
+
+    proc qsort(st: integer, e: integer) {
+        var pt: integer
+        func partition(st: integer, e: integer): integer {
+            var i: integer
+            var pivot: integer
+            var part: integer
+            var tmp: integer
+            i := st
+            part := st
+            pivot := e - 1
+            while i < e - 1 do
+                if arr[i] <= arr[pivot] then
+                    tmp := arr[part]
+                    arr[part] := arr[i]
+                    arr[i] := tmp
+                    part := part + 1
+                fi
+                i := i + 1
+            end
+            tmp := arr[part]
+            arr[part] := arr[e - 1]
+            arr[e - 1] := tmp
+            result part
+        }
+        if e - st < 2 then
+            return
+        fi
+        pt := partition(st, e)
+        qsort(st, pt)
+        qsort(pt + 1, e)
+    }
+    arr[0] := 463
+    arr[1] := 637
+    arr[2] := 856
+    arr[3] := 281
+    arr[4] := 382
+    arr[5] := 715
+    arr[6] := 483
+    arr[7] := 551
+    arr[8] := 476
+    arr[9] := 890
+    arr[10] := 367
+    arr[11] := 248
+    arr[12] := 797
+    arr[13] := 619
+    arr[14] := 988
+    arr[15] := 649
+    qsort(0, 16)
+
+    while i < 16 do
+        put arr[i]
+        put newline
+        i := i + 1
+    end
+}
