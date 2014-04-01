@@ -85,9 +85,6 @@ executed from command line on IR assembly programs. A run script is provided alo
 ``\texttt{ant assembler}''. To execute the assembler from command line, run
 ``\texttt{./RUNASSEMBLER.sh <source.ir>}''
 
-We will begin by outlining the grammar of the assembler. We will then explore the label system and
-IR instructions.
-
 \section{Grammar}
 \noindent The following is the grammar for assembly programs in EBNF. \\
 Please refer to http://en.wikipedia.org/wiki/Extended_Backus-Naur_Form for more information. \\
@@ -96,10 +93,12 @@ Please refer to http://en.wikipedia.org/wiki/Extended_Backus-Naur_Form for more 
 \begin{grammar}
 <program>           ::= \{ <section> \}
 
-<section>           ::= `SECTION' <label> `\\n'
-\alt                  \{ <instruction> \}
+<section>           ::= `SECTION', `.', <ident>, `\\n', \\
+                        \{ [<label>], [<instruction>], `\\n' \}
 
-<instruction>       ::= ( <machine_operation> | <ir_operation> )  \{ <operand> \} `\\n'
+<label>             ::= <ident>, `:'
+
+<instruction>       ::= ( <machine_operation> | <ir_operation> ), \{ <operand> \}
 
 <machine_operation> ::= `HALT' | `ADDR' | `LOAD' | `STORE' | `PUSH' | `PUSHMT' | `SETD' | `POP' | `POPN' | `DUP' | `DUPN' | `BR' | `BF' | `NEG' | `ADD' | `SUB' | `MUL' | `DIV' | `EQ' | `LT' | `OR' | `SWAP' | `READC' | `PRINTC' | `READI' | `PRINTI' | `TRON' | `TROFF' | `ILIMIT'
 
@@ -114,19 +113,33 @@ Please refer to http://en.wikipedia.org/wiki/Extended_Backus-Naur_Form for more 
 
 <boolean_operand>   ::= `\$true' | `\$false'
 
-<label_operand>     ::= <label>
+<label_operand>     ::= <ident>
 
-<string_operand>    ::= `"' \{ <character> \} `"'
+<string_operand>    ::= `"', \{ ? all characters ? \}, `"'
 
-<label>             ::= <letter>, \{<letter> | <digit>\}
+<ident>             ::= <letter>, \{<letter> | <digit>\}
 
 <letter>            ::= `a'..`z' | `A'..`Z' | `_'
 
 <digit>             ::= `0'..`9'
 \end{grammar}
 
-\section{}
+\section{Labels}
+The biggest difference between the IR assembly language and the assembly language built into
+\texttt{Machine} is the support for labels. Labels can be thought of as instructions of with zero
+size and no operation. The addresses of labels are stored as instructions are assembled. Afterwards,
+any label operand pointing to a valid label is set to resolve to the computed address of the label
+it points to.
 
+\section{Instructions}
+\subsection{\texttt{PUSHSTR}}
+\subsection{\texttt{SETUPCALL}}
+\subsection{\texttt{JMP}}
+\subsection{\texttt{BFALSE}}
+\subsection{\texttt{NOT}}
+\subsection{\texttt{SAVECTX}}
+\subsection{\texttt{RESTORECTX}}
+\subsection{\texttt{RESERVE}}
 
 % ----------------------------------------------------------------
 \end{document}
