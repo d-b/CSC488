@@ -1,6 +1,7 @@
 %
-% cash register program
+% Cash register program
 %
+
 {
   var tot,pri,tax : integer    
   tot := 0
