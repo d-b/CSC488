@@ -138,9 +138,12 @@ it points to.
 In addition to support for labels, the assembler also provides an extended instruction set. The
 following instructions outlined below are not available in \texttt{Machine}.
 \subsection{\texttt{PUSHSTR}(\texttt{$\langle$string_operand$\rangle$} \texttt{string})}
-This instruction adds ``\texttt{string}''to the text constant pool, if it has not already been
+This instruction adds \texttt{string} to the text constant pool, if it has not already been
 added, and obtains the address of the string in the pool. The address is then pushed on to the
 stack.
+\begin{lstlisting}
+    PUSH ``address of string in constant pool''
+\end{lstlisting}
 \subsection{\texttt{SETUPCALL}(\texttt{$\langle$value_operand$\rangle$} \texttt{return_address})}
 \texttt{SETUPCALL} sets up a call, according to calling convention designed for the compiler, by
 pushing a place holder for the return value, and by pushing \texttt{return_address}, the return
