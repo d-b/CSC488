@@ -62,7 +62,7 @@
 \begin{document}
 
 \title[CSC488 A5]{CSC488\\ASSIGNMENT 5\\Code Generator}
-\author{Daniel Bloemendal}
+\author{Daniel Bloemendal \\ Oren Watson}
 
 % ----------------------------------------------------------------
 \begin{titlepage}
@@ -88,27 +88,33 @@ complexities of managing major scopes, their displays, and ensuring that minor s
 into their enclosing major scopes, is dealt with by the \texttt{Frame} and \texttt{Table} classes.
 
 \subsection{Calling Convention}
-A key issue that we debated at length was the method by which function and procedure calls would
-be implemented. We decided that the most important thing in functions was for the calling code 
-to have the result value at the top of the stack when it returns, with no cleanup, so that the result
-could immediately be worked with. Therefore, the function cleans up its own arguments and places
-its result into a reserved place at the bottom of the call frame.\\
-To call a function, the calling code reserves a place for the result, pushes the return label and
-arguments, and then jumps to the function code. The function code then saves the display pointer for 
-its level, sets the display, and allocates space for its locals. The frame therefore has the following 
-structure, with the stack growing up. The ADDR instruction for accessing each part is given.\\
-\begin{tabular}{c|l}
-Local Space Word N & ADDR L N-1 \\
-\hline
-Local Space Word 1 & ADDR L 0 \\
-Saved display for L & ADDR L -1 \\
-Argument M & ADDR L -2 \\
-Argument M-1 & ADDR L -3 \\
-\hline
-Argument 0 & ADDR L -M-1  \\
-Return Address & ADDR L -M-2  \\
-Result Value & ADDR L -M-3  \\
+A key issue that we debated at length was the method by which function and procedure calls would be
+implemented. We decided that the most important thing in functions was for the calling code  to have
+the result value at the top of the stack when it returns, with no cleanup, so that the result could
+immediately be worked with. Therefore, the function cleans up its own arguments and places its
+result into a reserved place at the bottom of the call frame.
+
+To call a function, the calling code reserves a place for the result, pushes the return address and
+arguments, and then jumps to the function code. The function code then saves the display pointer for
+its level, sets the display, and allocates space for its locals. The frame therefore has the
+following structure, shown in figure \ref{fig:frame}, with the stack growing up. It should noted
+that the base address $D[LL]$ refers to the display set during the prolog of a function via the
+\texttt{SAVECTX LL} intermediate instruction. Here, $LL$ refers to the lexical level of the major
+scope.
+
+\begin{figure}[h]
+\caption{Call frame}
+\begin{tabular}{l|l}
+Result & $D[LL] - N - 3$ \\
+Return address & $D[LL] - N - 2$  \\
+Argument 1 & $D[LL] - N - 1$  \\
+... & ... \\
+Argument N & $D[LL] - 2$ \\
+Previous display & $D[LL] - 1$ \\
+Locals & $D[LL]$ \\
 \end{tabular}
+\label{fig:frame}
+\end{figure}
 
 % ----------------------------------------------------------------
 \end{document}
