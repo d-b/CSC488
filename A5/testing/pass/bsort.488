@@ -1,0 +1,70 @@
+%
+% Bubble sort
+%
+
+% @output=248
+% @output=281
+% @output=367
+% @output=382
+% @output=463
+% @output=476
+% @output=483
+% @output=551
+% @output=619
+% @output=637
+% @output=649
+% @output=715
+% @output=797
+% @output=856
+% @output=890
+% @output=988
+%
+
+{
+    var arr[0..15]: integer
+    var i: integer
+
+    proc bsort(e: integer) {
+    var i: integer
+     i := 1
+    var tmp: integer
+    while e > 0 do
+        var newn: integer
+        newn := 0
+        while i < e - 1 do
+            if arr[i-1] > arr[i] then
+                tmp := arr[i]
+                arr[i] := arr[i-1]
+                arr[i-1] := tmp
+                newn := i 
+            fi
+            i := i + 1
+        end  
+        e := newn
+        
+    end
+    }
+    arr[0] := 463
+    arr[1] := 637
+    arr[2] := 856
+    arr[3] := 281
+    arr[4] := 382
+    arr[5] := 715
+    arr[6] := 483
+    arr[7] := 551
+    arr[8] := 476
+    arr[9] := 890
+    arr[10] := 367
+    arr[11] := 248
+    arr[12] := 797
+    arr[13] := 619
+    arr[14] := 988
+    arr[15] := 649
+    bsort(16)
+
+    while i < 16 do
+        put arr[i]
+        put newline
+        i := i + 1
+    end
+}
