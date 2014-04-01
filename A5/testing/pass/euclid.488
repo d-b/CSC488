@@ -1,0 +1,47 @@
+
+% euclid
+%
+% @output=5
+% @output=7
+% @output=5
+% @output=1
+% @output=2
+% @output=9
+% @output=5
+%
+
+{
+   var remainder: integer
+
+   proc mod (A: integer, B: integer) {
+        var res: integer
+        var res2: integer
+        res := A / B
+        res2 := B * res
+        remainder := A - res2
+    }
+
+    proc euclid(A: integer, B: integer) {
+	while B  not=  0 do
+		mod(A, B)
+		A := B
+		B := remainder				
+	end
+	put A
+	put newline
+    }
+
+
+
+
+
+
+    euclid(45, 35)
+    euclid(7, 35)
+    euclid(45, 10)
+    euclid(43, 66)
+    euclid(206, 40)
+    euclid(27, 18)
+    euclid(45, 35)
+}
+
