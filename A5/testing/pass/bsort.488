@@ -27,20 +27,20 @@
     proc bsort(e: integer) {
         var i: integer
         var tmp: integer
-        var newn: integer
+        var newe: integer
         while e > 0 do {
-            newn := 0
+            newe := 0
             i := 1
             while i <= e - 1 do
                 if arr[i-1] > arr[i] then
                     tmp := arr[i]
                     arr[i] := arr[i-1]
                     arr[i-1] := tmp
-                    newn := i
+                    newe := i
                 fi
                 i := i + 1
             end
-            e := newn
+            e := newe
         } end
     }
     arr[0] := 463
