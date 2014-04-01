@@ -55,7 +55,8 @@
 \lstset {
     basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
     frame=none,
-    numbers=none
+    numbers=none,
+    escapeinside={<@}{@>}
 }
 % ----------------------------------------------------------------
 
@@ -204,6 +205,47 @@ prolog of a major scope to reserve memory for locals.
     PUSH 0 
     PUSH words
     DUPN
+\end{lstlisting}
+
+\section{Example}
+The example below is the currently used runtime library for the code generator. It contains only
+one function right now, \texttt{print}. It serves as a good demonstration of the IR assembly, using
+a number of the different IR instructions.
+\begin{lstlisting}[numbers=left]
+; ------------------------------------
+; Start of runtime library
+; ------------------------------------
+    SECTION <@\textcolor{red}{.library}@>
+
+<@\textcolor{red}{print:}@>
+    SAVECTX 0
+    PUSH 0
+<@\textcolor{red}{__print_start:}@>
+    DUP
+    ADDR 0 -2
+    LOAD
+    LOAD
+    LT
+    PUSH <@\textcolor{red}{__print_end}@>
+    BF
+    DUP
+    ADDR 0 -2
+    LOAD
+    PUSH 1
+    ADD
+    ADD
+    LOAD
+    PRINTC
+    PUSH 1
+    ADD
+    PUSH <@\textcolor{red}{__print_start}@>
+    BR
+<@\textcolor{red}{__print_end:}@> POP
+    RESTORECTX 0 1
+    BR
+; ------------------------------------
+; End of runtime library
+; ------------------------------------
 \end{lstlisting}
 
 % Exception handling
