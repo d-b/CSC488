@@ -14,6 +14,7 @@
             pdfmenubar=false,
             pdfdisplaydoctitle=true,
             bookmarks=false]{hyperref}
+\usepackage{caption}
 \usepackage{subcaption}
 \usepackage{mathtools}
 \usepackage{listings}
@@ -86,6 +87,28 @@ on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf
 complexities of managing major scopes, their displays, and ensuring that minor scopes are merged
 into their enclosing major scopes, is dealt with by the \texttt{Frame} and \texttt{Table} classes.
 
+\subsection{Calling Convention}
+A key issue that we debated at length was the method by which function and procedure calls would
+be implemented. We decided that the most important thing in functions was for the calling code 
+to have the result value at the top of the stack when it returns, with no cleanup, so that the result
+could immediately be worked with. Therefore, the function cleans up its own arguments and places
+its result into a reserved place at the bottom of the call frame.\\
+To call a function, the calling code reserves a place for the result, pushes the return label and
+arguments, and then jumps to the function code. The function code then saves the display pointer for 
+its level, sets the display, and allocates space for its locals. The frame therefore has the following 
+structure, with the stack growing up. The ADDR instruction for accessing each part is given.\\
+\begin{tabular}{c|l}
+Local Space Word N & ADDR L N-1 \\
+\hline
+Local Space Word 1 & ADDR L 0 \\
+Saved display for L & ADDR L -1 \\
+Argument M & ADDR L -2 \\
+Argument M-1 & ADDR L -3 \\
+\hline
+Argument 0 & ADDR L -M-1  \\
+Return Address & ADDR L -M-2  \\
+Result Value & ADDR L -M-3  \\
+\end{tabular}
 
 % ----------------------------------------------------------------
 \end{document}
