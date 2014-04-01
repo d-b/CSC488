@@ -71,7 +71,20 @@
 \end{titlepage}
 % ----------------------------------------------------------------
 
-\section{Overview}
+\section{Instructions}
+\subsection{Bounds checking}
+\subsection{Code dump \& syntax highlighting}
+
+\section{Design}
+\subsection{Overview}
+The overarching theme in the design of the code generator was to avoid exposing the code generator
+class \texttt{CodeGen} to the complexities and finer details of the underlying machine. To that
+end, an assembler was developed that hides the complexity of addressing code via a label system and
+provides an enhanced instruction set, simplifying the emitted code in \texttt{CodeGen}. It should be
+noted that the assembler is also entirely decoupled from the rest of the code generator and stands
+on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf}. In addition, the
+complexities of managing major scopes, their displays, and ensuring that minor scopes are merged
+into their enclosing major scopes, is dealt with by the \texttt{Frame} and \texttt{Table} classes.
 
 
 % ----------------------------------------------------------------
