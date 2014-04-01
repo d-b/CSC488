@@ -53,10 +53,16 @@
 \newcolumntype{B}{>{\columncolor{black}\color{white}}c}
 % ----------------------------------------------------------------
 \lstset {
-    basicstyle=\fontsize{8}{11}\selectfont\ttfamily,
-    frame=none,
-    numbers=none
+    frame=top,
+    frame=bottom,
+    numbers=none,
+    xleftmargin=14pt,
+    framexleftmargin=17pt,
+    framexrightmargin=17pt,
+    framexbottommargin=2pt,
+    framextopmargin=2pt   
 }
+\captionsetup[lstlisting]{singlelinecheck=false, margin=0pt, font={sf},labelsep=space,labelfont=bf}
 % ----------------------------------------------------------------
 
 \begin{document}
@@ -87,12 +93,59 @@ on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf
 complexities of managing major scopes, their displays, and ensuring that minor scopes are merged
 into their enclosing major scopes, is dealt with by the \texttt{Frame} and \texttt{Table} classes.
 
-\subsection{Calling Convention}
+\subsection{Coalescing minor scopes}
+One of the more involved parts of developing the code generator was to ensure that minor scopes were
+coalesced into the enclosing major scope. This is rather important as it avoids draining the rather
+limited resource of display registers, 16 in total. In addition it reduces the size of the generated
+code as it avoids having to generate a prolog and epilog for every minor scope. The main class
+responsible for manging this is \texttt{Frame}. It lays out the combined locals of all minor scopes
+in a given major scope. It does so via an algorithm identical to the record layout algorithm
+discussed in class. A frame can be thought of as a record corresponding to a major scope where all
+minor scopes are sub-records. One important detail is that sibling minor scopes can be thought of as
+belonging to a union. The reason this is a reasonable thing to do is because only one sibling minor
+scope is alive at any one time. Therefore, it is safe to overwrite the locals used by any previously
+executed sibling minor scope.
+
+We will now proceed to an example. We will define a small program and lay out the locals according
+to the algorithm in \texttt{Frame}.
+\begin{lstlisting}[caption=Major scope in 488]
+{
+    var a : integer a := 0
+    { var b, c : integer b := 0 c := 0 }
+    { var d, e, f : integer d := 0 e := 0 f := 0 }
+    { var g : integer g := 0
+        { var h : integer h := 0 }
+        { var i, j : integer i := 0 j := 0 }
+    } 
+}
+\end{lstlisting}
+
+\newpage
+
+\noindent We will proceed lay out the locals. We will express our layout using a C structure.
+\begin{lstlisting}[caption=Layout as C structure, language=C, directivestyle={\color{black}} emph={short}, emphstyle={\color{blue}}]
+struct major_1 {
+    short a;
+    union {
+        struct { short b, c; } minor_1;
+        struct { short d, e, f; } minor_2;
+        struct {
+            short g;
+            union {
+                struct { short h; } minor_4;
+                struct { short i, j; } minor_5;
+            } _siblings;
+        } minor_3;
+    } _siblings;
+};
+\end{lstlisting}
+
+\subsection{Calling convention}
 A key issue that we debated at length was the method by which function and procedure calls would be
 implemented. We decided that the most important thing in functions was for the calling code  to have
 the result value at the top of the stack when it returns, with no cleanup, so that the result could
 immediately be worked with. Therefore, the function cleans up its own arguments and places its
-result into a reserved place at the bottom of the call frame.
+result into a reserved place at the bottom of the stack frame.
 
 To call a function, the calling code reserves a place for the result, pushes the return address and
 arguments, and then jumps to the function code. The function code then saves the display pointer for
@@ -103,13 +156,13 @@ that the base address $D[LL]$ refers to the display set during the prolog of a f
 scope.
 
 \begin{figure}[h]
-\caption{Call frame}
+\caption{Stack frame}
 \begin{tabular}{l|l}
 Result & $D[LL] - N - 3$ \\
 Return address & $D[LL] - N - 2$  \\
-Argument 1 & $D[LL] - N - 1$  \\
+Argument $1$ & $D[LL] - N - 1$  \\
 ... & ... \\
-Argument N & $D[LL] - 2$ \\
+Argument $N$ & $D[LL] - 2$ \\
 Previous display & $D[LL] - 1$ \\
 Locals & $D[LL]$ \\
 \end{tabular}
