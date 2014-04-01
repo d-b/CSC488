@@ -104,10 +104,12 @@ Please refer to http://en.wikipedia.org/wiki/Extended_Backus-Naur_Form for more 
 
 <ir_operation>      ::= `PUSHSTR' | `SETUPCALL' | `JMP' | `BFALSE' | `NOT' | `SAVECTX' | `RESTORECTX' | `RESERVE'
 
-<operand>           ::= <integer_operand>
+<operand>           ::= <value_operand>
 \alt                    <boolean_operand>
-\alt                    <label_operand>
 \alt                    <string_operand>
+
+<value_operand>     ::= <integer_operand>
+\alt                    <label_operand>
 
 <integer_operand>   ::= [`-'], <digit>, \{<digit>\}
 
@@ -132,14 +134,53 @@ any label operand pointing to a valid label is set to resolve to the computed ad
 it points to.
 
 \section{Instructions}
-\subsection{\texttt{PUSHSTR}}
-\subsection{\texttt{SETUPCALL}}
-\subsection{\texttt{JMP}}
-\subsection{\texttt{BFALSE}}
+In addition to support for labels, the assembler also provides an extended instruction set. The
+following instructions outlined below are not available in \texttt{Machine}.
+\subsection{\texttt{PUSHSTR}(\texttt{$\langle$string_operand$\rangle$} \texttt{string})}
+This instruction adds ``\texttt{string}''to the text constant pool, if it has not already been
+added, and obtains the address of the string in the pool. The address is then pushed on to the
+stack.
+\subsection{\texttt{SETUPCALL}(\texttt{$\langle$value_operand$\rangle$} \texttt{return_address})}
+This instruction sets up a call, according to calling convention designed for the compiler, by
+pushing a place holder for the return value, and by pushing \texttt{return_address}, the return
+address for the call. The placeholder for the return value is set to be \texttt{Machine.UNDEFINED},
+to support returning from a function or procedure without an explicit ``\texttt{return}'' or
+``\texttt{result}'' statement. For a more detailed discussion on the calling convention, see the
+code generation documentation.
+\begin{lstlisting}
+    PUSH UNDEFINED
+    PUSH return_address
+\end{lstlisting}
+\subsection{\texttt{JMP}(\texttt{$\langle$value_operand$\rangle$} \texttt{address})}
+This instruction pushes $\texttt{address}$ on to the stack and then performs a branch.
+\begin{lstlisting}
+    PUSH address
+    BR
+\end{lstlisting}
+\subsection{\texttt{BFALSE}(\texttt{$\langle$value_operand$\rangle$} \texttt{address})}
+Like \texttt{JMP}, this instruction is also a short hand for pushing an address and then branching.
+This time, the branch is the conditional \texttt{BF}.
+\begin{lstlisting}
+    PUSH address
+    BF
+\end{lstlisting}
 \subsection{\texttt{NOT}}
+Unfortunately the machine has no built in method of negating boolean values. This instruction
+provides this much needed functionality. It does so by comparing the top of the stack with
+\texttt{\$false}. To see this, suppose $top = \texttt{\$true}$, then
+$(\texttt{\$true} = \texttt{\$false}) = \texttt{\$false}$
+on the other hand if $top = \texttt{\$false}$ then
+$(\texttt{\$false} = \texttt{\$false}) = \texttt{\$true}$
+\begin{lstlisting}
+    PUSH $false
+    EQ
+\end{lstlisting}
 \subsection{\texttt{SAVECTX}}
 \subsection{\texttt{RESTORECTX}}
 \subsection{\texttt{RESERVE}}
+
+% Exception handling
+% Program too large
 
 % ----------------------------------------------------------------
 \end{document}
