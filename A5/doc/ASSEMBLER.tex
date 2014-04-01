@@ -87,7 +87,7 @@ executed from command line on IR assembly programs. A run script is provided alo
 ``\texttt{./RUNASSEMBLER.sh <source.ir>}''
 
 \section{Grammar}
-\noindent The following is the grammar for assembly programs in EBNF. \\
+\noindent The following is the grammar for IR assembly programs in EBNF. \\
 Please refer to http://en.wikipedia.org/wiki/Extended_Backus-Naur_Form for more information. \\
 
 \setlength{\grammarindent}{12em}
@@ -248,8 +248,13 @@ a number of the different IR instructions.
 ; ------------------------------------
 \end{lstlisting}
 
-% Exception handling
-% Program too large
+\section{Error handling}
+The machine has a number of nontrivial limitations that are easy to run into. The limited memory
+and 16 bit operands ensure that it is easy to hit the limits. The assembler is careful to perform
+bounds checking on integer operands, enforcing the \texttt{Machine.MIN_INTEGER} and
+\texttt{Machine.MAX_INTEGER} bounds. In addition to integer bounds checking, the assembler also will
+gracefully handle programs that exceed the available machine memory \texttt{Machine.maxMemory}. An
+exception will be thrown when these errors are encountered.
 
 % ----------------------------------------------------------------
 \end{document}
