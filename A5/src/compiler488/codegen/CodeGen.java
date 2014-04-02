@@ -84,8 +84,8 @@ public class CodeGen extends Visitor
 
         emit("SAVECTX", table.getLevel());                    // Scope prolog
         reserve(table.getFrameLocalsSize());                  // Reserve memory for locals
-        if(routine != null)                                   //
-            label(table.getRoutineLabel(LabelPostfix.Inner)); // Inner routine label
+        if(routine != null)                                   // Inner routine label
+            label(table.getRoutineLabel(LabelPostfix.Inner)); // ...
     }
 
     void majorEpilog() {
@@ -122,7 +122,7 @@ public class CodeGen extends Visitor
         // Process routine declarations
         if(table.getRoutineCount() > 0 ) {
             String _end = table.getLabel();
-            emit("JMP", _end); emit("");
+            emit("JMP", _end); assemblerPrintln("");
             visit(scope.getDeclarations());
             label(_end);
         }
