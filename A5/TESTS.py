@@ -61,7 +61,7 @@ def test(path, failing = False):
 
     # Execute the test
     try:
-        output = subprocess.check_output(['java', '-jar', COMPILER, '-B', 's', path], stdin=inFile, stderr=subprocess.STDOUT)
+        output = subprocess.check_output(['java', '-jar', COMPILER, '-B', 's', '-OPT', 't', path], stdin=inFile, stderr=subprocess.STDOUT)
         lines  = output.decode('utf8').replace('\r', '').split('\n')
     except:
         # On exception consider the test a failure

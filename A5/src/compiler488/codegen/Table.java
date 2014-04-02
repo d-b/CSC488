@@ -109,8 +109,8 @@ public class Table {
     public int getOffsetResult() { return currentFrame().getOffsetResult(); }
 
     // Get a postfix
-    private String getPostfix(LabelPostfix prefix){
-        switch(prefix){
+    private String getPostfix(LabelPostfix postfix){
+        switch(postfix){
         case Start: return "";
         case Inner: return "_INNER";
         case End:   return "_END";

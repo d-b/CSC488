@@ -219,7 +219,7 @@ public class CodeGen extends Visitor
         // Evaluate each argument
         for(Expn expn : arguments)
             visit(expn);
-        // Store results in locals
+        // Store results in argument locals
         for(int i = arguments.size() - 1; i >= 0; i--) {
             short offset = (short) (table.getOffsetArguments() + i);
             emit("ADDR", table.getLevel(), offset); // Address of argument local
