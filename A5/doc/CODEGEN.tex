@@ -208,10 +208,26 @@ Locals & $D[LL]$ \\
 \end{figure}
 
 \subsection{Error handling}
+There are a number of errors that can occur during code generation. All of them are due to machine
+limitations or language limitations. When any of these errors are encountered, the code generator
+gracefully handles them by printing the location of the error in code and suppressing code
+execution.
+
 \subsubsection{Integer size}
+It is considered an error when an integer literal is above or below the machine maximum, or minimum
+integer size.
+
 \subsubsection{String size}
+It is considered an error when a string literal is larger than 255 characters, the language limit.
+
 \subsubsection{Array size}
+It is considered an error when an array is declared with a size larger than the machine memory.
+
 \subsubsection{Locals size}
+It is considered an error when the locals in some major scope, here we assume it has been coalesced
+with its minor scopes, are greater than the available stack memory. The available stack memory is
+computed to be the total machine memory minus the size of the program.
+
 
 % ----------------------------------------------------------------
 \end{document}
