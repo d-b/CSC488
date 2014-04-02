@@ -60,7 +60,7 @@
     framexleftmargin=17pt,
     framexrightmargin=17pt,
     framexbottommargin=2pt,
-    framextopmargin=2pt   
+    framextopmargin=2pt
 }
 \captionsetup[lstlisting]{singlelinecheck=false, margin=0pt, font={sf},labelsep=space,labelfont=bf}
 % ----------------------------------------------------------------
@@ -79,21 +79,44 @@
 % ----------------------------------------------------------------
 
 \section{Instructions}
+Before delving into the design of the code generator, it deserves noting that there are a couple of
+features that go somewhat beyond the assignment requirements and are therefore disabled by default.
+We will start with a brief discussion of the first of the two, bounds checking.
+
 \subsection{Bounds checking}
+Disabled by default, the code generator has the ability to add two different levels of array bounds
+checking. The first level is ``simple'' bounds checking. It can be enabled with the compiler flag
+``\texttt{-B s}''. In both modes array bounds are checked on array access. However, in the simple
+mode when an error occurs a simple error message with limited location information is provided. The
+second level is ``enhanced'' bounds checking, enabled with the compiler flag ``\texttt{-B e}''. It
+differs from the second mode in the level of detail provided in the location information contained
+in the error message. An example of a out of bounds error message is provided below.
+\begin{lstlisting}[caption=Out of bounds error, basicstyle=\fontsize{7}{10}\selectfont\ttfamily]
+db@vmbox ~/workspace/CSC488/A5 $ ./RUNCOMPILER.sh -B e testing/fail/runtime_bounds2d.488
+...
+Start Execution  pc = 0, msp = 311, mlp = 16383
+
+testing/fail/runtime_bounds2d.488:7:5: subscript out of range
+    a[1, 11] := 1
+         ^^
+...
+\end{lstlisting}
+
+
 \subsection{Code dump \& syntax highlighting}
 
 \section{Design}
 \subsection{Overview}
 The overarching theme in the design of the code generator was to avoid exposing the code generator
-class \texttt{CodeGen} to the complexities and finer details of the underlying machine. To that
-end, an assembler was developed that hides the complexity of addressing code via a label system and
+class \texttt{CodeGen} to the complexities and finer details of the underlying machine. To that end,
+an assembler was developed that hides the complexity of addressing code via a label system and
 provides an enhanced instruction set, simplifying the emitted code in \texttt{CodeGen}. It should be
 noted that the assembler is also entirely decoupled from the rest of the code generator and stands
-on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf}. We made a distinction 
-between `major' and `minor' scopes. A major scope is a whole program, a function, or a procedure,
-requiring its own stack frame; all other scopes are considered minor scopes. The complexities of 
-managing major scopes, their displays, and ensuring that minor scopes are merged into their enclosing 
-major scopes, are dealt with by the \texttt{Frame} and \texttt{Table} classes.
+on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf}. We made a
+distinction  between `major' and `minor' scopes. A major scope is a whole program, a function, or a
+procedure, requiring its own stack frame; all other scopes are considered minor scopes. The
+complexities of  managing major scopes, their displays, and ensuring that minor scopes are merged
+into their enclosing  major scopes, are dealt with by the \texttt{Frame} and \texttt{Table} classes.
 
 \subsection{Coalescing minor scopes}
 One of the more involved parts of developing the code generator was to ensure that minor scopes were
@@ -118,7 +141,7 @@ to the algorithm in \texttt{Frame}.
     { var g : integer g := 0
         { var h : integer h := 0 }
         { var i, j : integer i := 0 j := 0 }
-    } 
+    }
 }
 \end{lstlisting}
 
@@ -147,19 +170,19 @@ A key issue that we debated at length was the method by which function and proce
 implemented. We decided that the most important thing in functions was for the calling code  to have
 the result value at the top of the stack when it returns, with no cleanup, so that the result could
 immediately be worked with. Therefore, the function cleans up its own arguments and places its
-result into a reserved place at the bottom of the stack frame. We also decided that to avoid undue 
-complexity, we would treat procedures identically to functions, even if this resulted in wasting 
+result into a reserved place at the bottom of the stack frame. We also decided that to avoid undue
+complexity, we would treat procedures identically to functions, even if this resulted in wasting
 space with an unused result value space.
 
 To call a function, the calling code reserves a place for the result, pushes the return address and
 arguments, and then jumps to the function code. The function code then saves the display pointer for
-its level, sets the display, and allocates space for its locals. When returning, the function 
-deallocates its locals, restores the display pointer to its previous state, pops its arguments
-off the stack, and finally returns, leaving the result as the only thing left. The frame therefore has the
-following structure, shown in figure \ref{fig:frame}, with the stack growing down. It should be noted
-that the base address $D[LL]$ refers to the display set during the prolog of a function via the
-\texttt{SAVECTX LL} intermediate instruction. Here, $LL$ refers to the lexical level of the major
-scope.
+its level, sets the display, and allocates space for its locals. When returning, the function
+deallocates its locals, restores the display pointer to its previous state, pops its arguments off
+the stack, and finally returns, leaving the result as the only thing left. The frame therefore has
+the following structure, shown in figure \ref{fig:frame}, with the stack growing down. It should be
+noted that the base address $D[LL]$ refers to the display set during the prolog of a function via
+the \texttt{SAVECTX LL} intermediate instruction. Here, $LL$ refers to the lexical level of the
+major scope.
 
 \begin{figure}[h]
 \caption{Stack frame}
