@@ -205,7 +205,7 @@ calling convention, refer to the code generation documentation.
 \texttt{RESERVE} is used to reserve \texttt{words} of memory on the stack. It is current used in the
 prolog of a major scope to reserve memory for locals.
 \begin{lstlisting}
-    PUSH 0 
+    PUSH 0
     PUSH words
     DUPN
 \end{lstlisting}
@@ -258,6 +258,35 @@ bounds checking on integer operands, enforcing the \texttt{Machine.MIN_INTEGER} 
 \texttt{Machine.MAX_INTEGER} bounds. In addition to integer bounds checking, the assembler also will
 gracefully handle programs that exceed the available machine memory \texttt{Machine.maxMemory}. An
 exception will be thrown when these errors are encountered.
+
+\section{Changes}
+Since assignment 4 bugs were identified and fixed. First, \texttt{RESTORECTX} incorrectly restored
+the display. Instead of loading the saved display via \texttt{ADDR}, and then popping it off the
+stack afterwards, it made more sense to simply consume it and restore the display simultaneously
+with \texttt{SETD}. Other issues included the correct offsets in a stack frame. The stack frame
+and calling conventions are discussed in detail in the code generation documentation.
+
+\newpage
+
+\section{Credits}
+\begin{center}
+\begin{tabular}{ll}
+    src/compiler488/codegen/assembler/Operand.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/Section.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/StringOperand.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/Instruction.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/Processor.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/Assembler.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/InvalidInstructionException.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/IntegerOperand.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/ProgramSizeException.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/LabelNotResolvedException.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/LabelOperand.java & Daniel Bloemendal \\
+    src/compiler488/codegen/assembler/ir/AssemblerMachineEmitter.java & Mike Qin \\
+    src/compiler488/codegen/assembler/ir/AssemblerIREmitter.java & Mike Qin \\
+    src/compiler488/codegen/assembler/ir/Emitter.java & Mike Qin \\
+\end{tabular}
+\end{center}
 
 % ----------------------------------------------------------------
 \end{document}

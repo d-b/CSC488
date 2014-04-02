@@ -20,6 +20,8 @@
 \usepackage{listings}
 \usepackage{float}
 \usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{booktabs}
 % ----------------------------------------------------------------
 \vfuzz2pt % Don't report over-full v-boxes if over-edge is small
 \hfuzz2pt % Don't report over-full h-boxes if over-edge is small
@@ -228,6 +230,24 @@ It is considered an error when the locals in some major scope, here we assume it
 with its minor scopes, are greater than the available stack memory. The available stack memory is
 computed to be the total machine memory minus the size of the program.
 
+\newpage
+
+\section{Credits}
+\begin{center}
+\begin{tabular}{ll}
+    src/compiler488/codegen/AssemblerThread.java & Daniel Bloemendal \\
+    src/compiler488/codegen/CodeGen.java & Daniel Bloemendal \& Oren Watson \\
+    src/compiler488/codegen/CodeGenException.java & Daniel Bloemendal \\
+    src/compiler488/codegen/Frame.java & Daniel Bloemendal \\
+    src/compiler488/codegen/Library.java & Daniel Bloemendal \& Mike Qin \\
+    src/compiler488/codegen/Table.java & Daniel Bloemendal \\
+    src/compiler488/codegen/Variable.java & Daniel Bloemendal \\
+    src/compiler488/codegen/visitor/PostProcessor.java & Daniel Bloemendal \\
+    src/compiler488/codegen/visitor/PreProcessor.java & Daniel Bloemendal \\
+    src/compiler488/codegen/visitor/Processor.java & Daniel Bloemendal \\
+    src/compiler488/codegen/visitor/Visitor.java & Daniel Bloemendal \\
+\end{tabular}
+\end{center}
 
 % ----------------------------------------------------------------
 \end{document}
