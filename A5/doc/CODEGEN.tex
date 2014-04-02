@@ -148,7 +148,7 @@ implemented. We decided that the most important thing in functions was for the c
 the result value at the top of the stack when it returns, with no cleanup, so that the result could
 immediately be worked with. Therefore, the function cleans up its own arguments and places its
 result into a reserved place at the bottom of the stack frame. We also decided that to avoid undue 
-complexity, we woudl treat procedures identically to functions, even if this resulted in wasting 
+complexity, we would treat procedures identically to functions, even if this resulted in wasting 
 space with an unused result value space.
 
 To call a function, the calling code reserves a place for the result, pushes the return address and
