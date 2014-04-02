@@ -18,6 +18,7 @@
 \usepackage{subcaption}
 \usepackage{mathtools}
 \usepackage{listings}
+\usepackage{float}
 \usepackage[table]{xcolor}
 % ----------------------------------------------------------------
 \vfuzz2pt % Don't report over-full v-boxes if over-edge is small
@@ -108,6 +109,12 @@ less complex and varied. Since identical strings resolve to the same address in 
 section, this reduces program size a fair bit.
 
 \subsection{Code dump \& syntax highlighting}
+The second of the two features is syntax highlighting for dumped code. The code generator can be
+requested to dump code in two ways. The command line option ``\texttt{-D x}'' will prompt the
+generator to dump the generated code. However, the machine will also dump the final disassembly of
+the program. For only the IR assembly output use the command line option ``\texttt{-T c}''. To add
+syntax highlighting to the dump, coloured via ANSI colour codes, add the command line option
+``\texttt{--syntax-highlighting}''.
 
 \section{Design}
 \subsection{Overview}
