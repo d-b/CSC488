@@ -611,7 +611,7 @@ public class CodeGen extends Visitor
            resultStmt.getValue() instanceof FunctionCallExpn)
         { // Ensure that the call is a self recursive call & perform the optimization
             FunctionCallExpn funcCall = (FunctionCallExpn) resultStmt.getValue();
-            if(funcCall.getName().equals(table.getRoutine().getName())) {
+            if(table.getLabel(funcCall.getName()).equals(table.getRoutineLabel(LabelPostfix.Start))) {
                 processTailCall((FunctionCallExpn) resultStmt.getValue()); return;
             }
         }
