@@ -2,10 +2,12 @@ pass/A1a.io.488                     - Tests all logical, comparison, and arithme
 pass/A1b.io.488                     - Tests using arrays including both forms of array declaration, positive and negative bounds
 pass/A1c.io.488                     - Tests all forms of loop building and loop exit constructs
 pass/ackermann.488                  - Computes the Ackermann function
+pass/bsort.488                      - An implementation of bubble sort
 pass/cash_register.488              - Performs some functions of a cash register, including computing subtotal, taxes and total
 pass/collatz.488                    - Verifies Collatz conjecture for input numbers
 pass/dectohex.488                   - Converts a decimal number into hexadecimal
 pass/deeply_nested.488              - A program with deeply nested minor scopes
+pass/euclid.488                     - An implementation of the euclidean algorithm
 pass/four_fn_calc.488               - Four function calculator
 pass/multi_level_assignment.488     - Tests assignment to variables at different levels
 pass/outputspec.488                 - Tests the output in a simple proof of concept

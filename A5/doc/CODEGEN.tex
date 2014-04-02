@@ -86,7 +86,7 @@ We will start with a brief discussion of the first of the two, bounds checking.
 \subsection{Bounds checking}
 Disabled by default, the code generator has the ability to add two different levels of array bounds
 checking. The first level is ``simple'' bounds checking. It can be enabled with the compiler flag
-``\texttt{-B s}''. In both modes array bounds are checked on array access. However, in the simple
+``\texttt{-B s}''. In both modes, array bounds are checked on array access. However, in the simple
 mode when an error occurs a simple error message with limited location information is provided. The
 second level is ``enhanced'' bounds checking, enabled with the compiler flag ``\texttt{-B e}''. It
 differs from the second mode in the level of detail provided in the location information contained
@@ -101,7 +101,7 @@ testing/fail/runtime_bounds2d.488:7:5: subscript out of range
          ^^
 ...
 \end{lstlisting}
-One if the reasons bounds checking is disabled by default is due to the tendency of the feature to
+One of the reasons bounds checking is disabled by default is due to the tendency of the feature to
 greatly increase the generated program size. This is mostly due to the emitted text strings in the
 constant string pool. Simple bounds checking reduces this problem somewhat, as the text strings are
 less complex and varied. Since identical strings resolve to the same address in the text constant

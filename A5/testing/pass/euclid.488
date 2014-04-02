@@ -1,6 +1,7 @@
-
-% euclid
 %
+% Euclidean algorithm (GCD)
+%
+
 % @output=5
 % @output=7
 % @output=5
@@ -31,11 +32,6 @@
 	put newline
     }
 
-
-
-
-
-
     euclid(45, 35)
     euclid(7, 35)
     euclid(45, 10)
@@ -44,4 +40,3 @@
     euclid(27, 18)
     euclid(45, 35)
 }
-
