@@ -2,6 +2,7 @@ package compiler488.compiler;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import compiler488.parser.*;
@@ -58,6 +59,8 @@ public class Main {
     public static boolean syntaxHighlighting = false;
     /** User option -- bounds checking mode */
     public static CodeGen.BoundsChecking boundsChecking = CodeGen.BoundsChecking.None;
+    /** User option -- optimizations to apply */
+    public static EnumSet<CodeGen.Optimization> optimizations = EnumSet.noneOf(CodeGen.Optimization.class);
     
     // DUMP Options
     /** User option -- dump AST after parsing */
@@ -161,6 +164,17 @@ public class Main {
                         checkRoundtrip = true;
                     } else if (arguments[i].equals("--syntax-highlighting")) {
                         syntaxHighlighting = true;
+                    } else if (arguments[i].equals("-OPT")) {
+                        i++;    // advance to next argument
+                        argTmp = arguments[ i ] ;
+                        if(argTmp.indexOf('t') >= 0) optimizations.add(CodeGen.Optimization.TailCallOptimization);
+                        k = argTmp.length();
+                        for (j = 0; j < k ; j++) {
+                            if ("t".indexOf( argTmp.charAt(j)) < 0) {
+                                System.err.println("Invalid flag '" +
+                                        argTmp.charAt(j) + "' for -OPT option (ignored)");
+                            }
+                        }
                     } else if (arguments[i].equals("-B")) {
                         i++;    // advance to next argument
                         argTmp = arguments[ i ] ;
@@ -172,7 +186,7 @@ public class Main {
                                 System.err.println("Invalid flag '" +
                                         argTmp.charAt(j) + "' for -B option (ignored)");
                             }
-                        }                        
+                        }
                     } else if (arguments[i].equals("-D")) {
                         i++;	// advance to next argument
                         argTmp = arguments[ i ] ;
@@ -571,7 +585,7 @@ public class Main {
             System.out.println("Begin Code Generation");
             CodeGen codegen = new CodeGen(lines);
             codegen.Initialize();
-            codegen.Generate(programAST, boundsChecking);
+            codegen.Generate(programAST, boundsChecking, optimizations);
             if(codegen.Finalize())
                 System.out.println("End of Code Generation");
             else {

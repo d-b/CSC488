@@ -1,6 +1,7 @@
 package compiler488.codegen;
 
 import java.io.*;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import compiler488.ast.stmt.ReturnStmt;
 import compiler488.ast.stmt.Scope;
 import compiler488.runtime.Machine;
 import compiler488.compiler.Main;
+import compiler488.codegen.Table.LabelPostfix;
 import compiler488.codegen.visitor.Visitor;
 import compiler488.codegen.visitor.Processor;
 import compiler488.highlighting.AssemblyHighlighting;
@@ -77,24 +79,26 @@ public class CodeGen extends Visitor
             comment("Start of " + routine.getName());
             comment("------------------------------------");
             // Starting label for routine
-            label(table.getRoutineLabel(false));
+            label(table.getRoutineLabel(LabelPostfix.Start));
         }
 
-        emit("SAVECTX", table.getLevel());   // Scope prolog
-        reserve(table.getFrameLocalsSize()); // Reserve memory for locals
+        emit("SAVECTX", table.getLevel());                    // Scope prolog
+        reserve(table.getFrameLocalsSize());                  // Reserve memory for locals
+        if(routine != null)                                   //
+            label(table.getRoutineLabel(LabelPostfix.Inner)); // Inner routine label
     }
 
     void majorEpilog() {
         // Fetch enclosing routine
         RoutineDecl routine = (RoutineDecl) table.currentScope().getParent();
 
-        if(routine != null)                           // Routine ending label
-            label(table.getRoutineLabel(true));       // ...
-        free(table.getFrameLocalsSize());             // Free locals
-        emit("RESTORECTX", table.getLevel(),          // Restore context
-                           table.getArgumentsSize()); // ...
-        if(routine != null) emit("BR");               // Return from routine
-        else                emit("HALT");             // Halt machine
+        if(routine != null)                                   // Routine ending label
+            label(table.getRoutineLabel(LabelPostfix.End));   // ...
+        free(table.getFrameLocalsSize());                     // Free locals
+        emit("RESTORECTX", table.getLevel(),                  // Restore context
+                           table.getArgumentsSize());         // ...
+        if(routine != null) emit("BR");                       // Return from routine
+        else                emit("HALT");                     // Halt machine
 
         if(routine != null) {
             comment("------------------------------------");
@@ -207,6 +211,23 @@ public class CodeGen extends Visitor
             { emit("EQ"); }
         else if(equalsExpn.getOpSymbol().equals(EqualsExpn.OP_NOT_EQUAL))
             { emit("EQ"); emit("NOT"); }
+    }
+
+    void processTailCall(FunctionCallExpn functionCallExpn) {
+        // Argument list
+        List<Expn> arguments = functionCallExpn.getArguments().getList();
+        // Evaluate each argument
+        for(Expn expn : arguments)
+            visit(expn);
+        // Store results in locals
+        for(int i = arguments.size() - 1; i >= 0; i--) {
+            short offset = (short) (table.getOffsetArguments() + i);
+            emit("ADDR", table.getLevel(), offset); // Address of argument local
+            emit("SWAP"); // Swap with evaluated expression on stack
+            emit("STORE"); // Store evaluated expression in argument local
+        }
+        // Jump to the start of the function
+        emit("JMP", table.getRoutineLabel(LabelPostfix.Inner));
     }
 
     @Processor(target="FunctionCallExpn")
@@ -585,8 +606,18 @@ public class CodeGen extends Visitor
 
     @Processor(target="ResultStmt")
     void processResultStmt(ResultStmt resultStmt) {
+        // See if we can apply tail call optimization
+        if(optimizations.contains(Optimization.TailCallOptimization) &&
+           resultStmt.getValue() instanceof FunctionCallExpn)
+        { // Ensure that the call is a self recursive call & perform the optimization
+            FunctionCallExpn funcCall = (FunctionCallExpn) resultStmt.getValue();
+            if(funcCall.getName().equals(table.getRoutine().getName())) {
+                processTailCall((FunctionCallExpn) resultStmt.getValue()); return;
+            }
+        }
+
         // Get routine end label
-        String _end = table.getLabel(table.getRoutine().getName(), true);
+        String _end = table.getLabel(table.getRoutine().getName(), LabelPostfix.End);
         // Get the address of the result
         emit("ADDR", table.getLevel(), table.getOffsetResult());
         visit(resultStmt.getValue()); // Evaluate result
@@ -597,7 +628,7 @@ public class CodeGen extends Visitor
     @Processor(target="ReturnStmt")
     void processReturnStmt(ReturnStmt returnStmt) {
         // Get routine end label
-        String _end = table.getLabel(table.getRoutine().getName(), true);
+        String _end = table.getLabel(table.getRoutine().getName(), LabelPostfix.End);
         emit("JMP", _end); // Jump to the end of the function
     }
 
@@ -652,10 +683,11 @@ public class CodeGen extends Visitor
     }
 
     //
-    // Bounds checking modes
+    // Options
     //
 
     public enum BoundsChecking { None, Simple, Enhanced };
+    public enum Optimization { TailCallOptimization };
 
     //
     // Code generator life cycle
@@ -674,9 +706,10 @@ public class CodeGen extends Visitor
         assemblerStart();
     }
 
-    public void Generate(Program program, BoundsChecking boundsChecking) {
+    public void Generate(Program program, BoundsChecking checking, EnumSet<Optimization> optimizations) {
         // Set bounds checking mode
-        checking = boundsChecking;
+        this.checking = checking;
+        this.optimizations = optimizations;
 
         // Assemble the runtime library
         assemblerPrint(Library.code);
@@ -719,12 +752,13 @@ public class CodeGen extends Visitor
     }
 
     // Code generator internals
-    private int                 errors;        // The error count
-    private Table               table;         // Master table
-    private List<String>        source;        // Source listing
-    private Map<Scope, Integer> sizes;         // Major scope sizes
-    private BoundsChecking      checking;      // Bounds checking mode
-    private String              loopExitLabel; // Loop exit label
+    private int                   errors;        // The error count
+    private Table                 table;         // Master table
+    private List<String>          source;        // Source listing
+    private Map<Scope, Integer>   sizes;         // Major scope sizes
+    private BoundsChecking        checking;      // Bounds checking mode
+    private EnumSet<Optimization> optimizations; // The optimizations to apply
+    private String                loopExitLabel; // Loop exit label
 
     //
     // Assembler

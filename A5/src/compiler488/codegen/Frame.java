@@ -166,6 +166,11 @@ public class Frame extends Visitor {
         return frameArgs.get(identifier);
     }
 
+    public Integer getOffsetArguments() {
+        if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
+        return -frameArgs.size() - 1; // ON = -N - 1 arguments
+    }
+
     public Integer getOffsetReturn() {
         if(!isRoutine()) return null; // Bail out if the frame does not belong to a routine
         return -frameArgs.size() - 2; // ON = -N - 2 return address

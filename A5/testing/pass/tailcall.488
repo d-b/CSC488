@@ -1,0 +1,18 @@
+%
+% Passes with TCO enabled (-OPT t)
+%
+
+% Expected output:
+% @output=20000
+
+{
+    func f(x : integer) : integer {
+        if x >= 20000 then
+            result x
+        fi
+
+        result f(x + 1)
+    }
+
+    put f(0)
+}

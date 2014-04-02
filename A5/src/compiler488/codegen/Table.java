@@ -62,11 +62,11 @@ public class Table {
     }
 
     public String getLabel(String routine) {
-        return getLabel(0, routine, false);
+        return getLabel(0, routine, LabelPostfix.Start);
     }
 
-    public String getLabel(String routine, boolean end) {
-        return getLabel(0, routine, end);
+    public String getLabel(String routine, LabelPostfix postfix) {
+        return getLabel(0, routine, postfix);
     }
 
     public Variable getVaraible(String variable) {
@@ -78,8 +78,8 @@ public class Table {
         } return null;
     }
 
-    public String getRoutineLabel(boolean end) {
-        return getLabel(1, getRoutine().getName(), end);
+    public String getRoutineLabel(LabelPostfix postfix) {
+        return getLabel(1, getRoutine().getName(), postfix);
     }
 
     public int getRoutineCount() {
@@ -104,26 +104,39 @@ public class Table {
     public RoutineDecl getRoutine() { return currentFrame().getRoutine(); }
     public int getFrameLocalsSize() { return currentFrame().getLocalsSize(); }
     public int getArgumentsSize() { return currentFrame().getArgumentsSize(); }
+    public int getOffsetArguments() { return currentFrame().getOffsetArguments(); }
     public int getOffsetReturn() { return currentFrame().getOffsetReturn(); }
     public int getOffsetResult() { return currentFrame().getOffsetResult(); }
 
+    // Get a postfix
+    private String getPostfix(LabelPostfix prefix){
+        switch(prefix){
+        case Start: return "";
+        case Inner: return "_INNER";
+        case End:   return "_END";
+        default:    return "";
+        }
+    }
+
     // Get a label
-    String getLabel(int level, String routine, boolean end) {
+    private String getLabel(int level, String routine, LabelPostfix postfix) {
         String prefix = "_R_";
-        String postfix = end ? "_END" : "";
         Iterator<Minor> iter = minorStack.iterator();
         for(int i = 0; i < level; i++)
             if(iter.hasNext()) iter.next();
         while(iter.hasNext()) {
             String label = iter.next().getLabel(routine);
-            if(label != null) return prefix + label + postfix;
+            if(label != null) return prefix + label + getPostfix(postfix);
         } return null;
     }
 
     // Generate a label
-    String generateLabel(String routine) {
+    private String generateLabel(String routine) {
         return routine + "_LL" + (minorStack.size() - 1);
     }
+
+    // Label prefix
+    public enum LabelPostfix { None, Start, Inner, End };
 
     // Major/minor frames
     private Deque<Frame> majorStack;
