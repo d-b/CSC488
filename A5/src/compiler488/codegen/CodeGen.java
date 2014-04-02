@@ -707,7 +707,7 @@ public class CodeGen extends Visitor
     }
 
     public void Generate(Program program, BoundsChecking checking, EnumSet<Optimization> optimizations) {
-        // Set bounds checking mode
+        // Set bounds checking mode & optimizations
         this.checking = checking;
         this.optimizations = optimizations;
 
