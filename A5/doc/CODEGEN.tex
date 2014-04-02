@@ -91,14 +91,14 @@ provides an enhanced instruction set, simplifying the emitted code in \texttt{Co
 noted that the assembler is also entirely decoupled from the rest of the code generator and stands
 on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf}. In addition, the
 complexities of managing major scopes, their displays, and ensuring that minor scopes are merged
-into their enclosing major scopes, is dealt with by the \texttt{Frame} and \texttt{Table} classes.
+into their enclosing major scopes, are dealt with by the \texttt{Frame} and \texttt{Table} classes.
 
 \subsection{Coalescing minor scopes}
 One of the more involved parts of developing the code generator was to ensure that minor scopes were
 coalesced into the enclosing major scope. This is rather important as it avoids draining the rather
 limited resource of display registers, 16 in total. In addition, it reduces the size of the
 generated code as it avoids having to generate a prolog and epilog for every minor scope. The main
-class responsible for manging this is \texttt{Frame}. It lays out the combined locals of all minor
+class responsible for managing this is \texttt{Frame}. It lays out the combined locals of all minor
 scopes in a given major scope. It does so via an algorithm identical to the record layout algorithm
 discussed in class. A frame can be thought of as a record corresponding to a major scope where all
 minor scopes are sub-records. One important detail is that sibling minor scopes can be thought of as
@@ -149,8 +149,10 @@ result into a reserved place at the bottom of the stack frame.
 
 To call a function, the calling code reserves a place for the result, pushes the return address and
 arguments, and then jumps to the function code. The function code then saves the display pointer for
-its level, sets the display, and allocates space for its locals. The frame therefore has the
-following structure, shown in figure \ref{fig:frame}, with the stack growing up. It should noted
+its level, sets the display, and allocates space for its locals. When returning, the function 
+deallocates its locals, restores the display pointer to its previous state, pops its arguments
+off the stack, and finally returns, leaving the result as the only thing left. The frame therefore has the
+following structure, shown in figure \ref{fig:frame}, with the stack growing down. It should be noted
 that the base address $D[LL]$ refers to the display set during the prolog of a function via the
 \texttt{SAVECTX LL} intermediate instruction. Here, $LL$ refers to the lexical level of the major
 scope.
