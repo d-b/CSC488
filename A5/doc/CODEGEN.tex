@@ -96,10 +96,10 @@ into their enclosing major scopes, is dealt with by the \texttt{Frame} and \text
 \subsection{Coalescing minor scopes}
 One of the more involved parts of developing the code generator was to ensure that minor scopes were
 coalesced into the enclosing major scope. This is rather important as it avoids draining the rather
-limited resource of display registers, 16 in total. In addition it reduces the size of the generated
-code as it avoids having to generate a prolog and epilog for every minor scope. The main class
-responsible for manging this is \texttt{Frame}. It lays out the combined locals of all minor scopes
-in a given major scope. It does so via an algorithm identical to the record layout algorithm
+limited resource of display registers, 16 in total. In addition, it reduces the size of the
+generated code as it avoids having to generate a prolog and epilog for every minor scope. The main
+class responsible for manging this is \texttt{Frame}. It lays out the combined locals of all minor
+scopes in a given major scope. It does so via an algorithm identical to the record layout algorithm
 discussed in class. A frame can be thought of as a record corresponding to a major scope where all
 minor scopes are sub-records. One important detail is that sibling minor scopes can be thought of as
 belonging to a union. The reason this is a reasonable thing to do is because only one sibling minor
@@ -122,7 +122,7 @@ to the algorithm in \texttt{Frame}.
 
 \newpage
 
-\noindent We will proceed lay out the locals. We will express our layout using a C structure.
+\noindent We will proceed to lay out the locals. We will express our layout using a C structure.
 \begin{lstlisting}[caption=Layout as C structure, language=C, directivestyle={\color{black}} emph={short}, emphstyle={\color{blue}}]
 struct major_1 {
     short a;
