@@ -89,9 +89,11 @@ class \texttt{CodeGen} to the complexities and finer details of the underlying m
 end, an assembler was developed that hides the complexity of addressing code via a label system and
 provides an enhanced instruction set, simplifying the emitted code in \texttt{CodeGen}. It should be
 noted that the assembler is also entirely decoupled from the rest of the code generator and stands
-on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf}. In addition, the
-complexities of managing major scopes, their displays, and ensuring that minor scopes are merged
-into their enclosing major scopes, are dealt with by the \texttt{Frame} and \texttt{Table} classes.
+on its own. The assembler is covered in more detail in \texttt{doc/ASSEMBLER.pdf}. We made a distinction 
+between `major' and `minor' scopes. A major scope is a whole program, a function, or a procedure,
+requiring its own stack frame; all other scopes are considered minor scopes. The complexities of 
+managing major scopes, their displays, and ensuring that minor scopes are merged into their enclosing 
+major scopes, are dealt with by the \texttt{Frame} and \texttt{Table} classes.
 
 \subsection{Coalescing minor scopes}
 One of the more involved parts of developing the code generator was to ensure that minor scopes were
@@ -145,7 +147,9 @@ A key issue that we debated at length was the method by which function and proce
 implemented. We decided that the most important thing in functions was for the calling code  to have
 the result value at the top of the stack when it returns, with no cleanup, so that the result could
 immediately be worked with. Therefore, the function cleans up its own arguments and places its
-result into a reserved place at the bottom of the stack frame.
+result into a reserved place at the bottom of the stack frame. We also decided that to avoid undue 
+complexity, we woudl treat procedures identically to functions, even if this resulted in wasting 
+space with an unused result value space.
 
 To call a function, the calling code reserves a place for the result, pushes the return address and
 arguments, and then jumps to the function code. The function code then saves the display pointer for
