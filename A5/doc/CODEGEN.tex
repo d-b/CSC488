@@ -128,7 +128,8 @@ considered to be a tail call. Furthermore we do not handle mutual recursion. The
 be a self recursive call. If all those conditions are met, instead of emitting the usual function
 call, the code generator will emit code to evaluate the arguments of the function, store the
 evaluated arguments in the corresponding argument locals and jump to the start of the function, past
-the prolog.
+the prolog. Please find the sample program, \texttt{testing/pass/tailcall.488}, for an example of
+a program that will only successfully execute with tail call optimization enabled.
 
 \newpage
 

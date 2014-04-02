@@ -13,6 +13,7 @@ pass/multi_level_assignment.488     - Tests assignment to variables at different
 pass/outputspec.488                 - Tests the output in a simple proof of concept
 pass/qsort.488                      - An implementation of quicksort
 pass/quicksort.488                  - Quicksort, using inner functions instead of passing variables
+pass/tailcall.488                   - A program with recursion at the tail of a function
 fail/assembler_large_program.488    - A large program whose generated code exceeds machine memory
 fail/codegen_large_arrays.488       - Defines an array whose size exceeds machine memory
 fail/codegen_large_integer.488      - Uses an integer outside of the integer bounds of the machine
