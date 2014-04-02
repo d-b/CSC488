@@ -81,10 +81,10 @@
 \end{titlepage}
 % ----------------------------------------------------------------
 
-\section{Instructions}
-Before delving into the design of the code generator, it deserves noting that there are a couple of
+\section{Enhancements}
+Before delving into the design of the code generator, it deserves noting that there are a few
 features that go somewhat beyond the assignment requirements and are therefore disabled by default.
-We will start with a brief discussion of the first of the two, bounds checking.
+We will start with a brief discussion of the first one, bounds checking.
 
 \subsection{Bounds checking}
 Disabled by default, the code generator has the ability to add two different levels of array bounds
@@ -111,12 +111,26 @@ less complex and varied. Since identical strings resolve to the same address in 
 section, this reduces program size a fair bit.
 
 \subsection{Code dump \& syntax highlighting}
-The second of the two features is syntax highlighting for dumped code. The code generator can be
+The second feature we will discuss is syntax highlighting for dumped code. The code generator can be
 requested to dump code in two ways. The command line option ``\texttt{-D x}'' will prompt the
 generator to dump the generated code. However, the machine will also dump the final disassembly of
 the program. For only the IR assembly output use the command line option ``\texttt{-T c}''. To add
 syntax highlighting to the dump, coloured via ANSI colour codes, add the command line option
 ``\texttt{--syntax-highlighting}''.
+
+\subsection{Tail call optimization}
+The final and perhaps most interesting additional feature is tail call optimization. It can be
+enabled with ``\texttt{-OPT t}''. For our compiler we consider statements of the following form to
+be tail calls.
+\[\texttt{result FunctionCallExp}\]
+In other words, only a result statement who's value expression is a function call expression will be
+considered to be a tail call. Furthermore we do not handle mutual recursion. The function call must
+be a self recursive call. If all those conditions are met, instead of emitting the usual function
+call, the code generator will emit code to evaluate the arguments of the function, store the
+evaluated arguments in the corresponding argument locals and jump to the start of the function, past
+the prolog.
+
+\newpage
 
 \section{Design}
 \subsection{Overview}
@@ -143,6 +157,8 @@ minor scopes are sub-records. One important detail is that sibling minor scopes 
 belonging to a union. The reason this is a reasonable thing to do is because only one sibling minor
 scope is alive at any one time. Therefore, it is safe to overwrite the locals used by any previously
 executed sibling minor scope.
+
+\newpage
 
 We will now proceed to an example. We will define a small program and lay out the locals according
 to the algorithm in \texttt{Frame}.
@@ -229,8 +245,6 @@ It is considered an error when an array is declared with a size larger than the 
 It is considered an error when the locals in some major scope, here we assume it has been coalesced
 with its minor scopes, are greater than the available stack memory. The available stack memory is
 computed to be the total machine memory minus the size of the program.
-
-\newpage
 
 \section{Credits}
 \begin{center}
