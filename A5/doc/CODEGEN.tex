@@ -124,8 +124,8 @@ into their enclosing  major scopes, are dealt with by the \texttt{Frame} and \te
 
 \subsection{Coalescing minor scopes}
 One of the more involved parts of developing the code generator was to ensure that minor scopes were
-coalesced into the enclosing major scope. This is rather important as it avoids draining the rather
-limited resource of display registers, 16 in total. In addition, it reduces the size of the
+coalesced into their enclosing major scope. This is rather important as it avoids draining the
+rather limited resource of display registers, 16 in total. In addition, it reduces the size of the
 generated code as it avoids having to generate a prolog and epilog for every minor scope. The main
 class responsible for managing this is \texttt{Frame}. It lays out the combined locals of all minor
 scopes in a given major scope. It does so via an algorithm identical to the record layout algorithm
