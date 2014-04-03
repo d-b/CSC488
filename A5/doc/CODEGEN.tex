@@ -159,8 +159,6 @@ belonging to a union. The reason this is a reasonable thing to do is because onl
 scope is alive at any one time. Therefore, it is safe to overwrite the locals used by any previously
 executed sibling minor scope.
 
-\newpage
-
 We will now proceed to an example. We will define a small program and lay out the locals according
 to the algorithm in \texttt{Frame}.
 \begin{lstlisting}[caption=Major scope in 488]
@@ -174,6 +172,8 @@ to the algorithm in \texttt{Frame}.
     }
 }
 \end{lstlisting}
+
+\newpage
 
 \noindent We will proceed to lay out the locals. We will express our layout using a C structure.
 \begin{lstlisting}[caption=Layout as C structure, language=C, directivestyle={\color{black}} emph={short}, emphstyle={\color{blue}}]
