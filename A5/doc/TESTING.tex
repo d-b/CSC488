@@ -81,7 +81,7 @@ other than monitoring the machine state during execution is to perform input/out
 you think of a program as computing a Turing computable function, then the way to test whether or
 not the program is indeed computing the function is to ensure that for every input it achieves the
 expected output. We enhanced the test runner from assignment 3 to with two new commands in the
-comment meta language, ``\texttt{@input=string}'' and ``\texttt{@output=<string>}''. The test runner
+comment meta language, ``\texttt{@input=<string>}'' and ``\texttt{@output=<string>}''. The test runner
 feeds tested programs the inputs contained in the \texttt{@input} comment commands sequentially via
 \texttt{stdin} and then looks for the expected output contained in the \texttt{@output} commands via
 \texttt{stdout}.
@@ -97,10 +97,10 @@ coalescence of minor scopes was fully functional.
 \section{Failing tests}
 For the failing tests, there were three categories. Tests we expected to fail during code
 generation, prefixed by \texttt{codegen\_}, tests we expected to fail at assembly, prefixed by
-\texttt{assembler\_} and tests we expected to fail at runtime, prefixed by \texttt{runtime\_}. For the
-code generator and assembler errors, we expected graceful handling of the errors. These  were all
-errors related to machine limitations. For instance one failing test declares a very large scope,
-lots of large arrays, which hits the available stack space limit.
+\texttt{assembler\_} and tests we expected to fail at runtime, prefixed by \texttt{runtime\_}. For
+the code generator and assembler errors, we expected graceful handling of the errors. These were
+all errors related to machine limitations. For instance one failing test has a very large scope,
+achieved by declaring lots of large arrays, which hits the available stack space limit.
 
 \newpage
 \newgeometry{left=0.35in,right=0.35in}
@@ -110,7 +110,7 @@ lots of large arrays, which hits the available stack space limit.
 \begin{tabular}{l|l|p{8.5cm}}
 \rowcolor{black!80}\textcolor{white}{\textbf{Test}} & \textcolor{white}{\textbf{Author}} & \textcolor{white}{\textbf{Description}} \\
 \hline
-\texttt{pass/A1a.io.488}                       & Daniel Bloemendal & Tests all logical, comparison, and arithmetic operators. \\
+\texttt{pass/A1a.io.488}                       & Daniel Bloemendal & Tests all logical, comparison, and arithmetic operators \\
 \texttt{pass/A1b.io.488}                       & Daniel Bloemendal & Tests using arrays including both forms of array declaration, positive and negative bounds \\
 \texttt{pass/A1c.io.488}                       & Oren Watson       & Tests all forms of loop building and loop exit constructs \\
 \texttt{pass/ackermann.488}                    & Oren Watson       & Computes the Ackermann function \\
@@ -125,21 +125,19 @@ lots of large arrays, which hits the available stack space limit.
 \texttt{pass/outputspec.488}                   & Oren Watson       & Tests the output in a simple proof of concept \\
 \texttt{pass/qsort.488}                        & Mike Qin          & An implementation of quicksort \\
 \texttt{pass/quicksort.488}                    & Oren Watson       & Quicksort, using inner functions instead of passing variables \\
-\texttt{pass/tailcall.488}                     & Daniel Bloemendal & A program with recursion at the tail of a function \\
+\texttt{pass/tailcall.488}                     & Daniel Bloemendal & A program with recursion at the tail of a function (use compiler option ``\texttt{-OPT t}'', tail call optimization)\\
 \texttt{fail/assembler\_large\_program.488}    & Daniel Bloemendal & A large program whose generated code exceeds machine memory \\
 \texttt{fail/codegen\_large\_arrays.488}       & Daniel Bloemendal & Defines an array whose size exceeds machine memory \\
 \texttt{fail/codegen\_large\_integer.488}      & Daniel Bloemendal & Uses an integer outside of the integer bounds of the machine \\
 \texttt{fail/codegen\_large\_locals.488}       & Daniel Bloemendal & Declares a scope whose locals size exceeds available stack memory \\
 \texttt{fail/codegen\_large\_string.488}       & Daniel Bloemendal & Uses a string whose length is greater than 255 characters \\
-\texttt{fail/runtime\_bounds1d.488}            & Daniel Bloemendal & Out of bounds access to a 1D array (use compiler option -B s or -B e, simple or enhanced bounds checking) \\
-\texttt{fail/runtime\_bounds2d.488}            & Daniel Bloemendal & Out of bounds access to a 2D array (use compiler option -B s or -B e, simple or enhanced bounds checking) \\
+\texttt{fail/runtime\_bounds1d.488}            & Daniel Bloemendal & Out of bounds access to a 1D array (use compiler option ``\texttt{-B s}'' or ``\texttt{-B e}'', simple or enhanced bounds checking) \\
+\texttt{fail/runtime\_bounds2d.488}            & Daniel Bloemendal & Out of bounds access to a 2D array (use compiler option ``\texttt{-B s}'' or ``\texttt{-B e}'', simple or enhanced bounds checking) \\
 \texttt{fail/runtime\_deeply\_nested.488}      & Daniel Bloemendal & A program with deeply nested major scopes \\
 \texttt{fail/runtime\_infinite\_recursion.488} & Daniel Bloemendal & Infinitely recursive function, leading to a stack overflow \\
 \texttt{fail/runtime\_integer\_overflow.488}   & Daniel Bloemendal & Performs arithmetic operations that lead to an overflow \\
 \texttt{fail/runtime\_undefined\_return.488}   & Daniel Bloemendal & Declares a function without a result statement, and attempts to use the undefined return value
 \end{tabular}
-
-
 
 % ----------------------------------------------------------------
 \end{document}

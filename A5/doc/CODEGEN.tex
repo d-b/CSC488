@@ -92,8 +92,8 @@ checking. The first level is ``simple'' bounds checking. It can be enabled with 
 ``\texttt{-B s}''. In both modes, array bounds are checked on array access. However, in the simple
 mode when an error occurs a simple error message with limited location information is provided. The
 second level is ``enhanced'' bounds checking, enabled with the compiler flag ``\texttt{-B e}''. It
-differs from the second mode in the level of detail provided in the location information contained
-in the error message. An example of an out of bounds error message is provided below.
+differs from the first mode in the level of detail provided in the location information contained in
+the error message. An example of an out of bounds error message is provided below.
 \begin{lstlisting}[caption=Out of bounds error, basicstyle=\fontsize{7}{10}\selectfont\ttfamily]
 db@vmbox ~/workspace/CSC488/A5 $ ./RUNCOMPILER.sh -B e testing/fail/runtime_bounds2d.488
 ...
